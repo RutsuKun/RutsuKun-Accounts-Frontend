@@ -1,4 +1,4 @@
 @echo off
 
-docker-compose --profile development down
-docker-compose --profile development --env-file development.env up -d
+docker-compose --remove-orphans --profile jenkins-dev down
+docker-compose --remove-orphans --profile jenkins-dev --env-file development.env up -d

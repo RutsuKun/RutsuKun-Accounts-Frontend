@@ -1,4 +1,12 @@
-import { Controller, Delete, Get, Inject, Post, Res, UseBefore } from "@tsed/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Post,
+  Res,
+  UseBefore,
+} from "@tsed/common";
 import { Request, Response } from "express";
 
 import routes from "@routes";
@@ -20,7 +28,6 @@ import { ClientService } from "@services/ClientService";
 import { TokenService } from "@services/TokenService";
 
 import { HTTPCodes } from "@utils";
-
 
 @Controller("/oauth2")
 export class OAuth2Route {
@@ -134,5 +141,10 @@ export class OAuth2Route {
       this.clientService
       // this.accountService
     );
+  }
+
+  @Get("/clients/:clientId/public")
+  public getClientsPublic() {
+    return this.endpoints.GET_ClientsPublicRoute(this.clientService);
   }
 }

@@ -30,11 +30,17 @@
       "@routes": ["routes/index"],
       "@services/*": ["services/*"],
       "@utils": ["utils"]
-    }
+    },
+    "plugins": [
+      {
+          "transform": "@zerollup/ts-transform-paths",
+      }
+    ],
   },
   "include": [
     "src/**/*",
     "src/**/*.json",
+    "src/**/.gitkeep"
   ],
   "exclude": [
     "dist/"

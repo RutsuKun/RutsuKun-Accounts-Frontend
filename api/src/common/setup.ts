@@ -65,30 +65,36 @@ const emailTokenPrivateDir = path.join(
 );
 
 export const checkSetup = async () => {
-  const accessTokenPublic = await existsSync(accessTokenPublicDir);
-  const accessTokenPrivate = await existsSync(accessTokenPrivateDir);
+  return new Promise(async (resolve, reject) => {
+    const accessTokenPublic = await existsSync(accessTokenPublicDir);
+    const accessTokenPrivate = await existsSync(accessTokenPrivateDir);
 
-  const idTokenPublic = await existsSync(idTokenPublicDir);
-  const idTokenPrivate = await existsSync(idTokenPrivateDir);
+    const idTokenPublic = await existsSync(idTokenPublicDir);
+    const idTokenPrivate = await existsSync(idTokenPrivateDir);
 
-  const codeTokenPublic = await existsSync(codeTokenPublicDir);
-  const codeTokenPrivate = await existsSync(codeTokenPrivateDir);
+    const codeTokenPublic = await existsSync(codeTokenPublicDir);
+    const codeTokenPrivate = await existsSync(codeTokenPrivateDir);
 
-  const emailTokenPublic = await existsSync(emailTokenPublicDir);
-  const emailTokenPrivate = await existsSync(emailTokenPrivateDir);
+    const emailTokenPublic = await existsSync(emailTokenPublicDir);
+    const emailTokenPrivate = await existsSync(emailTokenPrivateDir);
 
-  if (
-    !accessTokenPublic ||
-    !accessTokenPrivate ||
-    !idTokenPublic ||
-    !idTokenPrivate ||
-    !codeTokenPublic ||
-    !codeTokenPrivate ||
-    !emailTokenPublic ||
-    !emailTokenPrivate
-  ) {
-    throw Error("Setup required, please run server with '--setup' param.");
-  }
+    if (
+      !accessTokenPublic ||
+      !accessTokenPrivate ||
+      !idTokenPublic ||
+      !idTokenPrivate ||
+      !codeTokenPublic ||
+      !codeTokenPrivate ||
+      !emailTokenPublic ||
+      !emailTokenPrivate
+    ) {
+      reject(
+        new Error("Setup required, please run server with '--setup' param.")
+      );
+    } else {
+      resolve(true);
+    }
+  });
 };
 
 export const initSetup = async () => {

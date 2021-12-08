@@ -3,15 +3,6 @@ import fs from "fs";
 import keys from "./keys";
 import { env } from "process";
 
-const accessTokenPrivateKey = jose.JWK.importKey(keys.accessTokenPrivateKey());
-const accessTokenPublicKey = jose.JWK.importKey(keys.accessTokenPublicKey());
-const idTokenPrivateKey = jose.JWK.importKey(keys.idTokenPrivateKey());
-const idTokenPublicKey = jose.JWK.importKey(keys.idTokenPublicKey());
-const codeTokenPrivateKey = jose.JWK.importKey(keys.codeTokenPrivateKey());
-const codeTokenPublicKey = jose.JWK.importKey(keys.codeTokenPublicKey());
-const emailCodePrivateKey = jose.JWK.importKey(keys.emailTokenPrivateKey());
-const emailCodePublicKey = jose.JWK.importKey(keys.emailTokenPublicKey());
-
 const processEnv = {
   NODE_ENV: process.env.NODE_ENV || "development",
   API_URL: process.env.API_URL,
@@ -89,7 +80,7 @@ export class Config {
   }
 
   static get isLocal() {
-    return processEnv.NODE_ENV === NodeEnvironment.Development;
+    return processEnv.NODE_ENV === NodeEnvironment.Local;
   }
 
   static get isDevelop() {
@@ -204,14 +195,14 @@ export class Config {
   static get Token() {
     return {
       AccessTokenExp: processEnv.ACCESS_TOKEN_EXP,
-      AccessTokenPrivateKey: accessTokenPrivateKey,
-      AccessTokenPublicKey: accessTokenPublicKey,
-      IDTokenPrivateKey: idTokenPrivateKey,
-      IDTokenPublicKey: idTokenPublicKey,
-      CodeTokenPrivateKey: codeTokenPrivateKey,
-      CodeTokenPublicKey: codeTokenPublicKey,
-      EmailCodePrivateKey: emailCodePrivateKey,
-      EmailCodePublicKey: emailCodePublicKey,
+      AccessTokenPrivateKey: jose.JWK.importKey(keys.accessTokenPrivateKey()),
+      AccessTokenPublicKey: jose.JWK.importKey(keys.accessTokenPublicKey()),
+      IDTokenPrivateKey: jose.JWK.importKey(keys.idTokenPrivateKey()),
+      IDTokenPublicKey: jose.JWK.importKey(keys.idTokenPublicKey()),
+      CodeTokenPrivateKey: jose.JWK.importKey(keys.codeTokenPrivateKey()),
+      CodeTokenPublicKey: jose.JWK.importKey(keys.codeTokenPublicKey()),
+      EmailCodePrivateKey: jose.JWK.importKey(keys.emailTokenPrivateKey()),
+      EmailCodePublicKey: jose.JWK.importKey(keys.emailTokenPublicKey()),
     };
   }
 

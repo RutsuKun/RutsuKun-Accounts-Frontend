@@ -6,6 +6,7 @@
 
 important
 report.html
+local.env
 
 # Logs
 logs

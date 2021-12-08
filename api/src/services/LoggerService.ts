@@ -5,7 +5,7 @@ import { UseConnection } from "@tsed/typeorm";
 import { LogRepository } from "../repositories/LogRepository";
 
 @Injectable()
-class LoggerService {
+export class LoggerService {
   private name: string;
   private type: string;
 
@@ -145,4 +145,4 @@ interface LoggerOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // if(Config.Environment.NODE_ENV != 'test')  console.log = function() {}
 
-export { LoggerService, LoggerLabelOptions, LoggerOptions };
+

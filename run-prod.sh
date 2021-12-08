@@ -1,2 +1,2 @@
-docker-compose --profile production down
-docker-compose --profile production --env-file production.env up -d
+docker-compose --remove-orphans --profile jenkins-prod down
+docker-compose --remove-orphans --profile jenkins-prod --env-file production.env up -d

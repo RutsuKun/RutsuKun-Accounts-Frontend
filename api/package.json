@@ -9,8 +9,8 @@
         "start:local": "nodemon --legacy-watch",
         "start:prod": "node ./dist --env=production",
         "start:dev": "node ./dist --env=development",
-        "build:prod": "tsc",
-        "build:dev": "tsc",
+        "build:prod": "ttsc -P ./tsconfig.json",
+        "build:dev": "ttsc -P ./tsconfig.json",
         "lint": "eslint ./src",
         "audit": "npm audit --json | npm-audit-html --output report.html",
         "monitor": "rm -rf dist && npm run build && npm run execute -- monitor"
@@ -45,6 +45,7 @@
         "@types/fs-extra": "^8.0.1",
         "@types/node": "^13.13.13",
         "@types/shelljs": "^0.8.6",
+        "@zerollup/ts-transform-paths": "^1.7.18",
         "fs-extra": "^8.1.0",
         "nodemon": "^2.0.4",
         "npm-run-all": "^4.1.5",
@@ -52,6 +53,7 @@
         "shelljs": "^0.8.3",
         "ts-node": "^8.6.2",
         "tslint": "^6.0.0",
+        "ttypescript": "^1.5.13",
         "typescript": "^4.0.5",
         "webpack-cli": "^3.3.12"
     },

@@ -22,7 +22,12 @@ import { GET_UserInfoRoute, POST_UserInfoRoute } from "./oauth2/userinfo";
 
 import { Controller } from "@tsed/di";
 import { Get } from "@tsed/schema";
-import { DELETE_ClientsRoute, GET_ClientsRoute, POST_ClientsRoute } from "./oauth2/clients";
+import {
+  DELETE_ClientsRoute,
+  GET_ClientsPublicRoute,
+  GET_ClientsRoute,
+  POST_ClientsRoute,
+} from "./oauth2/clients";
 import { POST_AuthDeviceRoute } from "./auth/device";
 import { POST_DeviceRoute } from "./oauth2/device";
 import {
@@ -63,6 +68,7 @@ const RouteV1Endpoints = {
     POST_ClientsRoute,
     DELETE_ClientsRoute,
     POST_DeviceRoute,
+    GET_ClientsPublicRoute,
   },
   AuthRoutesEndpoints: {
     POST_AuthIndexRoute,

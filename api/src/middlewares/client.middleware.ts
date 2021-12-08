@@ -6,7 +6,7 @@ import {
   Inject,
   InjectorService,
 } from "@tsed/common";
-import { ClientService } from "../services/ClientService";
+import { ClientService } from "@services/ClientService";
 
 @Middleware()
 export class CheckClientMiddleware {

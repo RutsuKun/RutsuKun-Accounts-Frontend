@@ -76,3 +76,31 @@ export const DELETE_ClientsRoute = async (
       });
   };
 };
+
+export const GET_ClientsPublicRoute = async (clientService: ClientService) => {
+  return async (req: Request, res: Response) => {
+    const clientId = req.params.clientId;
+    clientService
+      .getClientByClientId(clientId)
+      .then((client) => {
+        res.status(HTTPCodes.OK).json({
+          client_id: client.client_id,
+          name: client.name,
+          logo: client.logo,
+          privacy_policy: client.privacy_policy,
+          tos: client.tos,
+          verified: client.verified,
+          third_party: client.third_party,
+          owner: {
+            username: client.account.username,
+            avatar: client.account.avatar,
+          },
+        });
+      })
+      .catch((error) => {
+        res.status(HTTPCodes.BadRequest).json({
+          error: error,
+        });
+      });
+  };
+};
