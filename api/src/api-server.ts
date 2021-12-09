@@ -10,7 +10,6 @@ const memoryStore = MemoryStore(session);
 import { Configuration, Inject as DInjected } from "@tsed/di";
 import { PlatformApplication } from "@tsed/common";
 
-import routes from "./routes";
 import { cwd } from "process";
 import { Config } from "./config";
 import cors from "cors";
@@ -18,6 +17,8 @@ import methodOverride from "method-override";
 import path from "path";
 import "@tsed/typeorm";
 import { LoggerService } from "./services/LoggerService";
+import { WellKnownRoute } from "./routes/wellknown";
+import { V1IndexRoute } from "./routes/v1";
 
 const apiDir = __dirname;
 
@@ -26,7 +27,7 @@ const apiDir = __dirname;
   acceptMimes: ["application/json"],
   port: Config.API.port,
   mount: {
-    "/": [routes.routes.IndexRoute, routes.routes.WellKnownRoute],
+    "/": [V1IndexRoute, WellKnownRoute],
     "/v1": path.join(apiDir, "routes", "v1", "**", "*.ts"),
   },
   debug: false,

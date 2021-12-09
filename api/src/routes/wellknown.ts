@@ -1,17 +1,14 @@
 import { Controller, Get, Req, Res } from "@tsed/common";
 import * as jose from "jose";
 import { Config } from "@config";
-
 import { createPublicKey, createPrivateKey } from "crypto";
 import keys from "@config/keys";
 
 @Controller(".well-known")
 export class WellKnownRoute {
-  constructor() {}
-
   @Get("/oauth-authorization-server")
-  public getOAuth2AuthorizationServerSpecs(req: Req, res: Res) {
-    return res.status(200).json({
+  public getOAuth2AuthorizationServerSpecs(@Req() request: Req, @Res() response: Res) {
+    return response.status(200).json({
       issuer: Config.OAUTH2.issuer,
       authorization_endpoint: Config.OAUTH2.authorization_endpoint,
       registration_endpoint: Config.OAUTH2.registration_endpoint,
@@ -35,9 +32,9 @@ export class WellKnownRoute {
   }
 
   @Get("/openid-configuration")
-  public async getOpenIDConfigurationSpecs(req: Req, res: Res) {
+  public async getOpenIDConfigurationSpecs(@Req() request: Req, @Res() response: Res) {
     // CLIENT REGISTRATION https://tools.ietf.org/html/rfc7591
-    return res.status(200).json({
+    return response.status(200).json({
       issuer: Config.OAUTH2.issuer,
       authorization_endpoint: Config.OAUTH2.authorization_endpoint,
       registration_endpoint: Config.OAUTH2.registration_endpoint,
@@ -65,11 +62,11 @@ export class WellKnownRoute {
   }
 
   @Get("/jwks.json")
-  public async getJwks(req: Req, res: Res) {
+  public async getJwks(@Req() request: Req, @Res() response: Res) {
     const publicKey = createPublicKey(keys.idTokenPublicKey());
     // @ts-ignore
     const storeKey = jose.JWK.asKey(publicKey);
     const keystore = new jose.JWKS.KeyStore([storeKey]);
-    return res.status(200).json(keystore.toJWKS());
+    return response.status(200).json(keystore.toJWKS());
   }
 }

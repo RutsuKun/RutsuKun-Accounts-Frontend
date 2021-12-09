@@ -1,47 +1,143 @@
-import { Request, Response } from "express";
+import { Controller, Inject, Post, Req, Res, UseBefore } from "@tsed/common";
 
 // SERVICES
 
-import { TokenService } from "@services/TokenService";
+import { AccessTokenData, TokenService } from "@services/TokenService";
 import { LoggerService } from "@services/LoggerService";
 import { AccountsService } from "@services/AccountsService";
 import { ClientService } from "@services/ClientService";
 import { OAuth2Service } from "@services/OAuth2Service";
+import { SessionService } from "@services/SessionService";
 
-import { HTTPCodes } from "@utils";
+// MIDDLEWARES
+
+import { CheckClientMiddleware } from "@middlewares/client.middleware";
 
 // OAUTH2 FLOWS
-import { oAuth2AuthorizationCodeFlow } from "./AuthorizationCodeFlow";
-import { oAuth2ClientCredentials } from "./ClientCredentialsFlow";
-import { oAuth2DeviceCode } from "./DeviceCodeFlow";
 
-export const POST_TokenRoute = (
-  logger: LoggerService,
-  client: ClientService,
-  token: TokenService,
-  account: AccountsService,
-  oauth: OAuth2Service
-) => {
-  return async (req: Request, res: Response) => {
-    const grant_type = req.body.grant_type || "";
+import { oAuth2AuthorizationCodeFlow } from "./flows/AuthorizationCodeFlow";
+import { oAuth2ClientCredentials } from "./flows/ClientCredentialsFlow";
+import { oAuth2DeviceCode } from "./flows/DeviceCodeFlow";
+
+import { HTTP, HTTPCodes } from "@utils";
+
+@Controller("/oauth2/token")
+export class OAuth2TokenRoute {
+  public logger: LoggerService;
+  constructor(
+    @Inject() private sessionService: SessionService,
+    @Inject() private accountService: AccountsService,
+    @Inject() private oauthService: OAuth2Service,
+    @Inject() private clientService: ClientService,
+    @Inject() private loggerService: LoggerService,
+    @Inject() private tokenService: TokenService
+  ) {
+    this.logger = this.loggerService.child({
+      label: { name: "OAuth2", type: "oauth2" },
+    });
+  }
+
+  @Post("/")
+  @UseBefore(CheckClientMiddleware)
+  public getToken(@Req() request: Req, @Res() response: Res) {
+    const grant_type = request.body.grant_type || "";
 
     switch (grant_type) {
       case "authorization_code":
-        oAuth2AuthorizationCodeFlow(logger, client, token, account)(req, res);
+        oAuth2AuthorizationCodeFlow(
+          this.logger,
+          this.clientService,
+          this.tokenService,
+          this.accountService
+        )(request, response);
         break;
       case "client_credentials":
-        oAuth2ClientCredentials(logger, client, token)(req, res);
+        oAuth2ClientCredentials(
+          this.logger,
+          this.clientService,
+          this.tokenService
+        )(request, response);
         break;
       case "device_code":
-        oAuth2DeviceCode(logger, client, token, oauth)(req, res);
+        oAuth2DeviceCode(
+          this.logger,
+          this.clientService,
+          this.tokenService,
+          this.oauthService
+        )(request, response);
         break;
       default:
-        logger.error("Invalid grant type", null, true);
-        res.status(HTTPCodes.BadRequest).json({
+        this.logger.error("Invalid grant type", null, true);
+        response.status(HTTPCodes.BadRequest).json({
           error: "unsupported_grant_type",
           error_description: `Unsupported grant type: ${grant_type}`,
         });
         break;
     }
-  };
-};
+  }
+
+  @Post("/revoke")
+  @UseBefore(CheckClientMiddleware)
+  public async postTokenRevoke(@Req() request: Req, @Res() response: Res) {
+    const { token, token_type_hint } = request.body;
+    if (
+      token_type_hint === "access_token" ||
+      token_type_hint === "refresh_token"
+    ) {
+      if (!token) {
+        HTTP.OAuth2InvalidRequest(request, response, "Bad Request");
+      } else {
+        switch (token_type_hint) {
+          case "access_token":
+            try {
+              const tokenData = this.tokenService.verifyAccessToken(
+                token
+              ) as AccessTokenData;
+
+              const isRevoked =
+                await this.tokenService.checkAccessTokenIsRevoked(
+                  tokenData.jti
+                );
+              if (isRevoked) {
+                HTTP.OAuth2InvalidRequest(
+                  request,
+                  response,
+                  `access token already revoked`
+                );
+              } else {
+                await this.tokenService.revokeAccessToken({
+                  type: "access_token",
+                  jti: tokenData.jti,
+                  aud: tokenData.aud,
+                  sub: tokenData.sub,
+                  exp: tokenData.exp,
+                });
+                return response.status(200).json({
+                  success: true,
+                });
+              }
+            } catch (err) {
+              HTTP.OAuth2InvalidRequest(request, response, `Invalid token`);
+            }
+
+            break;
+          default:
+            HTTP.OAuth2InvalidRequest(
+              request,
+              response,
+              `token_type_hint refresh_token not supported yet`
+            );
+            break;
+        }
+      }
+    } else {
+      HTTP.OAuth2InvalidRequest(
+        request,
+        response,
+        `Invalid token_type_hit argument${
+          token_type_hint ? ": " + token_type_hint : ""
+        }`
+      );
+    }
+  }
+}

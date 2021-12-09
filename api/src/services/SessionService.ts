@@ -88,7 +88,7 @@ export class SessionService {
     const action = req.session.action;
     const error = req.session.error;
 
-    const flow = req.body.flow || "oauth";
+    const flow = req.body.flow || req.session.flow || "auth";
 
     if (clientQuery) this.setClientQuery(clientQuery);
     if (client) this.setClient(client);

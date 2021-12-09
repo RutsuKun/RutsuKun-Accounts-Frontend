@@ -1,52 +1,66 @@
-import { Request, Response } from "express";
-import { SessionService } from "@services/SessionService";
+import { Controller, Inject } from "@tsed/di";
+import { Get, Post } from "@tsed/schema";
+import { Req, Res } from "@tsed/common";
 
-export const GET_AuthSessionRoute = (session: SessionService) => {
-  return (req: Request, res: Response) => {
-    if (session.session && session.getUser) {
+import { SessionService } from "@services/SessionService";
+import { LoggerService } from "@services/LoggerService";
+
+@Controller("/auth/session")
+export class AuthSessionRoute {
+  public logger = this.loggerService.child({
+    label: {
+      name: "Auth Endpoint",
+      type: "auth",
+    },
+  });
+
+  constructor(
+    @Inject() private sessionService: SessionService,
+    @Inject() private loggerService: LoggerService
+  ) {}
+
+  @Get("/")
+  public getSession(@Req() request: Req, @Res() response: Res) {
+    if (this.sessionService.session && this.sessionService.getUser) {
       //   if (req.session.user.impersonate) {
       //     return res.status(200).json(req.session.user.impersonate);
       //   }
-      res.status(200).json(session.getUser);
+      response.status(200).json(this.sessionService.getUser);
     } else {
-      res.status(200).json({ logged: false });
+      response.status(200).json({ logged: false });
     }
-  };
-};
+  }
 
-export const GET_AuthSessionDetailsRoute = (session: SessionService) => {
-  return (req: Request, res: Response) => {
-    res.status(200).json(req.session);
-  };
-};
+  @Get("/details")
+  public getSessionDetails(@Req() request: Req, @Res() response: Res) {
+    response.status(200).json(request.session);
+  }
 
-export const GET_AuthSessionEndRoute = (session: SessionService) => {
-  return (req: Request, res: Response) => {
-    const { id_token_hint, post_logout_redirect_uri } = req.query;
+  @Get("/end")
+  public getSessionEnd(@Req() request: Req, @Res() response: Res) {
+    const { id_token_hint, post_logout_redirect_uri } = request.query;
     if (!post_logout_redirect_uri) {
-      const response = {
+      response.status(200).json({
         type: "error",
         error: "invalid_request",
         error_description: "Parameter post_logout_redirect_uri required",
-      };
-      return res.status(200).json(response);
+      });
     }
 
-    if (session.getUser && session.getUser.id) {
-      session
+    if (this.sessionService.getUser && this.sessionService.getUser.id) {
+      this.sessionService
         .setUser({ logged: false })
         .delPassport()
         .delAction()
         .saveSession();
     }
 
-    return res.redirect(post_logout_redirect_uri as string);
-  };
-};
+    return response.redirect(post_logout_redirect_uri as string);
+  }
 
-export const POST_AuthSessionEndRoute = (session: SessionService) => {
-  return (req: Request, res: Response) => {
-    if (session.getUser && session.getUser.id) {
+  @Post("/end")
+  public postSessionEnd(@Req() request: Req, @Res() response: Res) {
+    if (this.sessionService.getUser && this.sessionService.getUser.id) {
       /**if(req.session.user.impersonate){
 				delete req.session.user.impersonate;
 				return res.status(200).json({
@@ -55,16 +69,16 @@ export const POST_AuthSessionEndRoute = (session: SessionService) => {
 				})
 			}**/
 
-      session
+      this.sessionService
         .setUser({ logged: false })
         .delPassport()
         .delAction()
         .delIDC()
         .saveSession();
 
-      res.status(200).json(session.getUser);
+      response.status(200).json(this.sessionService.getUser);
     } else {
-      res.status(200).json({ logged: false });
+      response.status(200).json({ logged: false });
     }
-  };
-};
+  }
+}

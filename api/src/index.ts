@@ -18,8 +18,8 @@ setTimeout(() => {
 
   if (process.argv[2] == "monitor") {
     appInstance.on("SystemInit", () => {
-      // const term = new Terminal(appInstance);
-      // term.init();
+      const term = new Terminal(appInstance);
+      term.init();
     });
   }
 
