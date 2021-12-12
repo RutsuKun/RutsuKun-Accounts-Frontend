@@ -15,8 +15,8 @@ export class AccountsRoute {
   constructor(@Inject() private accountsService: AccountsService) {}
 
   @Get("/")
-  @UseBefore(new ScopeMiddleware().use(["accounts:read"]))
   @UseBefore(AccessTokenMiddleware)
+  @UseBefore(new ScopeMiddleware().use(["accounts:read"]))
   public async getIndex(req: Request, res: Response, next: NextFunction) {
     const accounts = await this.accountsService.listAccountsEndpoint();
     return res.status(200).json(accounts);

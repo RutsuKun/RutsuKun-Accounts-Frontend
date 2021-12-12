@@ -141,7 +141,7 @@ export class OAuth2Service {
     }
   }
 
-  public authorize(data: OAuth2AuthorizeData) {
+  public authorize(data: OAuth2AuthorizeData): Promise<any> {
     const ctx = this;
     return new Promise(async (resolve, reject) => {
       const {

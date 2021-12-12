@@ -38,35 +38,29 @@ const oAuth2AuthorizationCodeFlow = (
       clientSecret = client_secret;
     }
 
-    logger.info(
-      code_verifier
-        ? "Initialized Authorization Code flow with PKCE."
-        : "Initialized Authorization Code flow.",
-      null,
-      false
-    );
+    logger.info(code_verifier ? "Initialized Authorization Code flow with PKCE." : "Initialized Authorization Code flow.", null, false);
 
-    if (!(await client.checkClientRedirectUri(clientFromReq, redirect_uri))) {
+    const validRedirectURI = await client.checkClientRedirectUri(clientFromReq, redirect_uri);
+
+    if (!validRedirectURI) {
       logger.error("Client invalid redirect_uri: " + redirect_uri, null, false);
 
-      res.status(HTTPCodes.BadRequest).json({
+      return res.status(HTTPCodes.BadRequest).json({
         error: "invalid_client",
         error_description: "Invalid redirect_uri",
       });
     }
 
-    if (
-      !code_verifier &&
-      !(await client.checkClientSecret(clientFromReq, clientSecret))
-    ) {
-      res.status(HTTPCodes.BadRequest).json({
+    const validClientSecret = await client.checkClientSecret(clientFromReq, clientSecret);
+    if (!code_verifier && !validClientSecret) {
+      return res.status(HTTPCodes.BadRequest).json({
         error: "invalid_client",
         error_description: "Invalid client credentials",
       });
     }
 
     if (!code) {
-      res.status(HTTPCodes.BadRequest).json({
+      return res.status(HTTPCodes.BadRequest).json({
         error: "invalid_request",
         error_description: "Invalid request",
       });
@@ -78,28 +72,18 @@ const oAuth2AuthorizationCodeFlow = (
 
       if (!decoded) {
         logger.error("Authorization code expired.", null, true);
-        res.status(HTTPCodes.BadRequest).json({
+        return res.status(HTTPCodes.BadRequest).json({
           error: "invalid_request",
           error_description: "Invalid request",
         });
       }
 
       logger.success("Authorization code is fine.", null, true);
-      const findAccount = await account.getByUUIDWithRelations(decoded.sub, [
-        "emails",
-      ]);
+      const findAccount = await account.getByUUIDWithRelations(decoded.sub, ["emails",]);
       const scopes = decoded.scp;
       const state = decoded.state;
 
-      logger.info(
-        "Generates an Access Token for " +
-          findAccount.username +
-          " (" +
-          findAccount.uuid +
-          ")",
-        null,
-        true
-      );
+      logger.info("Generates an Access Token for " + findAccount.username + " (" + findAccount.uuid + ")", null, true);
       let rv1 = Math.floor(Math.random() * Math.floor(254));
       let rv2 = Math.random().toString(36).substr(2, 12);
       let rv3 = Math.floor(Math.random() * Math.floor(81458));
@@ -112,15 +96,7 @@ const oAuth2AuthorizationCodeFlow = (
 
       logger.success("Access Token generated: " + access_token);
 
-      logger.info(
-        "Generates an ID Token for " +
-          findAccount.username +
-          " (" +
-          findAccount.uuid +
-          ")",
-        null,
-        true
-      );
+      logger.info("Generates an ID Token for " + findAccount.username + " (" + findAccount.uuid +")", null, true);
 
       const at_hash = token.createAtHash(access_token, "RS256");
       const c_hash = token.createCHash(code, "RS256");
@@ -155,7 +131,7 @@ const oAuth2AuthorizationCodeFlow = (
         const verified = verifyChallenge(code_verifier, decoded.code_challenge);
         if (!verified) {
           logger.error("Code challenge verify failed.", null, true);
-          res.status(HTTPCodes.BadRequest).json({
+          return res.status(HTTPCodes.BadRequest).json({
             error: "invalid_client",
             error_description: "Invalid client credentials",
           });
@@ -163,7 +139,7 @@ const oAuth2AuthorizationCodeFlow = (
         logger.success("Code challenge verified.", null, true);
       }
 
-      res.status(HTTPCodes.OK).json({
+      return res.status(HTTPCodes.OK).json({
         access_token: access_token,
         type: "Bearer",
         expires_in: Config.Token.AccessTokenExp,
@@ -171,7 +147,7 @@ const oAuth2AuthorizationCodeFlow = (
       });
     } catch (err) {
       logger.error(err, null, false);
-      res.status(HTTPCodes.BadRequest).json({
+      return res.status(HTTPCodes.BadRequest).json({
         error: "access_denied",
         error_description: "Invalid request",
       });

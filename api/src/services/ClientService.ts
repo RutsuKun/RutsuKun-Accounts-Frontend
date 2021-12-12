@@ -255,7 +255,7 @@ export class ClientService {
     });
   }
 
-  public checkClientRedirectUri(client: ClientData, redirectUri): Promise<any> {
+  public checkClientRedirectUri(client: ClientData, redirectUri): Promise<boolean> {
     const ctx = this;
     const { redirect_uris } = client;
     return new Promise((resolve) => {
@@ -272,17 +272,13 @@ export class ClientService {
     });
   }
 
-  public checkClientSecret(client: ClientData, clientSecret): Promise<any> {
+  public checkClientSecret(client: ClientData, clientSecret): Promise<boolean> {
     const ctx = this;
     // @ts-ignore
     const { secret } = client;
     return new Promise((resolve) => {
       if (secret !== clientSecret) {
-        ctx.logger.error(
-          "Invalid Client " + client.client_id + " Secret: " + clientSecret,
-          null,
-          true
-        );
+        ctx.logger.error("Invalid Client " + client.client_id + " Secret: " + clientSecret, null, true);
         resolve(false);
       } else {
         resolve(true);

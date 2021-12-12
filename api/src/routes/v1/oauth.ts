@@ -248,7 +248,7 @@ export class OAuth2Route {
   }
 
   @Post("/authorize")
-  public postAuthorize(@Req() request: Req, @Res() response: Res) {
+  public async postAuthorize(@Req() request: Req, @Res() response: Res) {
     // const logger = Logger.child({
     // 	label: {
     // 		type: "oauth",
@@ -266,50 +266,50 @@ export class OAuth2Route {
       });
     }
 
-    this.sessionService
-      .needReAuth()
-      .then(() => {
-        this.oauthService
-          .authorize({
-            response_type: this.sessionService.getClientQuery.response_type,
-            redirect_uri: this.sessionService.getClientQuery.redirect_uri,
-            scope: this.sessionService.getClientQuery.scope,
-            accountId: this.sessionService.getUser.id,
-            country,
-            nonce: this.sessionService.getClientQuery.nonce,
-            state: this.sessionService.getClientQuery.state,
-            client: this.sessionService.getClient,
-            consentGiven,
-            session_state: this.sessionService.getSession.id,
-          })
-          .then((data: any) => {
-            switch (data.type) {
-              case "response":
-                const userId = this.sessionService.getUser.id;
-                const userUsername = this.sessionService.getUser.username;
-                this.logger.success(
-                  "Authorized  " + userUsername + " (" + userId + ")"
-                );
-                this.logger.info("Response Type: " + data.type);
-                this.logger.info("Response Mode: " + data.response.mode);
-                this.logger.info(
-                  "Response Parameter URI: " + data.response.parameters.uri
-                );
-                return response.status(200).json(data);
-                break;
-            }
-          })
-          .catch((error) => {
-            return response.status(200).json({
-              type: "error",
-              error: error,
-              reqId: request.id,
-            });
-          });
-      })
-      .catch((err) => {
-        return response.status(200).json(err);
+    const needReAuth = await this.sessionService.needReAuth();
+
+    if (needReAuth) {
+      return response.status(HTTPCodes.OK).json({
+        type: "auth",
       });
+    }
+
+    try {
+      const data = await this.oauthService.authorize({
+        response_type: this.sessionService.getClientQuery.response_type,
+        redirect_uri: this.sessionService.getClientQuery.redirect_uri,
+        scope: this.sessionService.getClientQuery.scope,
+        accountId: this.sessionService.getUser.id,
+        country,
+        nonce: this.sessionService.getClientQuery.nonce,
+        state: this.sessionService.getClientQuery.state,
+        client: this.sessionService.getClient,
+        consentGiven,
+        session_state: this.sessionService.getSession.id,
+      });
+
+      switch (data.type) {
+        case "response":
+          const userId = this.sessionService.getUser.id;
+          const userUsername = this.sessionService.getUser.username;
+          this.logger.success(
+            "Authorized  " + userUsername + " (" + userId + ")"
+          );
+          this.logger.info("Response Type: " + data.type);
+          this.logger.info("Response Mode: " + data.response.mode);
+          this.logger.info(
+            "Response Parameter URI: " + data.response.parameters.uri
+          );
+          return response.status(200).json(data);
+          break;
+      }
+    } catch (error) {
+      return response.status(200).json({
+        type: "error",
+        error: error,
+        reqId: request.id,
+      });
+    }
   }
 
   @Post("/device")
@@ -329,8 +329,8 @@ export class OAuth2Route {
   @UseBefore(AccessTokenMiddleware)
   @UseBefore(new ScopeMiddleware().use(["account"], { failWithError: true }))
   public async getUserInfo(@Req() request: Req, @Res() response: Res) {
-    if (request.user.logged) {
-      const a = await this.accountService.getAccountInfo(request.user.sub);
+    if (response.user.logged) {
+      const a = await this.accountService.getAccountInfo(response.user.sub);
       response.status(200).json(a);
     } else {
       response.status(200).json({

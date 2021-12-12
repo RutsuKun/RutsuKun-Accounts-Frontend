@@ -3,29 +3,32 @@ import {
   Entity,
   Generated,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   VersionColumn,
 } from "typeorm";
 import bcrypt from "bcryptjs";
 import { ClientEntity } from "./Client";
 import { Email } from "./Email";
 import { AccountProvider } from "./AccountProvider";
+import { AccountGroup } from "./AccountGroup";
 
 @Entity({
   name: "oauth_accounts",
-  engine: "MyISAM",
+  engine: "InnoDB",
 })
 export class AccountEntity {
   constructor(account: AccountEntity) {
     Object.assign(this, account);
   }
 
-  @Column({
-    type: "uuid",
-  })
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   @Generated("uuid")
-  @PrimaryColumn()
   uuid?: string;
 
   @Column({
@@ -95,6 +98,22 @@ export class AccountEntity {
     cascade: true,
   })
   emails?: Email[];
+
+  @ManyToMany(() => AccountGroup, (group) => group.account, {
+    cascade: true
+  })
+  @JoinTable({
+    name: 'AcccountToGroup',
+    joinColumn: {
+      name: 'account_id',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'group_id',
+      referencedColumnName: 'id'
+    }
+  })
+  groups?: AccountGroup[];
 
   @VersionColumn()
   version?: number;

@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  Request,
-} from "@tsed/common";
+import { Injectable, Request } from "@tsed/common";
 import { LoggerService } from "./LoggerService";
 
 @Injectable()
@@ -30,9 +27,9 @@ export class SessionService {
     return this;
   }
 
-  needReAuth() {
+  needReAuth(): Promise<boolean> {
     const ctx = this;
-    return new Promise<void>(async (resolve, reject) => {
+    return new Promise<boolean>(async (resolve, reject) => {
       const currentTime = Math.floor(Date.now() / 1000);
 
       const authTime = this.getIDC.auth_time;
@@ -58,9 +55,7 @@ export class SessionService {
 
       // 1 h after full auth
       if (timeDifferenceAuth > 3600) {
-        reject({
-          type: "auth",
-        });
+        resolve(true);
       }
       // 10 min after reauth or first auth
       if (timeDifferenceReAuth > 600) {
@@ -70,7 +65,7 @@ export class SessionService {
         });
       }
 
-      resolve();
+      resolve(false);
     });
   }
 

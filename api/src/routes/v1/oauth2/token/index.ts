@@ -44,19 +44,19 @@ export class OAuth2TokenRoute {
 
     switch (grant_type) {
       case "authorization_code":
-        oAuth2AuthorizationCodeFlow(
+        return oAuth2AuthorizationCodeFlow(
           this.logger,
           this.clientService,
           this.tokenService,
           this.accountService
-        )(request, response);
+        );
         break;
       case "client_credentials":
-        oAuth2ClientCredentials(
+        return oAuth2ClientCredentials(
           this.logger,
           this.clientService,
           this.tokenService
-        )(request, response);
+        );
         break;
       case "device_code":
         oAuth2DeviceCode(
@@ -64,11 +64,11 @@ export class OAuth2TokenRoute {
           this.clientService,
           this.tokenService,
           this.oauthService
-        )(request, response);
+        );
         break;
       default:
         this.logger.error("Invalid grant type", null, true);
-        response.status(HTTPCodes.BadRequest).json({
+        return response.status(HTTPCodes.BadRequest).json({
           error: "unsupported_grant_type",
           error_description: `Unsupported grant type: ${grant_type}`,
         });
