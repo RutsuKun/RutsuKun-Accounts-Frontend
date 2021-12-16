@@ -8,7 +8,6 @@ import { LoggerService } from "@services/LoggerService";
 import { AccountsService } from "@services/AccountsService";
 
 import crypto from "crypto";
-import { AccountEntity } from "@entities/Account";
 
 @Injectable()
 export class ClientService {
@@ -53,6 +52,7 @@ export class ClientService {
           uuid: accountUUID,
         },
       },
+      relations: ["acl", "acl.groups", "acl.accounts"]
     });
   }
 

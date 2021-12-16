@@ -1,11 +1,13 @@
 import {
   Column,
   Entity,
-  Generated,
+  JoinTable,
   ManyToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
 } from "typeorm";
 import { AccountEntity } from "./Account";
+import { OAuthClientACL } from "./OAuthClientACL";
+import { OAuthScope } from "./OAuthScope";
 
 @Entity({
   name: "oauth_accounts_groups",
@@ -16,13 +18,8 @@ export class AccountGroup {
     Object.assign(this, group);
   }
 
-  @PrimaryGeneratedColumn()
-  id?: number;
-
-  @Generated("uuid")
-  uuid?: string;
-
   @Column({ type: "varchar" })
+  @PrimaryColumn()
   name: string;
 
   @Column({ type: "varchar" })
@@ -32,5 +29,22 @@ export class AccountGroup {
   enabled: boolean;
 
   @ManyToMany(() => AccountEntity, (account)=> account.groups)
-  account: AccountEntity; 
+  accounts?: AccountEntity[];
+
+  @ManyToMany(() => OAuthClientACL, (acl) => acl.groups, { cascade: true })
+  acl?: OAuthClientACL[];
+
+  @ManyToMany(() => OAuthScope, (scope) => scope.groups)
+  @JoinTable({
+    name: 'GroupToScope',
+    joinColumn: {
+      name: 'group_name',
+      referencedColumnName: 'name'
+    },
+    inverseJoinColumn: {
+      name: 'scope_name',
+      referencedColumnName: 'name'
+    }
+  })
+  scopes?: OAuthScope[];
 }

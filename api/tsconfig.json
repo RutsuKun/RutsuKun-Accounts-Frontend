@@ -27,7 +27,8 @@
       "@models/*": ["models/*"],
       "@entities/*": ["entities/*"],
       "@repositories/*": ["repositories/*"],
-      "@routes": ["routes/index"],
+      "@routes": ["routes/"],
+      "@routes/*": ["routes/*"],
       "@services/*": ["services/*"],
       "@utils": ["utils"]
     },

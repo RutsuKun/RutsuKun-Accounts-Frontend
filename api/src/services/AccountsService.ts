@@ -177,7 +177,7 @@ export class AccountsService {
 
       const account = await this.accountRepository.save(accountData);
 
-      ctx.logger.success("created account " + account, null, true);
+      ctx.logger.success("created account ", account, true);
 
       resolve(account);
     });
@@ -412,7 +412,7 @@ export class AccountsService {
 
   public deleteEmail(email: string, accountUUID: string) {
     return this.emailRepository.delete({
-      id: Number(email),
+      uuid: Number(email),
       account: {
         uuid: accountUUID,
       },

@@ -28,7 +28,7 @@ export class AccountsRoute {
     const session = req.userSession as SessionService;
     const currentAccount = await this.accountsService.getByUUIDWithRelations(
       session.getUser.id,
-      ["emails", "providers"]
+      ["emails", "providers", "groups"]
     );
     delete currentAccount.password;
     delete currentAccount.verifyPassword;

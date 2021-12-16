@@ -29,7 +29,7 @@
         "@models": "src/models",
         "@entities": "src/entities",
         "@repositories": "src/repositories",
-        "@routes": "src/routes/index",
+        "@routes": "src/routes",
         "@services": "src/services",
         "@utils": "src/utils"
     },

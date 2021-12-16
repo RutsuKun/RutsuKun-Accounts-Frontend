@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Inject,
-  Post,
-  Req,
-  Res,
-  UseBefore,
-} from "@tsed/common";
+import {Controller, Get, Inject, Post, Req, Res, UseBefore } from "@tsed/common";
 
 // MIDDLEWARES
 
@@ -50,6 +42,7 @@ export class OAuth2Route {
   @Get("/authorize")
   public async getAuthorize(@Req() request: Req, @Res() response: Res) {
     const session = this.sessionService.setSession(request);
+    session.setFlow("oauth");
     const authUrl = Config.FRONTEND.url + "/signin";
     let {
       client_id,

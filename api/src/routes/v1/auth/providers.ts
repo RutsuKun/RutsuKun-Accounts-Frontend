@@ -361,8 +361,8 @@ export class AuthProvidersRoute {
 
         return response.redirect(`${Config.FRONTEND.url}/account/general`);
       } else {
-        this.accountsService
-          .signupByProvider({
+        try {
+          const account = await this.accountsService.signupByProvider({
             provider: providerId,
             email: providerIdentity.email,
             username: providerIdentity.name.toLowerCase().split(" ").join("."),
@@ -370,56 +370,53 @@ export class AuthProvidersRoute {
             id: providerIdentity.id,
             picture: providerIdentity.picture,
             email_verified: providerIdentity.email_verified,
-          })
-          .then((account) => {
-            const auth_time = Math.floor(Date.now() / 1000);
-
-            this.sessionService
-              .setUser({
-                logged: true,
-                id: account.uuid,
-                username: account.username,
-                email: account.getPrimaryEmail(),
-                picture: account.avatar,
-                role: account.role,
-              })
-              .setIDC({
-                session_id: this.sessionService.getSession.id,
-                session_issued: new Date(),
-                session_expires: this.sessionService.getSession.cookie.expires,
-                sub: account.uuid,
-                idp: providerId, // identity provider
-                username: account.username,
-                amr: [providerId],
-                auth_time: auth_time,
-                reauth_time: auth_time,
-              })
-              .saveSession();
-
-            this.logger.success(
-              account.username + " logged successful in system",
-              null,
-              true
-            );
-
-            this.sessionService.delAction();
-            this.sessionService.saveSession();
-
-            if (redirectTo) {
-              return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
-            } else {
-              return response.redirect(
-                `${Config.FRONTEND.url}/account/general`
-              );
-            }
-          })
-          .catch((error) => {
-            this.sessionService.delAction();
-            this.sessionService.saveSession();
-            return response.redirect(
-              `${Config.FRONTEND.url}/signin?error=${error}`
-            );
           });
+
+          const auth_time = Math.floor(Date.now() / 1000);
+
+          this.sessionService
+            .setUser({
+              logged: true,
+              id: account.uuid,
+              username: account.username,
+              email: account.getPrimaryEmail(),
+              picture: account.avatar,
+              role: account.role,
+            })
+            .setIDC({
+              session_id: this.sessionService.getSession.id,
+              session_issued: new Date(),
+              session_expires: this.sessionService.getSession.cookie.expires,
+              sub: account.uuid,
+              idp: providerId, // identity provider
+              username: account.username,
+              amr: [providerId],
+              auth_time: auth_time,
+              reauth_time: auth_time,
+            })
+            .saveSession();
+
+          this.logger.success(
+            account.username + " logged successful in system",
+            null,
+            true
+          );
+
+          this.sessionService.delAction();
+          this.sessionService.saveSession();
+
+          if (redirectTo) {
+            return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
+          } else {
+            return response.redirect(`${Config.FRONTEND.url}/account/general`);
+          }
+        } catch (error) {
+          this.sessionService.delAction();
+          this.sessionService.saveSession();
+          return response.redirect(
+            `${Config.FRONTEND.url}/signin?error=${error}`
+          );
+        }
       }
     }
   }

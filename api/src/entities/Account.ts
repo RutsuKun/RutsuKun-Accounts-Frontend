@@ -2,11 +2,10 @@ import {
   Column,
   Entity,
   Generated,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   VersionColumn,
 } from "typeorm";
 import bcrypt from "bcryptjs";
@@ -14,6 +13,8 @@ import { ClientEntity } from "./Client";
 import { Email } from "./Email";
 import { AccountProvider } from "./AccountProvider";
 import { AccountGroup } from "./AccountGroup";
+import { OAuthClientACL } from "./OAuthClientACL";
+import { OAuthScope } from "./OAuthScope";
 
 @Entity({
   name: "oauth_accounts",
@@ -24,61 +25,32 @@ export class AccountEntity {
     Object.assign(this, account);
   }
 
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+  @PrimaryColumn()
   @Generated("uuid")
   uuid?: string;
 
-  @Column({
-    type: "varchar",
-  })
+  @Column({ type: "varchar" })
   username?: string;
 
-  @Column({
-    type: "varchar",
-    nullable: true,
-    default: null,
-  })
+  @Column({ type: "varchar", nullable: true, default: null })
   password?: string;
 
-  @Column({
-    type: "varchar",
-    default: "/assets/images/avatars/default-avatar.png",
-  })
+  @Column({ type: "varchar", default: "/assets/images/avatars/default-avatar.png" })
   avatar?: string;
 
-  @Column({
-    type: "varchar",
-    default: "user",
-  })
+  @Column({ type: "varchar", default: "user" })
   role?: string;
 
-  @Column({
-    type: "boolean",
-    default: false,
-  })
+  @Column({ type: "boolean", default: false })
   banned?: boolean;
 
-  @Column({
-    type: "varchar",
-    nullable: true,
-    default: null,
-  })
+  @Column({ type: "varchar", nullable: true, default: null })
   secret2fa?: string;
 
-  @Column({
-    type: "boolean",
-    default: false,
-  })
+  @Column({ type: "boolean", default: false })
   enabled2fa?: boolean;
 
-  @Column({
-    type: "varchar",
-    nullable: true,
-    default: null,
-  })
+  @Column({ type: "varchar", nullable: true, default: null })
   state?: string;
 
   @OneToMany(() => AccountProvider, (provider) => provider.account, {
@@ -88,32 +60,42 @@ export class AccountEntity {
   })
   providers?: AccountProvider[];
 
-  @OneToMany(() => ClientEntity, (client) => client.account, {
-    cascade: true,
-  })
-  @JoinColumn()
+  @OneToMany(() => ClientEntity, (client) => client.account, { cascade: true })
   clients?: ClientEntity[];
 
-  @OneToMany(() => Email, (email) => email.account, {
-    cascade: true,
-  })
+  @OneToMany(() => Email, (email) => email.account, { cascade: true })
   emails?: Email[];
 
-  @ManyToMany(() => AccountGroup, (group) => group.account, {
-    cascade: true
-  })
+  @ManyToMany(() => AccountGroup, (group) => group.accounts, { cascade: true })
   @JoinTable({
-    name: 'AcccountToGroup',
+    name: 'AccountToGroup',
     joinColumn: {
-      name: 'account_id',
-      referencedColumnName: 'id'
+      name: 'account_uuid',
+      referencedColumnName: 'uuid'
     },
     inverseJoinColumn: {
-      name: 'group_id',
-      referencedColumnName: 'id'
+      name: 'group_name',
+      referencedColumnName: 'name'
     }
   })
   groups?: AccountGroup[];
+
+  @ManyToMany(() => OAuthClientACL, (acl) => acl.accounts, { cascade: true })
+  acl?: OAuthClientACL[];
+
+  @ManyToMany(() => OAuthScope, (scope) => scope.accounts)
+  @JoinTable({
+    name: 'AccountToScope',
+    joinColumn: {
+      name: 'account_uuid',
+      referencedColumnName: 'uuid'
+    },
+    inverseJoinColumn: {
+      name: 'scope_name',
+      referencedColumnName: 'name'
+    }
+  })
+  scopes?: OAuthScope[];
 
   @VersionColumn()
   version?: number;

@@ -17,7 +17,7 @@ import { LoggerService } from "@services/LoggerService";
 import { SessionService } from "@services/SessionService";
 import { ClientService } from "@services/ClientService";
 
-import { OAuthDeviceCodeEntity } from "@entities/OAuth";
+import { OAuthDeviceCode } from "@entities/OAuthDeviceCode";
 
 import { Config } from "@config";
 import crypto from "crypto";
@@ -161,7 +161,7 @@ export class OAuth2Service {
       } = data;
 
       if (deviceCodeData) {
-        const toSaveDeviceCode: OAuthDeviceCodeEntity = {
+        const toSaveDeviceCode: OAuthDeviceCode = {
           ...deviceCodeData,
           authorized: true,
           user_uuid: accountId,
@@ -653,7 +653,7 @@ export class OAuth2Service {
     // } else {
     const device_code = await crypto.randomBytes(15).toString("hex");
     const user_code = await crypto.randomBytes(4).toString("hex").toUpperCase();
-    const data: OAuthDeviceCodeEntity = {
+    const data: OAuthDeviceCode = {
       client_id: client_id,
       scope: scope,
       device_code: device_code,
@@ -702,7 +702,7 @@ interface OAuth2AuthorizeData {
   consentGiven: boolean;
   session_state?: string;
 
-  deviceCodeData?: OAuthDeviceCodeEntity;
+  deviceCodeData?: OAuthDeviceCode;
 }
 
 interface GetTokenData {
@@ -717,7 +717,7 @@ interface GetTokenData {
   client: any;
   scope: string;
 
-  deviceCodeData?: OAuthDeviceCodeEntity;
+  deviceCodeData?: OAuthDeviceCode;
 }
 
 export interface SigninData {

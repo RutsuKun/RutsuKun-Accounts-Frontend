@@ -5,7 +5,8 @@ import { UseConnection } from "@tsed/typeorm";
 import { TokenCheck } from "@middlewares/security";
 
 import { OAuthRevokedTokenRepository } from "@repositories/OAuthRepository";
-import { OAuthRevokedTokenEntity } from "@entities/OAuth";
+import { OAuthRevokedToken } from "@entities/OAuthRevokedToken";
+
 import { LoggerService } from "@services/LoggerService";
 
 import { Config } from "@config";
@@ -13,6 +14,7 @@ import { Config } from "@config";
 import * as jose from "jose";
 import { createHash } from "crypto";
 import { Req, Res } from "@tsed/common";
+
 
 @Injectable()
 export class TokenService {
@@ -187,7 +189,7 @@ export class TokenService {
     return !!check;
   }
 
-  public revokeAccessToken(item: OAuthRevokedTokenEntity) {
+  public revokeAccessToken(item: OAuthRevokedToken) {
     return this.revokedTokenRepository.saveRevokedToken(item);
   }
 
