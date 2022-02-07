@@ -8,6 +8,7 @@ import { LoggerService } from "@services/LoggerService";
 import { AccountsService } from "@services/AccountsService";
 
 import crypto from "crypto";
+import { ScopeService } from "./ScopeService";
 
 @Injectable()
 export class ClientService {
@@ -20,7 +21,8 @@ export class ClientService {
 
   constructor(
     private loggerService: LoggerService,
-    private accountsService: AccountsService
+    private accountsService: AccountsService,
+    private scopeService: ScopeService
   ) {
     this.logger = this.loggerService.child({
       label: {
@@ -53,6 +55,12 @@ export class ClientService {
         },
       },
       relations: ["acl", "acl.groups", "acl.accounts"]
+    });
+  }
+
+  getAdminClients(relations: string[]) {
+    return this.clientRepository.find({
+      relations: relations
     });
   }
 
@@ -144,26 +152,118 @@ export class ClientService {
           accountUUID
         );
 
-        const clientToSave = new ClientEntity({
-          client_id: clientId,
-          secret: clientSecret,
-          name: name,
-          description: description,
-          grant_types: grantTypes,
-          redirect_uris: redirect_uris,
-          response_types: responseTypes,
-          privacy_policy: privacy_policy,
-          tos: tos,
-          website: website,
-          consent: consent,
-          state: "ENABLED",
-          type: type,
-          account: accountToSave,
-        });
+          try {
+            const clientToSave = new ClientEntity({
+              client_id: clientId,
+              secret: clientSecret,
+              name: name,
+              description: description,
+              grant_types: grantTypes,
+              redirect_uris: redirect_uris,
+              response_types: responseTypes,
+              privacy_policy: privacy_policy,
+              tos: tos,
+              website: website,
+              consent: consent,
+              state: "ENABLED",
+              type: type,
+              account: accountToSave
+            });
+    
+            const defaultScopes = await this.scopeService.getDefaultScopes()
 
-        const savedClient = this.clientRepository.save(clientToSave);
+            clientToSave.addAcl(defaultScopes);
+    
+            const savedClient = await this.clientRepository.save(clientToSave);
+    
+            resolve(savedClient);
+          } catch(error) {
+            console.log(error);
+            
+          }
+        
 
-        resolve(savedClient);
+      } else {
+        ctx.logger.error(
+          "Client with client_id '" + clientId + "' already exist",
+          null,
+          true
+        );
+        reject("CLIENT_WITH_CLIENT_ID_EXIST");
+      }
+    });
+  }
+
+  public addAdminClient(
+    accountUUID: string,
+    client: ClientEntity
+  ): Promise<ClientEntity> {
+    const ctx = this;
+
+    return new Promise(async (resolve, reject) => {
+      const { name, description, type, response_types, grant_types, consent, third_party = true, redirect_uris, privacy_policy, verified, tos, website } = client;
+      let clientId;
+      let clientSecret;
+
+      if (!name) {
+        return reject("CLIENT_NAME_EMPTY");
+      }
+
+      if (!response_types.length) {
+        return reject("CLIENT_RESPONSE_TYPES_EMPTY");
+      }
+
+      if (!grant_types.length) {
+        return reject("CLIENT_GRANT_TYPES_EMPTY");
+      }
+
+      if (redirect_uris.length < 1) {
+        return reject("CLIENT_REDIRECT_URIS_EMPTY");
+      }
+
+      if (third_party) {
+        clientId = await crypto.randomBytes(18).toString("hex");
+      } else {
+        clientId = name.toLowerCase().split(" ").join("-");
+      }
+
+      if (response_types.includes('code')) {
+        clientSecret = await crypto.randomBytes(18).toString("hex");
+      }
+
+      const clientById = await this.clientRepository.findByClientID(clientId);
+      if (!clientById) {
+        const accountToSave = await this.accountsService.getAccountByUUID(
+          accountUUID
+        );
+
+        
+            const clientToSave = new ClientEntity({
+              client_id: clientId,
+              secret: clientSecret,
+              name: name,
+              description: description,
+              grant_types: grant_types,
+              redirect_uris: redirect_uris,
+              response_types: response_types,
+              privacy_policy: privacy_policy,
+              tos: tos,
+              website: website,
+              consent: consent,
+              state: "ENABLED",
+              type: type,
+              verified,
+              account: accountToSave
+            });
+    
+            const defaultScopes = await this.scopeService.getDefaultScopes()
+
+            clientToSave.addAcl(defaultScopes);
+    
+            const savedClient = await this.clientRepository.save(clientToSave);
+    
+            resolve(savedClient);
+            
       } else {
         ctx.logger.error(
           "Client with client_id '" + clientId + "' already exist",

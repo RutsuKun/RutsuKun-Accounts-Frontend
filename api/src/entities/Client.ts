@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { AccountEntity } from "./Account";
 import { OAuthClientACL } from "./OAuthClientACL";
+import { OAuthScope } from "./OAuthScope";
 
 @Entity({
   name: "oauth_clients",
@@ -62,7 +63,7 @@ export class ClientEntity {
   @Column({ type: "json" })
   grant_types: string[];
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", default: 'hybrid' })
   type: string;
 
   @Column({ type: "boolean" })
@@ -75,11 +76,14 @@ export class ClientEntity {
   @JoinColumn({ name: "account_uuid", referencedColumnName: "uuid" })
   account?: AccountEntity;
 
-  @OneToOne(() => OAuthClientACL, (acl) => acl)
-  @JoinColumn({
-    name: "acl_uuid",
-    referencedColumnName: "uuid"
-  })
+  @OneToOne(() => OAuthClientACL, (acl) => acl.client, { cascade: true  })
   acl?: OAuthClientACL;
+
+  addAcl?(scopes: OAuthScope[]) {
+    this.acl = {
+      client: this,
+      scopes: scopes
+    };
+  }
 
 }

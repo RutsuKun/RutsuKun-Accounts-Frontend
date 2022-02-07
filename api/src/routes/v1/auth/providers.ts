@@ -3,7 +3,7 @@ import { Get } from "@tsed/schema";
 import { AccountsService } from "@services/AccountsService";
 import { AuthService } from "@services/AuthService";
 import { SessionService } from "@services/SessionService";
-import { Req, Res, UseBefore } from "@tsed/common";
+import { Context, Req, Res, UseBefore } from "@tsed/common";
 import { SessionMiddleware } from "@middlewares/session.middleware";
 import { LoggerService } from "@services/LoggerService";
 
@@ -21,7 +21,6 @@ export class AuthProvidersRoute {
   });
 
   constructor(
-    @Inject() private sessionService: SessionService,
     @Inject() private accountsService: AccountsService,
     @Inject() private authService: AuthService,
     @Inject() private loggerService: LoggerService
@@ -29,7 +28,11 @@ export class AuthProvidersRoute {
 
   @Get("/:providerId")
   @UseBefore(SessionMiddleware)
-  public async getProvider(@Req() request: Req, @Res() response: Res) {
+  public async getProvider(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
     const providerId = request.params.providerId || "unknown";
     const redirectTo = (request.query.redirectTo as string) || null;
 
@@ -53,7 +56,7 @@ export class AuthProvidersRoute {
     ]);
 
     if (callbackUrl) {
-      this.sessionService.setAction({
+      session.setAction({
         type: "connect-provider",
         connectProvider: {
           providerId: providerId,
@@ -61,7 +64,7 @@ export class AuthProvidersRoute {
           redirectTo: redirectTo,
         },
       });
-      await this.sessionService.saveSession();
+      await session.saveSession();
     }
 
     return response.redirect(callbackUrl);
@@ -70,17 +73,15 @@ export class AuthProvidersRoute {
   // need refactor
   @Get("/:providerId/callback")
   @UseBefore(SessionMiddleware)
-  public async getProviderCallback(@Req() request: Req, @Res() response: Res) {
+  public async getProviderCallback(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
     const providerId = request.params.providerId || "unknown";
-    const provider = this.authService
-      .getProviders()
-      .find((p) => p.id === providerId);
+    const provider = this.authService.getProviders().find((p) => p.id === providerId);
     const state = request.query.state || null;
-    const redirectTo =
-      this.sessionService.getAction &&
-      this.sessionService.getAction.connectProvider
-        ? this.sessionService.getAction.connectProvider.redirectTo
-        : null;
+    const redirectTo = session.getAction && session.getAction.connectProvider ? session.getAction.connectProvider.redirectTo : null;
 
     if (!provider) {
       return response.redirect(
@@ -91,7 +92,7 @@ export class AuthProvidersRoute {
       );
     }
 
-    const connectProviderAction = this.sessionService.getAction;
+    const connectProviderAction = session.getAction;
 
     if (connectProviderAction) {
       if (connectProviderAction.type !== "connect-provider") {
@@ -113,8 +114,8 @@ export class AuthProvidersRoute {
         !connectProviderAction ||
         connectProviderAction.connectProvider.providerId !== providerId
       ) {
-        this.sessionService.delAction();
-        this.sessionService.saveSession();
+        session.delAction();
+        session.saveSession();
         return response.redirect(
           `${Config.FRONTEND.url}/signin?${new URLSearchParams({
             error: "invalid_request",
@@ -123,8 +124,8 @@ export class AuthProvidersRoute {
         );
       }
     } else {
-      this.sessionService.delAction();
-      this.sessionService.saveSession();
+      session.delAction();
+      session.saveSession();
       return response.redirect(
         `${Config.FRONTEND.url}/signin?${new URLSearchParams({
           error: "invalid_request",
@@ -138,14 +139,10 @@ export class AuthProvidersRoute {
     let providerIdentity: ProviderIdentity;
 
     try {
-      providerIdentity = (await provider.handleCallback(
-        connectProviderAction.connectProvider.requestId,
-        ["openid", "profile", "email"],
-        originalUrl
-      )) as ProviderIdentity;
+      providerIdentity = (await provider.handleCallback(connectProviderAction.connectProvider.requestId, ["openid", "profile", "email"], originalUrl)) as ProviderIdentity;
     } catch (err) {
-      this.sessionService.delAction();
-      this.sessionService.saveSession();
+      session.delAction();
+      session.saveSession();
       return response.redirect(
         `${Config.FRONTEND.url}/signin?${new URLSearchParams({
           error: "invalid_request",
@@ -156,29 +153,17 @@ export class AuthProvidersRoute {
 
     if (providerIdentity["error"]) {
       response.status(500);
-      this.sessionService.delAction();
-      this.sessionService.saveSession();
+      session.delAction();
+      session.saveSession();
       return response.render("error", { error: providerIdentity["error"] });
     }
 
-    const findedAccount =
-      (await this.accountsService.getAccountByPrimaryEmail(
-        providerIdentity.email
-      )) ||
-      (await this.accountsService.getAccountByProvider(
-        providerId,
-        providerIdentity.id
-      ));
+    const findedAccount = (await this.accountsService.getAccountByProvider(providerId, providerIdentity.id)) || (await this.accountsService.getAccountByPrimaryEmail(providerIdentity.email));
 
-    console.log("findedAccount", findedAccount);
+    const loggedAccount = await this.accountsService.getByUUIDWithRelations(session.getUser.logged ? session.getUser.id : null, ["providers"]);
 
-    if (findedAccount) {
-      if (
-        !findedAccount.providers ||
-        !findedAccount.providers.find(
-          (p) => p.provider === providerId && p.id === providerIdentity.id
-        )
-      ) {
+    if (findedAccount && !session.getUser.logged) {
+      if (!findedAccount.providers || !findedAccount.providers.find((p) => p.provider === providerId && p.id === providerIdentity.id)) {
         findedAccount.addProvider({
           provider: providerId,
           id: providerIdentity.id,
@@ -196,13 +181,13 @@ export class AuthProvidersRoute {
         const auth_time = Math.floor(Date.now() / 1000);
 
         if (
-          this.sessionService.session &&
-          this.sessionService.getUser &&
-          this.sessionService.getUser.logged
+          session.session &&
+          session.getUser &&
+          session.getUser.logged
         ) {
           if (redirectTo) {
-            this.sessionService.delAction();
-            this.sessionService.saveSession();
+            session.delAction();
+            session.saveSession();
             return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
           } else {
             return response.redirect(`${Config.FRONTEND.url}/account/general`);
@@ -210,7 +195,7 @@ export class AuthProvidersRoute {
         } else {
           console.log("savedAccount", savedAccount);
 
-          this.sessionService
+          session
             .setUser({
               logged: true,
               id: savedAccount.uuid,
@@ -219,22 +204,24 @@ export class AuthProvidersRoute {
               picture: savedAccount.avatar,
               role: savedAccount.role,
             })
-            .setIDC({
-              session_id: this.sessionService.getSession.id,
+            .setIDP({
+              session_id: session.getSession.id,
+              session_state: session.getSession.id,
               session_issued: new Date(),
-              session_expires: this.sessionService.getSession.cookie.expires,
+              session_expires: session.getSession.cookie.expires,
               sub: savedAccount.uuid,
               idp: providerId, // identity provider
               username: savedAccount.username,
               amr: [providerId],
               auth_time: auth_time,
               reauth_time: auth_time,
+              used_authn_methods: []
             })
             .saveSession();
 
           if (redirectTo) {
-            this.sessionService.delAction();
-            this.sessionService.saveSession();
+            session.delAction();
+            session.saveSession();
             return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
           } else {
             return response.redirect(`${Config.FRONTEND.url}/account/general`);
@@ -243,8 +230,8 @@ export class AuthProvidersRoute {
       } else {
         if (!findedAccount.isPrimaryEmailVerified()) {
           this.logger.error("Account email doesn't verified", null, true);
-          this.sessionService.delAction();
-          this.sessionService.saveSession();
+          session.delAction();
+          session.saveSession();
           return response.redirect(
             `${Config.FRONTEND.url}/signin?${new URLSearchParams({
               error: "invalid_login",
@@ -255,8 +242,8 @@ export class AuthProvidersRoute {
 
         if (findedAccount.banned) {
           this.logger.error("Account banned", null, true);
-          this.sessionService.delAction();
-          this.sessionService.saveSession();
+          session.delAction();
+          session.saveSession();
           return response.redirect(
             `${Config.FRONTEND.url}/signin?${new URLSearchParams({
               error: "invalid_login",
@@ -268,9 +255,9 @@ export class AuthProvidersRoute {
         if (findedAccount.enabled2fa) {
           this.logger.info("Account have 2fa", null, true);
 
-          this.sessionService.delAction();
-          this.sessionService.saveSession();
-          this.sessionService
+          session.delAction();
+          session.saveSession();
+          session
             .setAction({
               type: "multifactor",
               multifactor: {
@@ -289,9 +276,9 @@ export class AuthProvidersRoute {
         }
 
         if (
-          this.sessionService.session &&
-          this.sessionService.getUser &&
-          this.sessionService.getUser.logged
+          session.session &&
+          session.getUser &&
+          session.getUser.logged
         ) {
           return response.redirect(`${Config.FRONTEND.url}/account/general`);
         } else {
@@ -305,7 +292,7 @@ export class AuthProvidersRoute {
 
           const auth_time = Math.floor(Date.now() / 1000);
 
-          this.sessionService
+          session
             .setUser({
               logged: true,
               id: findedAccount.uuid,
@@ -314,21 +301,23 @@ export class AuthProvidersRoute {
               picture: findedAccount.avatar,
               role: findedAccount.role,
             })
-            .setIDC({
-              session_id: this.sessionService.getSession.id,
+            .setIDP({
+              session_id: session.getSession.id,
+              session_state: session.getSession.id,
               session_issued: new Date(),
-              session_expires: this.sessionService.getSession.cookie.expires,
+              session_expires: session.getSession.cookie.expires,
               sub: findedAccount.uuid,
               idp: providerId, // identity provider
               username: findedAccount.username,
               amr: [providerId],
               auth_time: auth_time,
               reauth_time: auth_time,
+              used_authn_methods: []
             })
             .saveSession();
 
-          this.sessionService.delAction();
-          this.sessionService.saveSession();
+          session.delAction();
+          session.saveSession();
 
           if (redirectTo) {
             return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
@@ -339,14 +328,11 @@ export class AuthProvidersRoute {
       }
     } else {
       if (
-        this.sessionService.session &&
-        this.sessionService.getUser &&
-        this.sessionService.getUser.logged
+        session.session &&
+        session.getUser &&
+        session.getUser.logged
       ) {
-        const loggedAccount = await this.accountsService.getByUUIDWithRelations(
-          this.sessionService.getUser.id,
-          ["providers"]
-        );
+
         this.accountsService.addProvider({
           provider: providerId,
           id: providerIdentity.id,
@@ -356,8 +342,8 @@ export class AuthProvidersRoute {
           account: loggedAccount,
         });
 
-        this.sessionService.delAction();
-        this.sessionService.saveSession();
+        session.delAction();
+        session.saveSession();
 
         return response.redirect(`${Config.FRONTEND.url}/account/general`);
       } else {
@@ -374,7 +360,7 @@ export class AuthProvidersRoute {
 
           const auth_time = Math.floor(Date.now() / 1000);
 
-          this.sessionService
+          session
             .setUser({
               logged: true,
               id: account.uuid,
@@ -383,16 +369,18 @@ export class AuthProvidersRoute {
               picture: account.avatar,
               role: account.role,
             })
-            .setIDC({
-              session_id: this.sessionService.getSession.id,
+            .setIDP({
+              session_id: session.getSession.id,
+              session_state: session.getSession.id,
               session_issued: new Date(),
-              session_expires: this.sessionService.getSession.cookie.expires,
+              session_expires: session.getSession.cookie.expires,
               sub: account.uuid,
               idp: providerId, // identity provider
               username: account.username,
               amr: [providerId],
               auth_time: auth_time,
               reauth_time: auth_time,
+              used_authn_methods: []
             })
             .saveSession();
 
@@ -402,8 +390,8 @@ export class AuthProvidersRoute {
             true
           );
 
-          this.sessionService.delAction();
-          this.sessionService.saveSession();
+          session.delAction();
+          session.saveSession();
 
           if (redirectTo) {
             return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
@@ -411,8 +399,8 @@ export class AuthProvidersRoute {
             return response.redirect(`${Config.FRONTEND.url}/account/general`);
           }
         } catch (error) {
-          this.sessionService.delAction();
-          this.sessionService.saveSession();
+          session.delAction();
+          session.saveSession();
           return response.redirect(
             `${Config.FRONTEND.url}/signin?error=${error}`
           );
@@ -425,7 +413,8 @@ export class AuthProvidersRoute {
   @UseBefore(SessionMiddleware)
   public async getProviderDisconnect(
     @Req() request: Req,
-    @Res() response: Res
+    @Res() response: Res,
+    @Context("session") session: SessionService
   ) {
     const providerId = request.params.providerId || "unknown";
 
@@ -444,7 +433,7 @@ export class AuthProvidersRoute {
 
     try {
       const account = await this.accountsService.getByUUIDWithRelations(
-        this.sessionService.getUser.id,
+        session.getUser.id,
         ["providers"]
       );
       const findProvider = account.providers.find(

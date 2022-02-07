@@ -20,6 +20,8 @@ import { oAuth2ClientCredentials } from "./flows/ClientCredentialsFlow";
 import { oAuth2DeviceCode } from "./flows/DeviceCodeFlow";
 
 import { HTTP, HTTPCodes } from "@utils";
+import { AclService } from "@services/AclService";
+import { oAuth2RefreshToken } from "./flows/RefreshTokenFlow";
 
 @Controller("/oauth2/token")
 export class OAuth2TokenRoute {
@@ -41,7 +43,6 @@ export class OAuth2TokenRoute {
   @UseBefore(CheckClientMiddleware)
   public getToken(@Req() request: Req, @Res() response: Res) {
     const grant_type = request.body.grant_type || "";
-
     switch (grant_type) {
       case "authorization_code":
         return oAuth2AuthorizationCodeFlow(
@@ -50,6 +51,13 @@ export class OAuth2TokenRoute {
           this.tokenService,
           this.accountService
         );
+        break;
+      case "refresh_token":
+          return oAuth2RefreshToken(
+            this.logger,
+            this.clientService,
+            this.tokenService
+          );
         break;
       case "client_credentials":
         return oAuth2ClientCredentials(

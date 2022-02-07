@@ -41,6 +41,7 @@ export class WellKnownRoute {
       token_endpoint: Config.OAUTH2.token_endpoint,
       userinfo_endpoint: Config.OAUTH2.userinfo_endpoint,
       end_session_endpoint: Config.OpenID.end_session_endpoint,
+      check_session_iframe: `${Config.OAUTH2.issuer}/v1/oauth2/check-session-iframe`,
       revocation_endpoint: Config.OAUTH2.revocation_endpoint,
       introspection_endpoint: Config.OAUTH2.introspection_endpoint,
       jwks_uri: Config.OAUTH2.jwks_uri,

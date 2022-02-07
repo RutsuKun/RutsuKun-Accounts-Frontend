@@ -1,62 +1,30 @@
-import { Injectable } from "@tsed/di";
-import { LoggerService } from "@services/LoggerService";
+import { Inject, Injectable } from "@tsed/di";
+import { UseConnection } from "@tsed/typeorm";
+import { OAuthScopeRepository } from "@repositories/OAuthScopeRepository";
+import { OAuthScope } from "@entities/OAuthScope";
+import { DeleteResult } from "typeorm";
 
 @Injectable()
 export class ScopeService {
-  private running;
-  private logger: LoggerService;
+  @Inject()
+  @UseConnection("default")
+  private oauthScopeRepository: OAuthScopeRepository;
+  constructor() {}
 
-  constructor(private loggerService: LoggerService) {
-    this.logger = this.loggerService.child({
-      label: {
-        type: "scope",
-        name: "Scope Service",
-      },
-    });
+
+  public getScopes() {
+    return this.oauthScopeRepository.findAll();
   }
 
-  public healthy() {
-    const ctx = this;
-    ctx.logger.info("Requested Scope Component Healthy Check");
-    const healthy = {
-      name: "Scope",
-      slug: "scope",
-      healthy: ctx.running,
-    };
-    return healthy;
+  public getDefaultScopes() {
+    return this.oauthScopeRepository.findDefaultScopes();
   }
 
-  public getScopes(): Promise<any> {
-    return new Promise(async (resolve, reject) => {
-      // const scopes = await this.database.scope.find({});
-      // resolve(scopes);
-      resolve([]);
-    });
+  public createScope(scope: OAuthScope): Promise<OAuthScope> {
+    return this.oauthScopeRepository.save(scope);
   }
 
-  public addScope(scope, description): Promise<any> {
-    const ctx = this;
-    return new Promise(async (resolve) => {
-      // const dataToSave = {
-      //     scope,
-      //     description
-      // };
-      // const newScope = new ctx.database.scope(dataToSave);
-      // newScope.save();
-      // return resolve(newScope);
-    });
-  }
-
-  public deleteScope(scopeId): Promise<any> {
-    const ctx = this;
-    return new Promise(async (resolve, reject) => {
-      // ctx.database.scope.deleteOne({ "_id": scopeId }).then((res) => {
-      //     if (res.deletedCount > 0) {
-      //         resolve("Scope deleted");
-      //     } else {
-      //         reject("Scope doesn't exist or already deleted")
-      //     }
-      // });
-    });
+  public deleteScope(scope: string): Promise<DeleteResult> {
+    return this.oauthScopeRepository.delete({ name: scope });
   }
 }

@@ -22,6 +22,9 @@ export class OAuthScope {
   @Column()
   uuid?: string;
 
+  @Column({ type: 'boolean' })
+  default: boolean;
+
   @PrimaryColumn()
   name: string;
 

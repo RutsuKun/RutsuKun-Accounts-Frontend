@@ -9,9 +9,10 @@ import { OAuthDeviceCodeRepository } from "@repositories/OAuthRepository";
 import { AccountRepository } from "@repositories/AccountRepository";
 
 import {
-  IDTokenData,
+  ICreateIDTokenData,
   TokenService,
   CreateAccessTokenData,
+  CreateRefreshTokenData,
 } from "@services/TokenService";
 import { LoggerService } from "@services/LoggerService";
 import { SessionService } from "@services/SessionService";
@@ -22,6 +23,7 @@ import { OAuthDeviceCode } from "@entities/OAuthDeviceCode";
 import { Config } from "@config";
 import crypto from "crypto";
 import { AccountsService } from "./AccountsService";
+import { OAuthClientACL } from "@entities/OAuthClientACL";
 
 @Injectable()
 export class OAuth2Service {
@@ -147,7 +149,6 @@ export class OAuth2Service {
       const {
         response_type,
         redirect_uri,
-        scope,
         accountId,
         country,
         code_challenge,
@@ -159,6 +160,8 @@ export class OAuth2Service {
         session_state,
         deviceCodeData,
       } = data;
+
+      const scope = data.scope;
 
       if (deviceCodeData) {
         const toSaveDeviceCode: OAuthDeviceCode = {
@@ -179,7 +182,7 @@ export class OAuth2Service {
           ["emails"]
         );
         // const scopes = await ctx.settings.getScopesByRole(account.role);
-        let IDTokenData: IDTokenData = {
+        let IDTokenData: ICreateIDTokenData = {
           sub: account.uuid,
           username: account.username,
           picture: `${Config.CDN.url}/${account.uuid}`,
@@ -232,19 +235,11 @@ export class OAuth2Service {
         }
 
         if (response_types_check.includes("id_token")) {
-          const rv1 = Math.floor(Math.random() * Math.floor(254));
-          const rv2 = Math.random().toString(36).substr(2, 12);
-          const rv3 = Math.floor(Math.random() * Math.floor(81458));
-          IDTokenData.jti = rv1 + "-" + rv2 + "-" + rv3;
           const id_token = await ctx.tokenService.createIDToken(IDTokenData);
           res.id_token = id_token;
         }
 
         if (response_types_check.includes("token")) {
-          const rv1 = Math.floor(Math.random() * Math.floor(254));
-          const rv2 = Math.random().toString(36).substr(2, 12);
-          const rv3 = Math.floor(Math.random() * Math.floor(81458));
-          AccessTokenData.jti = rv1 + "-" + rv2 + "-" + rv3;
           const access_token = await ctx.tokenService.createAccessToken(
             AccessTokenData
           );
@@ -259,6 +254,22 @@ export class OAuth2Service {
         if (state) {
           res.state = state;
           IDTokenData.s_hash = ctx.tokenService.createSHash(state, "RS256");
+        }
+
+        if(scope.includes("offline_access") && !response_types_check.includes("code")) {
+          const RefreshTokenData: CreateRefreshTokenData = {
+            sub: account.uuid,
+            client_id: client.client_id,
+            scopes: scope.split(" "),
+          };
+
+          const rv1 = Math.floor(Math.random() * Math.floor(254));
+          const rv2 = Math.random().toString(36).substr(2, 12);
+          const rv3 = Math.floor(Math.random() * Math.floor(81458));
+          RefreshTokenData.jti = rv1 + "-" + rv2 + "-" + rv3;
+          const refresh_token = await ctx.tokenService.createRefreshToken(RefreshTokenData);
+          res.refresh_token = refresh_token;
+          res.refresh_token_type = "Bearer";
         }
 
         if (session_state) res.session_state = session_state;
@@ -307,6 +318,18 @@ export class OAuth2Service {
         });
       }
     });
+  }
+
+  public filterAllowedScopes(acl: OAuthClientACL, scopes: string[]) {
+    let allowed = scopes;
+
+    if(acl && acl.scopes.length) {
+      const unallowedScopes = allowed.filter(filteredScope => !acl.scopes.map(s=>s.name).includes(filteredScope));
+      console.log('unallowedScopes', unallowedScopes.join(", "));
+      allowed = allowed.filter(filteredScope => acl.scopes.map(s=>s.name).includes(filteredScope))
+    }
+
+    return allowed;
   }
 
   public getToken(data: GetTokenData) {
@@ -393,14 +416,10 @@ export class OAuth2Service {
               null,
               true
             );
-            let rv1 = Math.floor(Math.random() * Math.floor(254));
-            let rv2 = Math.random().toString(36).substr(2, 12);
-            let rv3 = Math.floor(Math.random() * Math.floor(81458));
             const access_token = await ctx.tokenService.createAccessToken({
               sub: account.uuid,
               client_id: data.client.client_id,
-              scopes: scopes,
-              jti: rv1 + "-" + rv2 + "-" + rv3,
+              scopes: scopes
             });
 
             ctx.logger.success("Access Token generated: " + access_token);
@@ -421,9 +440,6 @@ export class OAuth2Service {
             );
             const c_hash = ctx.tokenService.createCHash(data.code, "RS256");
             const s_hash = ctx.tokenService.createSHash("12345", "RS256");
-            rv1 = Math.floor(Math.random() * Math.floor(254));
-            rv2 = Math.random().toString(36).substr(2, 12);
-            rv3 = Math.floor(Math.random() * Math.floor(81458));
             const id_token = await ctx.tokenService.createIDToken({
               sub: account.uuid,
               username: account.username,
@@ -437,7 +453,6 @@ export class OAuth2Service {
               amr: ["pw"],
               acr: "urn:raining:bronze",
               azp: ["raining_auth"],
-              jti: rv1 + "-" + rv2 + "-" + rv3,
               at_hash: at_hash,
               c_hash: c_hash,
               s_hash: s_hash,
@@ -501,14 +516,10 @@ export class OAuth2Service {
             null,
             true
           );
-          let rv1 = Math.floor(Math.random() * Math.floor(254));
-          let rv2 = Math.random().toString(36).substr(2, 12);
-          let rv3 = Math.floor(Math.random() * Math.floor(81458));
           const access_token = await ctx.tokenService.createAccessToken({
             sub: data.client.client_id,
             client_id: data.client.client_id,
-            scopes: data.scope.split(" "),
-            jti: rv1 + "-" + rv2 + "-" + rv3,
+            scopes: data.scope.split(" ")
           });
 
           ctx.logger.success("Access Token generated: " + access_token);
@@ -557,14 +568,10 @@ export class OAuth2Service {
               null,
               true
             );
-            let rv1 = Math.floor(Math.random() * Math.floor(254));
-            let rv2 = Math.random().toString(36).substr(2, 12);
-            let rv3 = Math.floor(Math.random() * Math.floor(81458));
             const access_token = await ctx.tokenService.createAccessToken({
               sub: account.uuid,
               client_id: data.client.client_id,
-              scopes: scopes,
-              jti: rv1 + "-" + rv2 + "-" + rv3,
+              scopes: scopes
             });
 
             ctx.logger.success("Access Token generated: " + access_token);
@@ -588,9 +595,7 @@ export class OAuth2Service {
               );
 
               const s_hash = ctx.tokenService.createSHash("12345", "RS256");
-              rv1 = Math.floor(Math.random() * Math.floor(254));
-              rv2 = Math.random().toString(36).substr(2, 12);
-              rv3 = Math.floor(Math.random() * Math.floor(81458));
+
 
               const IDTokenData = {
                 sub: account.uuid,
@@ -604,7 +609,6 @@ export class OAuth2Service {
                 amr: ["pw"],
                 acr: "urn:raining:bronze",
                 azp: ["raining_auth"],
-                jti: rv1 + "-" + rv2 + "-" + rv3,
                 at_hash: at_hash,
                 s_hash: s_hash,
                 nonce: "123",

@@ -1,4 +1,4 @@
-import { Req, Res } from "@tsed/common";
+import { Logger, Req, Res } from "@tsed/common";
 import { Request, Response } from "express";
 
 import { LoggerService } from "@services/LoggerService";
@@ -29,8 +29,8 @@ class HTTP {
     }
   }
 
-  public static BadRequest(req: Request, res: Response, logger: LoggerService) {
-    logger.warn("System received a bad request.", {
+  public static BadRequest(message: string, req: Request, res: Response, logger: Logger) {
+    logger.warn(`System received a bad request (${message})`, {
       body: req.body,
       parameters: req.params,
       query: req.query,
@@ -39,7 +39,7 @@ class HTTP {
     try {
       return res.status(HTTPCodes.BadRequest).json({
         status: "error",
-        error: "Re-Check Parameters being sent",
+        message,
       });
     } catch (_) {
       // shall do nothing
@@ -49,7 +49,7 @@ class HTTP {
   public static Unauthorized(
     req: Request,
     res: Response,
-    logger: LoggerService,
+    logger: Logger,
     user?: string
   ) {
     logger.warn(

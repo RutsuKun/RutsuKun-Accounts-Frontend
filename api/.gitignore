@@ -7,6 +7,7 @@
 important
 report.html
 local.env
+sessions/*.json
 
 # Logs
 logs

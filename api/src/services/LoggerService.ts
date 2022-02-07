@@ -33,7 +33,12 @@ export class LoggerService {
   // INFO LOG
   public info(message: string, payload?: any, supressDB = false) {
     //if (Config.Environment.NODE_ENV !== 'test')
-    this.logger.info(message);
+    if(payload) {
+      this.logger.info(message, payload);
+    } else {
+      this.logger.info(message);
+    }
+    
 
     if (supressDB !== true) {
       //this.db.dbInterface.logs.create({

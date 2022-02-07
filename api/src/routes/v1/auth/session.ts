@@ -1,9 +1,11 @@
 import { Controller, Inject } from "@tsed/di";
 import { Get, Post } from "@tsed/schema";
-import { Req, Res } from "@tsed/common";
+import { Context, Req, Res, Use, UseBefore } from "@tsed/common";
 
 import { SessionService } from "@services/SessionService";
 import { LoggerService } from "@services/LoggerService";
+import { SessionMiddleware } from "@middlewares/session.middleware";
+import { AuthService } from "@services/AuthService";
 
 @Controller("/auth/session")
 export class AuthSessionRoute {
@@ -15,29 +17,39 @@ export class AuthSessionRoute {
   });
 
   constructor(
-    @Inject() private sessionService: SessionService,
-    @Inject() private loggerService: LoggerService
+    @Inject() private loggerService: LoggerService,
+    private authService: AuthService
   ) {}
 
   @Get("/")
-  public getSession(@Req() request: Req, @Res() response: Res) {
-    if (this.sessionService.session && this.sessionService.getUser) {
+  @UseBefore(SessionMiddleware)
+  public async getSession(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context('session') session: SessionService
+  ) {
+    if (session && session.getUser && session.getUser.logged) {
       //   if (req.session.user.impersonate) {
       //     return res.status(200).json(req.session.user.impersonate);
       //   }
-      response.status(200).json(this.sessionService.getUser);
+      const acr_values = session.getFlow === 'auth' ? 'urn:rutsukun:gold' : session.getClientQuery.acr_values;
+      if(!!await this.authService.checkMfaAuthnRequired(session.getUser.id, session, acr_values)) return response.status(200).json({ logged: false });
+
+      response.status(200).json(session.getUser);
     } else {
       response.status(200).json({ logged: false });
     }
   }
 
   @Get("/details")
-  public getSessionDetails(@Req() request: Req, @Res() response: Res) {
-    response.status(200).json(request.session);
+  @Use(SessionMiddleware)
+  public getSessionDetails(@Req() request: Req, @Res() response: Res, @Context('session') session: SessionService) {
+    response.status(200).json(session.session);
   }
 
   @Get("/end")
-  public getSessionEnd(@Req() request: Req, @Res() response: Res) {
+  @UseBefore(SessionMiddleware)
+  public async getSessionEnd(@Req() request: Req, @Res() response: Res, @Context('session') session: SessionService) {
     const { id_token_hint, post_logout_redirect_uri } = request.query;
     if (!post_logout_redirect_uri) {
       response.status(200).json({
@@ -47,8 +59,8 @@ export class AuthSessionRoute {
       });
     }
 
-    if (this.sessionService.getUser && this.sessionService.getUser.id) {
-      this.sessionService
+    if (session.getUser && session.getUser.id) {
+      await session
         .setUser({ logged: false })
         .delPassport()
         .delAction()
@@ -59,8 +71,13 @@ export class AuthSessionRoute {
   }
 
   @Post("/end")
-  public postSessionEnd(@Req() request: Req, @Res() response: Res) {
-    if (this.sessionService.getUser && this.sessionService.getUser.id) {
+  @UseBefore(SessionMiddleware)
+  public async postSessionEnd(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context('session') session: SessionService
+  ) {
+    if (session.getUser && session.getUser.id) {
       /**if(req.session.user.impersonate){
 				delete req.session.user.impersonate;
 				return res.status(200).json({
@@ -69,14 +86,13 @@ export class AuthSessionRoute {
 				})
 			}**/
 
-      this.sessionService
-        .setUser({ logged: false })
-        .delPassport()
-        .delAction()
-        .delIDC()
-        .saveSession();
+      const newSession = session.setUser({ logged: false }).delPassport().delAction().delIDP();
+      console.log('newSession', newSession);
 
-      response.status(200).json(this.sessionService.getUser);
+      await newSession.saveSession();
+      
+
+      response.status(200).json(newSession.getUser);
     } else {
       response.status(200).json({ logged: false });
     }

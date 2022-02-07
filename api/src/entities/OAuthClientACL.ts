@@ -17,20 +17,22 @@ import { OAuthScope } from "./OAuthScope";
   engine: "InnoDB",
 })
 export class OAuthClientACL {
-  constructor(acl: OAuthClientACL) {
-    Object.assign(this, acl);
+  constructor(acl?: OAuthClientACL) {
+    if(acl) {
+      Object.assign(this, acl);
+    }
   }
 
   @PrimaryColumn()
   @Generated("uuid")
   uuid?: string;
 
-  @OneToOne(() => ClientEntity, (client) => client.acl)
+  @OneToOne(() => ClientEntity, (client) => client.acl, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   @JoinColumn({
     name: "client_id",
     referencedColumnName: "client_id",
   })
-  client?: ClientEntity[];
+  client?: ClientEntity;
 
   @ManyToMany(() => AccountGroup, (group) => group.acl)
   @JoinTable({

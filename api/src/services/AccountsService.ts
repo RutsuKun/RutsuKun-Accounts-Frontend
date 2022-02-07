@@ -10,6 +10,9 @@ import { AccountProviderRepository } from "@repositories/AccountProviderReposito
 import { AccountProvider } from "@entities/AccountProvider";
 import { Validate } from "@utils";
 import bcrypt from "bcryptjs";
+import { AccountAuthnMethodRepository } from "@repositories/AccountAuthnMethod.repository";
+import { AuthenticationMethods } from "common/interfaces/authentication.interface";
+import { AccountAuthnMethod } from "@entities/AccountAuthnMethod";
 
 @Injectable()
 export class AccountsService {
@@ -24,6 +27,10 @@ export class AccountsService {
   @Inject()
   @UseConnection("default")
   private accountsProviderRepository: AccountProviderRepository;
+
+  @Inject()
+  @UseConnection("default")
+  private accountsAuthnMethodRepository: AccountAuthnMethodRepository;
 
   constructor(
     private logger: LoggerService,
@@ -353,6 +360,31 @@ export class AccountsService {
     });
   }
 
+  public getAccountAuthnMethods(uuid: string) {
+    return this.accountsAuthnMethodRepository.find({
+      account: {
+        uuid
+      }
+    })
+  }
+
+  public getAccountAuthnMethod(uuid: string, method: AuthenticationMethods) {
+    return this.accountsAuthnMethodRepository.findOne({
+      type: method,
+      account: {
+        uuid
+      }
+    })
+  }
+
+  public removeAccountAuthnMethod(method: AccountAuthnMethod) {
+    return this.accountsAuthnMethodRepository.delete(method);
+  }
+
+  public addAccountAuthnMethod(authn: AccountAuthnMethod) {
+    return this.accountsAuthnMethodRepository.save(authn);
+  }
+
   public verifyEmailByCode(code: string): Promise<any> {
     const ctx = this;
     return new Promise(async (resolve, reject) => {
@@ -410,9 +442,11 @@ export class AccountsService {
     return this.emailRepository.save(email);
   }
 
-  public deleteEmail(email: string, accountUUID: string) {
+
+
+  public deleteEmail(emailUuid: string, accountUUID: string) {
     return this.emailRepository.delete({
-      uuid: Number(email),
+      uuid: emailUuid,
       account: {
         uuid: accountUUID,
       },

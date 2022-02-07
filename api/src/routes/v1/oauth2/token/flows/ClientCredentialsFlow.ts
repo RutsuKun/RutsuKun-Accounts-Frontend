@@ -31,31 +31,17 @@ const oAuth2ClientCredentials = (
     logger.info("Initialized Client Credentials flow.", null, true);
 
     if (!(await client.checkClientSecret(clientFromReq, clientSecret))) {
-      res.status(HTTPCodes.BadRequest).json({
-        error: "invalid_client",
-        error_description: "Client secret invalid",
-      });
+      res.status(HTTPCodes.BadRequest).json({ error: "invalid_client", error_description: "Client secret invalid" });
     }
 
     logger.info("Client Secret is fine");
 
-    logger.info(
-      "Generates an Access Token for " +
-        clientFromReq.name +
-        " (" +
-        clientFromReq.client_id +
-        ")",
-      null,
-      true
-    );
-    let rv1 = Math.floor(Math.random() * Math.floor(254));
-    let rv2 = Math.random().toString(36).substr(2, 12);
-    let rv3 = Math.floor(Math.random() * Math.floor(81458));
+    logger.info("Generates an Access Token for " + clientFromReq.name + " (" + clientFromReq.client_id +")", null, true);
+
     const access_token = await token.createAccessToken({
       sub: clientFromReq.client_id,
       client_id: clientFromReq.client_id,
       scopes: scope,
-      jti: rv1 + "-" + rv2 + "-" + rv3,
     });
 
     logger.success("Access Token generated: " + access_token);

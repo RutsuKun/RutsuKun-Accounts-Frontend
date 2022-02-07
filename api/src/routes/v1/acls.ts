@@ -11,12 +11,12 @@ export class AclsRoute {
   constructor(@Inject() private aclService: AclService) {}
 
   @Get()
-  @UseBefore(AccessTokenMiddleware)
-  @UseBefore(
-    new ScopeMiddleware().use(["acls:read", "acls:manage"], {
-      checkAllScopes: false,
-    })
-  )
+  // @UseBefore(AccessTokenMiddleware)
+  // @UseBefore(
+  //   new ScopeMiddleware().use(["acls:read", "acls:manage"], {
+  //     checkAllScopes: false,
+  //   })
+  // )
   public async getIndex(req: Request, res: Response, next: NextFunction) {
     let acls = await this.aclService.getAcls();
 
@@ -24,6 +24,7 @@ export class AclsRoute {
       ...acls.map((acl) => {
         return {
           uuid: acl.uuid,
+          client_id: acl.client.client_id,
           allowedScopes: acl.scopes.map((scope) => scope.name),
           allowedAccounts: acl.accounts.map((account) => {
             return {

@@ -1,8 +1,9 @@
-import { Context, Controller, Delete, Get, Inject, PathParams, Post, Req, Res, UseBefore } from "@tsed/common";
+import { Controller, Delete, Get, Inject, Post, Req, Res, UseBefore } from "@tsed/common";
 
 // MIDDLEWARES
 
-import { SessionLoggedMiddleware, SessionMiddleware } from "@middlewares/session.middleware";
+import { SessionMiddleware } from "@middlewares/session.middleware";
+import { AccessTokenMiddleware } from "@middlewares/security";
 
 // SERVICES
 
@@ -11,13 +12,14 @@ import { SessionService } from "@services/SessionService";
 import { ClientService } from "@services/ClientService";
 
 import { HTTPCodes } from "@utils";
+import { ScopeMiddleware } from "@middlewares/scope.middleware";
 
-import { map, timer } from 'rxjs';
 
-@Controller("/oauth2/clients")
-export class OAuth2ClientsRoute {
+@Controller("/admin/clients")
+export class AdminClientsRoute {
   public logger: LoggerService;
   constructor(
+    @Inject() private sessionService: SessionService,
     @Inject() private clientService: ClientService,
     @Inject() private loggerService: LoggerService
   ) {
@@ -27,72 +29,54 @@ export class OAuth2ClientsRoute {
   }
 
   @Get("/")
-  @UseBefore(SessionLoggedMiddleware)
-  @UseBefore(SessionMiddleware)
-  public async getClients(
-    @Req() request: Req,
-    @Res() response: Res,
-    @Context("session") session: SessionService
-  ) {
+  @UseBefore(AccessTokenMiddleware)
+  @UseBefore(new ScopeMiddleware().use(["admin:clients"]))
+  public async getAdminClients(@Req() request: Req, @Res() response: Res) {
+    const clients = await this.clientService.getAdminClients(["account"]);
 
-    const clients = await this.clientService.getAccountClients(session.getUser.id);
+    const filtered = clients.map((client)=>{
+        return {
+            ...client,
+            account: {
+                uuid: client.account.uuid,
+                username: client.account.username,
+                avatar: client.account.avatar
+            }
+        }
+    })
 
-    return timer(2000).pipe(map(() => clients));
-
+    response.status(HTTPCodes.OK).json(filtered);
   }
 
   @Post("/")
-  @UseBefore(SessionLoggedMiddleware)
-  @UseBefore(SessionMiddleware)
-  public async postClients(
-    @Req() request: Req,
-    @Res() response: Res,
-    @Context("session") session: SessionService
-  ) {
+  @UseBefore(AccessTokenMiddleware)
+  @UseBefore(new ScopeMiddleware().use(["admin:clients"]))
+  public async postClients(@Req() request: Req, @Res() response: Res) {
+    const session = this.sessionService.getUser;
     const data = request.body;
     try {
-      const client = await this.clientService.addClient(session.getUser.id, data);
+      const client = await this.clientService.addAdminClient(response.user.sub, data);
       response.status(HTTPCodes.Created).json(client);
     } catch (err) {
+      console.log('err', err);
+      
       response.status(HTTPCodes.BadRequest).json({
         error: err,
       });
     }
   }
 
-  @Get("/:client_id")
-  public async getClient(
-    @Req() request: Req,
-    @Res() response: Res,
-    @PathParams("client_id") client_id: string
-  ) {
-
-    try {
-      const client = await this.clientService.getClientByClientId(client_id);
-      response.status(HTTPCodes.OK).json(client);
-    } catch (error) {
-      response.status(HTTPCodes.BadRequest).json({
-        error: error,
-      });
-    }
-  }
-
   @Delete("/:clientId")
-  @UseBefore(SessionLoggedMiddleware)
   @UseBefore(SessionMiddleware)
-  public deleteClients(
-    @Req() request: Req,
-    @Res() response: Res,
-    @Context("session") session: SessionService
-  ) {
-
+  public deleteClients(@Req() request: Req, @Res() response: Res) {
+    const session = this.sessionService.getUser;
 
     const clientId = request.params.clientId;
 
     this.clientService
       .getClientByClientId(clientId)
       .then((client) => {
-        if (session.getUser.id === client.account.uuid) {
+        if (session.id === client.account.uuid) {
           this.clientService
             .deleteClient(clientId)
             .then(() => {

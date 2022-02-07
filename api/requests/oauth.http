@@ -1,0 +1,56 @@
+
+@hostname = https://api.rutsukun.pl
+@client_id = app-debug-api
+@client_secret = 2c573dc6b4d51e9af29ca4fe1bb6e43a67b4
+@redirect_uri = http://localhost
+@response_type = code
+@scope = openid offline_access
+
+### get authorize client
+# https://api.rutsukun.pl/v1/oauth2/authorize?client_id=app-debug-api&service=app-debug-api&redirect_uri=http://localhost&response_type=code&scope=openid offline_access
+GET {{hostname}}/v1/oauth2/authorize?client_id={{client_id}}&redirect_uri={{redirect_uri}}&response_type={{response_type}}&scope={{scope}} HTTP/1.1
+
+### post authorize client
+
+POST {{hostname}}/v1/oauth2/authorize HTTP/1.1
+Content-Type: application/json
+
+{
+    "consentGiven": true,
+    "scope": "openid offline_access"
+}
+
+### grant type authorization code
+POST {{hostname}}/v1/oauth2/token
+Content-Type: application/json
+
+{
+    "grant_type": "authorization_code",
+    "client_id": "{{client_id}}",
+    "client_secret": "{{client_secret}}",
+    "redirect_uri": "{{redirect_uri}}",
+    "code": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkpUS2pMZmx0Z3dqZnVMeHBTTmk1emloX0tGM3FIeEdDMllKRFFPbU1WYlEifQ.eyJpc3MiOiJodHRwczovL2FwaS5ydXRzdWt1bi5wbCIsInN1YiI6Ijg1ZTcxZGJiLTM2YTAtNDRjYi05YWU4LWM4NDNmM2FiY2MzNSIsInNjcCI6WyJvcGVuaWQiLCJvZmZsaW5lX2FjY2VzcyJdLCJhdWQiOiJodHRwczovL2FwaS5ydXRzdWt1bi5wbCIsImNpZCI6ImFwcC1kZWJ1Zy1hcGkiLCJ0eXBlIjoiY29kZSIsInRpbWVzdGFtcCI6MTY0MTIzODAwNTQyOCwiaWF0IjoxNjQxMjM4MDA1LCJleHAiOjE2NDEyMzgxMjV9.qGnnC805fDHSVo7RrzwXY3Q9q1Fo0OjeBfPPXkoC8Wt8hi0qrt_LyVaS14cx5ivcRTuoOxnXWb8zr5jtLy1_AkT99p0zRWzPwzx5tDDUc7XpBD3mYdohgyct7bPW8OTnvPXSCMzAuQLc1XHfJ1HA4cSNJKLtLfCSxfRh5XXxyqoMWc5K65RzaC3TvbcZ5X9YwnSJxabRLt1SyTch0ZCuoGl_vm7Hu3PnpQdfDoz33DpZJSORLqR45TnWO8hmal-gCqK0D90NL9NE3HMHmqdmcesUROAhap7-EsGLlf24qm0kwMasoReizwGN2bFPqWienEfq88Opjq5Ww6b6eQOkXA"
+}
+
+### grant type refresh token
+POST {{hostname}}/v1/oauth2/token
+Content-Type: application/json
+
+{
+    "grant_type": "refresh_token",
+    "client_id": "{{client_id}}",
+    "client_secret": "{{client_secret}}",
+    "redirect_uri": "{{redirect_uri}}",
+    "refresh_token": "eyJhbGciOiJSUI1NiIsImtpZCI6Im1ZdHIyekxKVjd6ZUZkZnd3ZktEZl9kSk1pcTZYRXJkMmIxU0NRVlk5NzgifQ.eyJpc3MiOiJodHRwczovL2FwaS5ydXRzdWt1bi5wbCIsInN1YiI6Ijg1ZTcxZGJiLTM2YTAtNDRjYi05YWU4LWM4NDNmM2FiY2MzNSIsImF1ZCI6ImFwcC1kZWJ1Zy1hcGkiLCJzY3AiOlsib3BlbmlkIiwib2ZmbGluZV9hY2Nlc3MiXSwidGltZXN0YW1wIjoxNjQxMjM4MTA4MTY5LCJ0eXBlIjoicmVmcmVzaF90b2tlbiIsImlhdCI6MTY0MTIzODEwOCwiZXhwIjoxNjQzOTE2NTA4fQ.I6S4CaeWiUMcDurqr6zK8IOdsJnmxLrMCybppht_s_9x76h0AwzMAihAySJVL0xXE35Fb4C0taBr_JWZETV06GXbvF605vari95GviLeAipKrdZeIcrYUTvMCqRh7cNCPwUt8_VHxVB37X-ZaRvf4KNRd4JLDPWjFO0Li4Fl80kD765yW-oQEHICDeQkjyf2fU_u4WkCbVWnXQrZsBflKJtnR4uqK9jbhPT3RvdOcauSu0bmnLhUfsdt8S3tY_horh5F9rCYdAERCq8eR5zhJx1SkkSV9SsWSsnRHWXLnTG3_th_d8vWSGBbRuKuAvX2b5AUebavwFW-0gFdKWkC4w"
+}
+
+### grant type client credentials
+POST {{hostname}}/v1/oauth2/token
+Content-Type: application/json
+
+{
+    "grant_type": "client_credentials",
+    "client_id": "{{client_id}}",
+    "client_secret": "{{client_secret}}",
+    "scope": "offline_access"
+}

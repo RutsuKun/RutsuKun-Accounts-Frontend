@@ -10,9 +10,10 @@ import { Config } from "@config";
 import bcrypt from "bcryptjs";
 import { initializeProviders } from "@config/providers";
 import { IProvider } from "./../providers/IProvider";
-import { AccountEntity } from "@entities/Account";
 import { AccountsService } from "./AccountsService";
 import { EmailRepository } from "@repositories/EmailRepository";
+import { TokenService } from "./TokenService";
+import * as speakeasy from "speakeasy";
 
 @Injectable()
 export class AuthService {
@@ -28,8 +29,9 @@ export class AuthService {
   private emailRepository: EmailRepository;
 
   constructor(
-    @Inject() private loggerService: LoggerService,
-    private accountsService: AccountsService
+    private loggerService: LoggerService,
+    private accountsService: AccountsService,
+    private tokenService: TokenService
   ) {
     this.logger = this.loggerService.child({
       label: { name: "AuthService", type: "service" },
@@ -123,25 +125,6 @@ export class AuthService {
         return resolve({ type: "error", error: "ACCOUNT_BANNED" });
       }
 
-      if (account.enabled2fa) {
-        ctx.logger.info("Account have 2fa", null, true);
-        session
-          .setAction({
-            type: "multifactor",
-            multifactor: {
-              type: "2fa",
-              accountId: account.uuid,
-            },
-          })
-          .saveSession();
-
-        return resolve({
-          type: "multifactor",
-          multifactor: {
-            type: "2fa",
-          },
-        });
-      }
 
       // IN THIS MOMENT USER IS LOGGED SUCCESSFUL
 
@@ -162,8 +145,9 @@ export class AuthService {
         role: account.role,
       });
 
-      session.setIDC({
+      session.setIDP({
         session_id: session.getSession.id,
+        session_state: session.getSession.id,
         session_issued: new Date(),
         session_expires: session.getSession.cookie.expires,
         sub: account.uuid,
@@ -172,6 +156,7 @@ export class AuthService {
         amr: ["pwd"],
         auth_time: auth_time,
         reauth_time: auth_time,
+        used_authn_methods: []
       });
 
       // if (session.getAction && session.getAction.type === "connection") {
@@ -253,16 +238,17 @@ export class AuthService {
         role: account.role,
       });
 
-      session.setIDC({
-        ...session.getIDC,
+      session.setIDP({
+        ...session.getIDP,
         reauth_time: auth_time,
       });
 
       session.saveSession();
 
       resolve({
-        type: "check",
-      });
+        type: "logged-in"
+      })
+
     });
   }
 
@@ -270,56 +256,76 @@ export class AuthService {
     return this.providers;
   }
 
-  //   public multifactor(data: MultifactorData, req: Request): Promise<any> {
-  //     const ctx = this;
-  //     return new Promise(async (resolve, reject) => {
-  //       if (
-  //         req.session.action &&
-  //         req.session.action.multifactor.type === data.type
-  //       ) {
-  //         const accountId = req.session.action.multifactor.accountId;
-  //         console.log(accountId);
-  //         const account = await this.account.getAccountById(accountId);
-  //         console.log(account);
-  //         console.log(data);
-  //         const verified = speakeasy.totp.verify({
-  //           secret: account.secret2fa,
-  //           encoding: "base32",
-  //           token: data.code,
-  //         });
-  //         if (verified) {
-  //           ctx.logger.info("Account passed 2fa", null, true);
-  //           req.session.user = {
-  //             logged: true,
-  //             provider: data.provider,
-  //             id: account._id,
-  //             username: account.username,
-  //             email: account.email,
-  //             picture: "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //             role: account.role,
-  //             multifactorPassed: true,
-  //           };
-  //           delete req.session.action;
-  //           req.session.save(() => {
-  //             resolve({
-  //               type: "success",
-  //             });
-  //           });
-  //         } else {
-  //           console.log(verified);
-  //           return resolve({
-  //             type: "error",
-  //             error: "INVALID_CODE",
-  //           });
-  //         }
-  //       } else {
-  //         return resolve({
-  //           type: "error",
-  //           error: "INVALID_MULTIFACTOR_TYPE",
-  //         });
-  //       }
-  //     });
-  //   }
+  public async checkMfaAuthnRequired(accountId: string, session: SessionService, acr_values: string = 'urn:rutsukun:bronze') {
+    const account = await this.accountsService.getByUUIDWithRelations(accountId, ["authn_methods"]);
+    const enabledMethod =  account.authn_methods.find(m => !!m.enabled);
+
+    if(account.authn_methods.length && enabledMethod) {
+
+      if(acr_values === 'urn:rutsukun:bronze') return null;
+      if(session.getIDP.used_authn_methods.find(m => m.method === enabledMethod.type)) return null;
+
+      return {
+        type: "multifactor",
+        multifactor: {
+          type: enabledMethod.type,
+          token: await this.tokenService.createMfaToken(account.uuid, enabledMethod.type)
+        }
+      }
+
+    } else {
+      return null;
+    }
+  }
+
+    public async multifactor(code: string, token: string, session: SessionService): Promise<any> {
+
+        const { valid, data } = this.tokenService.verifyMfaToken(token);
+
+        if (valid && data.multifactor.type === "OTP") {
+          const accountId = data.multifactor.accountId;
+
+          const account = await this.accountsService.getByUUIDWithRelations(accountId, ["authn_methods"]);
+          const method = account.authn_methods.find(m => m.type === "OTP");
+
+          if(accountId !== account.uuid) {
+            return { type: "error", error: "TOKEN_ACCOUNT_INVALID" };
+          }
+
+          const verified = speakeasy.totp.verify({
+            secret: method.data.secret,
+            encoding: "base32",
+            token: code,
+          });
+          
+          if (verified) {
+
+            session.setIDP({
+              ...session.getIDP,
+              used_authn_methods: [
+                ...session.getIDP.used_authn_methods,
+                {
+                  method: 'OTP',
+                  first_used_date: new Date(),
+                  last_used_date: new Date()
+                }
+              ]
+            });
+
+            await session.saveSession()
+
+
+            return { type: "logged-in" };
+
+          } else {
+
+            return { type: "error", error: "INVALID_CODE" };
+          }
+        } else {
+          return { type: "error", error: "INVALID_MULTIFACTOR_TYPE" };
+        }
+
+    }
 
   //   public checkEmailExist(email: string) {
   //     const ctx = this;

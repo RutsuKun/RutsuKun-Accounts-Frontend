@@ -15,6 +15,7 @@ import { AccountProvider } from "./AccountProvider";
 import { AccountGroup } from "./AccountGroup";
 import { OAuthClientACL } from "./OAuthClientACL";
 import { OAuthScope } from "./OAuthScope";
+import { AccountAuthnMethod } from "./AccountAuthnMethod";
 
 @Entity({
   name: "oauth_accounts",
@@ -50,7 +51,7 @@ export class AccountEntity {
   @Column({ type: "boolean", default: false })
   enabled2fa?: boolean;
 
-  @Column({ type: "varchar", nullable: true, default: null })
+  @Column({ type: "varchar", nullable: true, default: "ENABLED" })
   state?: string;
 
   @OneToMany(() => AccountProvider, (provider) => provider.account, {
@@ -96,6 +97,13 @@ export class AccountEntity {
     }
   })
   scopes?: OAuthScope[];
+
+  @OneToMany(() => AccountAuthnMethod, (authn) => authn.account, {
+    cascade: true,
+    onUpdate: "CASCADE",
+    onDelete: "CASCADE",
+  })
+  authn_methods?: AccountAuthnMethod[];
 
   @VersionColumn()
   version?: number;

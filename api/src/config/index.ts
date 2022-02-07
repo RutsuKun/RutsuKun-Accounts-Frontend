@@ -33,7 +33,8 @@ const processEnv = {
     process.env.OAUTH2_UI_LOCALES_SUPPORTED.split(",") || [],
   OAUTH2_OP_POLICY_URI: process.env.OAUTH2_OP_POLICY_URI || "",
   OAUTH2_OP_TOS_URI: process.env.OAUTH2_OP_TOS_URI || "",
-  ACCESS_TOKEN_EXP: process.env.ACCESS_TOKEN_EXP || 3600,
+  ACCESS_TOKEN_EXP: process.env.ACCESS_TOKEN_EXP || 3600, // 1 hour
+  REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN || 2678400, // 31 days
 
   OPENID_CLAIMS_PARAMETER_SUPORTED: Boolean(
     process.env.OPENID_CLAIMS_PARAMETER_SUPORTED
@@ -123,6 +124,12 @@ export class Config {
     };
   }
 
+  static get AUTHN() {
+    return {
+      supported_authn_methods: ["otp"]
+    }
+  }
+
   static get AUTH() {
     return {
       providers: [
@@ -197,12 +204,17 @@ export class Config {
       AccessTokenExp: processEnv.ACCESS_TOKEN_EXP,
       AccessTokenPrivateKey: jose.JWK.importKey(keys.accessTokenPrivateKey()),
       AccessTokenPublicKey: jose.JWK.importKey(keys.accessTokenPublicKey()),
+      RefreshTokenPrivateKey: jose.JWK.importKey(keys.accessTokenPrivateKey()),
+      RefreshTokenPublicKey: jose.JWK.importKey(keys.accessTokenPublicKey()),
+      RefreshTokenExpiresIn: processEnv.REFRESH_TOKEN_EXPIRES_IN,
       IDTokenPrivateKey: jose.JWK.importKey(keys.idTokenPrivateKey()),
       IDTokenPublicKey: jose.JWK.importKey(keys.idTokenPublicKey()),
       CodeTokenPrivateKey: jose.JWK.importKey(keys.codeTokenPrivateKey()),
       CodeTokenPublicKey: jose.JWK.importKey(keys.codeTokenPublicKey()),
       EmailCodePrivateKey: jose.JWK.importKey(keys.emailTokenPrivateKey()),
       EmailCodePublicKey: jose.JWK.importKey(keys.emailTokenPublicKey()),
+      MfaTokenPrivateKey: jose.JWK.importKey(keys.mfaTokenPrivateKey()),
+      MfaTokenPublicKey: jose.JWK.importKey(keys.mfaTokenPublicKey()),
     };
   }
 

@@ -19,7 +19,7 @@ export class Email {
 
   @PrimaryColumn()
   @Generated("uuid")
-  uuid?: number;
+  uuid?: string;
 
   @Column({ type: "varchar" })
   email: string;

@@ -117,9 +117,12 @@ export class TokenService {
     }
   }
 
-  public async createIDToken(data: IDTokenData): Promise<string> {
+  public async createIDToken(data: ICreateIDTokenData): Promise<string> {
     const ctx = this;
     return new Promise((resolve, reject) => {
+      const rv1 = Math.floor(Math.random() * Math.floor(254));
+      const rv2 = Math.random().toString(36).substr(2, 12);
+      const rv3 = Math.floor(Math.random() * Math.floor(81458));
       const auth_time = Math.floor(Date.now() / 1000);
 
       const id_token = jose.JWT.sign(
@@ -138,12 +141,12 @@ export class TokenService {
           scp: data.scopes,
           country: data.country,
           locale: data.locale,
-          jti: data.jti, // id token unique id
+          jti: rv1 + "-" + rv2 + "-" + rv3, // id token unique id
           at_hash: data.at_hash, //access token hash
           c_hash: data.c_hash, // code hash
           s_hash: data.s_hash, // state hash
           nonce: data.nonce,
-          type: "id_token",
+          typ: "id_token",
         },
         Config.Token.IDTokenPrivateKey,
         {
@@ -157,15 +160,18 @@ export class TokenService {
 
   public createAccessToken(data: CreateAccessTokenData): Promise<string> {
     return new Promise((resolve, reject) => {
+      let rv1 = Math.floor(Math.random() * Math.floor(254));
+      let rv2 = Math.random().toString(36).substr(2, 12);
+      let rv3 = Math.floor(Math.random() * Math.floor(81458));
       const access_token = jose.JWT.sign(
         {
           iss: Config.OAUTH2.issuer,
           sub: data.sub,
           aud: data.client_id,
           scp: data.scopes,
-          jti: data.jti, // access token unique id
+          jti: rv1 + "-" + rv2 + "-" + rv3, // access token unique id
           timestamp: Date.now(),
-          type: "access_token",
+          typ: "access_token",
         },
         Config.Token.AccessTokenPrivateKey,
         {
@@ -193,12 +199,51 @@ export class TokenService {
     return this.revokedTokenRepository.saveRevokedToken(item);
   }
 
+  public createRefreshToken(data: CreateRefreshTokenData): Promise<string> {
+    let rv1 = Math.floor(Math.random() * Math.floor(254));
+    let rv2 = Math.random().toString(36).substr(2, 12);
+    let rv3 = Math.floor(Math.random() * Math.floor(81458));
+    return new Promise((resolve, reject) => {
+      const refresh_token = jose.JWT.sign(
+        {
+          iss: Config.OAUTH2.issuer,
+          sub: data.sub,
+          aud: data.client_id,
+          scp: data.scopes,
+          jti:rv1 + "-" + rv2 + "-" + rv3, // refresh token unique id
+          timestamp: Date.now(),
+          typ: "refresh_token",
+        },
+        Config.Token.RefreshTokenPrivateKey,
+        {
+          algorithm: "RS256",
+          expiresIn: `${Config.Token.RefreshTokenExpiresIn.toString()}s`,
+        }
+      );
+      resolve(refresh_token);
+    });
+  }
+
+  public verifyRefreshToken(token: string) {
+    let verify;
+    try {
+      verify = jose.JWT.verify(token, Config.Token.RefreshTokenPublicKey, {
+        issuer: Config.OAUTH2.issuer, //who signed the token
+      });
+    } catch(error) {
+      verify = false;
+    }
+
+
+    return { valid: !!verify, data: verify };
+  }
+
   public generateEmailCode(accountId: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const email_code_token = jose.JWT.sign(
         {
           sub: accountId,
-          type: "email_code",
+          typ: "email_code",
         },
         Config.Token.EmailCodePrivateKey,
         {
@@ -213,6 +258,39 @@ export class TokenService {
   public verifyEmailCode(token: string) {
     const verify = jose.JWT.verify(token, Config.Token.EmailCodePublicKey);
     return verify;
+  }
+
+  public createMfaToken(accountId: string, method: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const mfa_token = jose.JWT.sign(
+        {
+          multifactor: {
+            type: method,
+            accountId
+          },
+          typ: "mfa_token",
+        },
+        Config.Token.MfaTokenPrivateKey,
+        {
+          algorithm: "RS256",
+          expiresIn: "30m",
+        }
+      );
+      resolve(mfa_token);
+    });
+  }
+
+  public verifyMfaToken(token: string) {
+    let verify;
+    try {
+      verify = jose.JWT.verify(token, Config.Token.MfaTokenPublicKey);
+    } catch(error) {
+      verify = false;
+    }
+
+
+    return { valid: !!verify, data: verify };
+
   }
 }
 
@@ -241,7 +319,6 @@ export interface CreateAccessTokenData {
   sub: string;
   client_id: string;
   scopes: Array<string>;
-  jti?: string;
 }
 
 export interface AccessTokenData {
@@ -255,7 +332,7 @@ export interface AccessTokenData {
   exp: number;
 }
 
-export interface IDTokenData {
+export interface ICreateIDTokenData {
   sub: string;
   username: string;
   picture: string;
@@ -269,9 +346,17 @@ export interface IDTokenData {
   acr?: string;
   azp?: Array<string>;
   locale?: string;
-  jti?: string;
   at_hash?: string;
   c_hash?: string;
   s_hash?: string;
   nonce?: string;
 }
+
+export interface CreateRefreshTokenData {
+  iss?: string;
+  sub: string;
+  client_id: string;
+  scopes: Array<string>;
+  jti?: string;
+}
+

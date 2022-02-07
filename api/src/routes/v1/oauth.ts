@@ -1,4 +1,4 @@
-import {Controller, Get, Inject, Post, Req, Res, UseBefore } from "@tsed/common";
+import {Context, Controller, Get, Inject, Post, Req, Res, Use, UseBefore } from "@tsed/common";
 
 // MIDDLEWARES
 
@@ -14,18 +14,26 @@ import { AccountsService } from "@services/AccountsService";
 import { OAuth2Service } from "@services/OAuth2Service";
 import { ClientService } from "@services/ClientService";
 
-import { HTTPCodes } from "@utils";
+import { HTTP, HTTPCodes } from "@utils";
 import { Config } from "@config";
+import { AclService } from "@services/AclService";
+import { SessionMiddleware } from "@middlewares/session.middleware";
+
+import fs from 'fs';
+import path from "path";
+import { cwd } from "process";
+import { AuthService } from "@services/AuthService";
 
 @Controller("/oauth2")
 export class OAuth2Route {
   public logger: LoggerService;
   constructor(
-    @Inject() private sessionService: SessionService,
     @Inject() private accountService: AccountsService,
     @Inject() private oauthService: OAuth2Service,
     @Inject() private clientService: ClientService,
-    @Inject() private loggerService: LoggerService
+    @Inject() private loggerService: LoggerService,
+    @Inject() private aclService: AclService,
+    private authService: AuthService
   ) {
     this.logger = this.loggerService.child({
       label: { name: "OAuth2", type: "oauth2" },
@@ -40,26 +48,16 @@ export class OAuth2Route {
   }
 
   @Get("/authorize")
-  public async getAuthorize(@Req() request: Req, @Res() response: Res) {
-    const session = this.sessionService.setSession(request);
+  @Use(SessionMiddleware)
+  public async getAuthorize(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
     session.setFlow("oauth");
     const authUrl = Config.FRONTEND.url + "/signin";
-    let {
-      client_id,
-      redirect_uri,
-      response_type,
-      scope,
-      nonce,
-      state,
-      code_challenge,
-      code_challenge_method,
-      prompt,
-      login_hint,
-      password_hint,
-      display,
-      service,
-    } = request.query;
-    const acr_values = request.query.acr_values || "urn:raining:bronze";
+    let { client_id, redirect_uri, response_type, scope, nonce, state, code_challenge, code_challenge_method, prompt, login_hint, password_hint, display, service } = request.query;
+    const acr_values = request.query.acr_values || "urn:rutskun:bronze";
 
     let error = null;
 
@@ -189,43 +187,62 @@ export class OAuth2Route {
 
       session.saveSession();
 
-      const paramsInUri = new URLSearchParams(params);
+      let paramsInUri = new URLSearchParams(params);
 
-      if (session.getClientQuery.prompt === "none" && session.getUser.logged) {
-        const {
-          response_type,
-          redirect_uri,
-          scope,
-          code_challenge,
-          code_challenge_method,
-          nonce,
-          state,
-        } = session.getClientQuery;
+      if(session.getClientQuery.prompt === "none") {
+        if(session.getUser.logged) {
 
-        const accountId = session.getUser.id;
-        const client = session.getClient;
-        const session_state = session.getIDC.session_id;
+          // refactor
+          const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getUser.id, session, acr_values as string);
 
-        const {
-          response: {
-            parameters: { uri },
-          },
-        } = (await this.oauthService.authorize({
-          response_type,
-          redirect_uri,
-          scope,
-          code_challenge,
-          code_challenge_method,
-          nonce,
-          state,
-          accountId,
-          client,
-          consentGiven: true,
-          session_state,
-        })) as any;
+          if(multifactorRequired && multifactorRequired.type === 'multifactor') {
+            return response.redirect(authUrl + "?" + paramsInUri);
+          }
+          
+          const {
+            response_type,
+            redirect_uri,
+            scope,
+            code_challenge,
+            code_challenge_method,
+            nonce,
+            state,
+          } = session.getClientQuery;
+  
+          const accountId = session.getUser.id;
+          const client = session.getClient;
+          const session_state = session.getIDP.session_id;
+  
+          const {
+            response: {
+              parameters: { uri },
+            },
+          } = (await this.oauthService.authorize({
+            response_type,
+            redirect_uri,
+            scope,
+            code_challenge,
+            code_challenge_method,
+            nonce,
+            state,
+            accountId,
+            client,
+            consentGiven: true,
+            session_state,
+          })) as any;
+  
+          return response.redirect(uri);
+        } else {
+          error = new URLSearchParams({
+            error: "login_required",
+            error_description: "Login required in Identity Provider.",
+          });
 
-        return response.redirect(uri);
+          return response.redirect(authUrl + "?" + error);
+        }
       }
+
+
 
       return response.redirect(authUrl + "?" + paramsInUri);
     } catch (err) {
@@ -241,7 +258,12 @@ export class OAuth2Route {
   }
 
   @Post("/authorize")
-  public async postAuthorize(@Req() request: Req, @Res() response: Res) {
+  @UseBefore(SessionMiddleware)
+  public async postAuthorize(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context('session') session: SessionService
+  ) {
     // const logger = Logger.child({
     // 	label: {
     // 		type: "oauth",
@@ -252,39 +274,47 @@ export class OAuth2Route {
     const { ip, country, city, eu } = request.ipInfo;
     const { consentGiven } = request.body;
 
-    if (!this.sessionService.getUser.logged) {
+
+
+    if (!session.getUser.logged) {
       return response.status(200).json({
         type: "error",
         error: "You must be logged as real account",
       });
     }
 
-    const needReAuth = await this.sessionService.needReAuth();
+    const needReAuth = await session.needReAuth();
 
     if (needReAuth) {
       return response.status(HTTPCodes.OK).json({
-        type: "auth",
+        type: "reauth",
       });
     }
 
+    let scopeToAuthorize = session.getClientQuery.scope.split(" ");
+
+    const acl = await this.aclService.getAcl(session.getClientQuery.client_id);
+
+    scopeToAuthorize = this.oauthService.filterAllowedScopes(acl, scopeToAuthorize);
+
     try {
       const data = await this.oauthService.authorize({
-        response_type: this.sessionService.getClientQuery.response_type,
-        redirect_uri: this.sessionService.getClientQuery.redirect_uri,
-        scope: this.sessionService.getClientQuery.scope,
-        accountId: this.sessionService.getUser.id,
+        response_type: session.getClientQuery.response_type,
+        redirect_uri: session.getClientQuery.redirect_uri,
+        scope: scopeToAuthorize.join(" "),
+        accountId: session.getUser.id,
         country,
-        nonce: this.sessionService.getClientQuery.nonce,
-        state: this.sessionService.getClientQuery.state,
-        client: this.sessionService.getClient,
+        nonce: session.getClientQuery.nonce,
+        state: session.getClientQuery.state,
+        client: session.getClient,
         consentGiven,
-        session_state: this.sessionService.getSession.id,
+        session_state: session.getSession.id,
       });
 
       switch (data.type) {
         case "response":
-          const userId = this.sessionService.getUser.id;
-          const userUsername = this.sessionService.getUser.username;
+          const userId = session.getUser.id;
+          const userUsername = session.getUser.username;
           this.logger.success(
             "Authorized  " + userUsername + " (" + userId + ")"
           );
@@ -320,7 +350,7 @@ export class OAuth2Route {
 
   @Get("/userinfo")
   @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["account"], { failWithError: true }))
+  @UseBefore(new ScopeMiddleware().use(["account"]))
   public async getUserInfo(@Req() request: Req, @Res() response: Res) {
     if (response.user.logged) {
       const a = await this.accountService.getAccountInfo(response.user.sub);
@@ -334,7 +364,7 @@ export class OAuth2Route {
 
   @Post("/userinfo")
   @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["account"], { failWithError: true }))
+  @UseBefore(new ScopeMiddleware().use(["account"]))
   public async postUserInfo(@Req() request: Req, @Res() response: Res) {
     if (response.user.logged) {
       const a = await this.accountService.getAccountInfo(response.user.sub);
@@ -344,5 +374,15 @@ export class OAuth2Route {
         error: "Account doesn't authenticated",
       });
     }
+  }
+
+  @Get("/check-session-iframe")
+  public async getCheckSessionIframe(
+    @Req() request: Req,
+    @Res() response: Res
+  ) {
+    const iframeData = await fs.readFileSync(path.join(cwd(), "data", "check-session-iframe.html")).toString();
+
+    response.status(HTTPCodes.OK).send(iframeData);
   }
 }

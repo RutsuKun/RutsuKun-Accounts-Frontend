@@ -8,6 +8,13 @@ const accessTokenPublicKey = () => {
   return fs.readFileSync(path.join(__dirname, "AccessTokenPublic.pem")).toString();
 };
 
+const refreshTokenPrivateKey = () => {
+  return fs.readFileSync(path.join(__dirname, "RefreshTokenPrivate.key")).toString();
+};
+const refreshTokenPublicKey = () => {
+  return fs.readFileSync(path.join(__dirname, "RefreshTokenPublic.pem")).toString();
+};
+
 const idTokenPrivateKey = () => {
   return fs.readFileSync(path.join(__dirname, "IDTokenPrivate.key")).toString();
 };
@@ -29,13 +36,24 @@ const emailTokenPublicKey = () => {
   return fs.readFileSync(path.join(__dirname, "CodeTokenPublic.pem")).toString();
 };
 
+const mfaTokenPrivateKey = () => {
+  return fs.readFileSync(path.join(__dirname, "MfaTokenPrivate.key")).toString();
+};
+const mfaTokenPublicKey = () => {
+  return fs.readFileSync(path.join(__dirname, "MfaTokenPublic.pem")).toString();
+};
+
 export default {
-accessTokenPrivateKey,
-accessTokenPublicKey,
-idTokenPrivateKey,
-idTokenPublicKey,
-codeTokenPrivateKey,
-codeTokenPublicKey,
-emailTokenPrivateKey,
-emailTokenPublicKey,
+  accessTokenPrivateKey,
+  accessTokenPublicKey,
+  refreshTokenPrivateKey,
+  refreshTokenPublicKey,
+  idTokenPrivateKey,
+  idTokenPublicKey,
+  codeTokenPrivateKey,
+  codeTokenPublicKey,
+  emailTokenPrivateKey,
+  emailTokenPublicKey,
+  mfaTokenPrivateKey,
+  mfaTokenPublicKey
 };
