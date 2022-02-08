@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Raining Dreams OAuth Doc</title>
+  <title>RutsuKun Accounts OAuth Doc</title>
   <style>
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -325,7 +325,7 @@ border: none; }
   <![endif]-->
 </head>
 <body>
-<h1 id="rainingdreams-authorization">Raining Dreams OAuth2.0 & OpenID Connect</h1>
+<h1 id="rainingdreams-authorization">RutsuKun Accounts OAuth2.0 & OpenID Connect</h1>
 <h2 id="table-of-contents">Table of contents</h2>
 <ul>
 <li><a href="#overview">Overview</a>
@@ -337,9 +337,9 @@ border: none; }
 <ul>
 <li><a href="#step-1-generate-a-code-verifier-and-challenge">Step 1: Generate a code verifier and challenge</a></li>
 <li><a href="#step-2-client-requests-oauth-20-authentication">Step 2: Client requests OAuth 2.0 authentication</a></li>
-<li><a href="#step-3-rainingdreams-authenticates-user">Step 3: Raining Dreams authenticates user</a></li>
+<li><a href="#step-3-rainingdreams-authenticates-user">Step 3: RutsuKun Accounts authenticates user</a></li>
 <li><a href="#step-4-user-authorizes-the-client-on-rainingdreams">Step 4: User authorizes the client on rainingdreams</a></li>
-<li><a href="#step-5-rainingdreams-redirects-back-to-the-client">Step 5: Raining Dreams redirects back to the client</a></li>
+<li><a href="#step-5-rainingdreams-redirects-back-to-the-client">Step 5: RutsuKun Accounts redirects back to the client</a></li>
 <li><a href="#step-6-exchange-authorization-code-for-refresh-and-access-tokens">Step 6: Exchange authorization code for <span style="text-decoration: line-through">refresh</span> and access tokens</a>
 <ul>
 <li><a href="#scheme-1-the-http-basic-authentication"><span style="text-decoration: line-through">Scheme 1: The HTTP Basic authentication</span></a></li>
@@ -388,11 +388,11 @@ with <a href="https://tools.ietf.org/html/rfc7636">PKCE</a></li>
 </tbody>
 </table>
 <h2 id="client-registration">Client registration</h2>
-<p>First you need to register your application in Raining Dreams system and get a client_id and a client secret.<br />
+<p>First you need to register your application in RutsuKun Accounts system and get a client_id and a client secret.<br />
 Please register client in <a href="https://account-dev.rainingdreams.to/clients/new">this website</a>.</p>
 <h2 id="obtaining-oauth-2.0-access-tokens">Obtaining OAuth 2.0 access tokens</h2>
 <h3 id="step-1-generate-a-code-verifier-and-challenge">Step 1: Generate a code verifier and challenge</h3>
-<p>Raining Dreams supports <a href="https://tools.ietf.org/html/rfc7636">PKCE</a> to prevent authorization code interception attacks, mainly native apps.<br />
+<p>RutsuKun Accounts supports <a href="https://tools.ietf.org/html/rfc7636">PKCE</a> to prevent authorization code interception attacks, mainly native apps.<br />
 In accordance with the procedures in <a href="https://tools.ietf.org/html/rfc7636#section-4.1">Section 4.1</a> and <a href="https://tools.ietf.org/html/rfc7636#section-4.2">Section 4.2</a>, generate <code>code_verifier</code> and <code>code_challenge</code>.<br />
 A unique code verifier must be generated for every authorization request.</p>
 <p>Supported methods: <code>plain</code> and <code>S256</code>.</p>
@@ -444,12 +444,12 @@ Host: YOUR_HOST_URL</code></pre>
 </tr>
 </tbody>
 </table>
-<h3 id="step-3-rainingdreams-authenticates-user">Step 3: Raining Dreams authenticates user</h3>
-<p>Raining Dreams authenticates the user.</p>
+<h3 id="step-3-rainingdreams-authenticates-user">Step 3: RutsuKun Accounts authenticates user</h3>
+<p>RutsuKun Accounts authenticates the user.</p>
 <h3 id="step-4-user-authorizes-the-client-on-rainingdreams">Step 4: User authorizes the client on rainingdreams</h3>
-<p>The user authorizes the client on Raining Dreams.</p>
-<h3 id="step-5-rainingdreams-redirects-back-to-the-client">Step 5: Raining Dreams redirects back to the client</h3>
-<p>Raining Dreams authorization server redirects back to YOUR_REDIRECT_URI.</p>
+<p>The user authorizes the client on RutsuKun Accounts.</p>
+<h3 id="step-5-rainingdreams-redirects-back-to-the-client">Step 5: RutsuKun Accounts redirects back to the client</h3>
+<p>RutsuKun Accounts authorization server redirects back to YOUR_REDIRECT_URI.</p>
 <pre><code>HTTP/1.1 302 Found
 Location: YOUR_REDIRECT_URI?code=AUTHORIZATION_CODE
 &amp;state=YOUR_STATE</code></pre>
@@ -477,7 +477,7 @@ Location: YOUR_REDIRECT_URI?code=AUTHORIZATION_CODE
 </table>
 <p>The client should verify the <code>state</code>.</p>
 <h3 id="step-6-exchange-authorization-code-for-refresh-and-access-tokens">Step 6: Exchange authorization code for <span style="text-decoration: line-through">refresh</span> and access tokens</h3>
-<p>In this step, you exchange the client authorization code you get in the previous step for <span style="text-decoration: line-through">refresh</span> and access tokens. Also, your clients are authenticated by the authorization server. Raining Dreams supports <span style="text-decoration: line-through">two</span> schemes to authenticate clients. The form of access token request varies depending on which scheme you use.</p>
+<p>In this step, you exchange the client authorization code you get in the previous step for <span style="text-decoration: line-through">refresh</span> and access tokens. Also, your clients are authenticated by the authorization server. RutsuKun Accounts supports <span style="text-decoration: line-through">two</span> schemes to authenticate clients. The form of access token request varies depending on which scheme you use.</p>
 <span style="text-decoration: line-through">
 <h4 id="scheme-1-the-http-basic-authentication">Scheme 1: the HTTP Basic authentication</h4>
 <p>rainingdreams supports the HTTP Basic authentication scheme as defined in <a href="https://tools.ietf.org/html/rfc2617">RFC2617</a> to authenticate with the authorization server.<br />
@@ -496,7 +496,7 @@ client_id=YOUR_CLIENT_ID
 </span>
 
 <h4 id="scheme-2-including-the-client-credentials-in-the-request-body">Scheme 2: including the client credentials in the request-body</h4>
-<p>Also, Raining Dreams supports the authentication scheme which includes the client credentials in the request-body.<br />
+<p>Also, RutsuKun Accounts supports the authentication scheme which includes the client credentials in the request-body.<br />
 In this case, the access token request has the following form:</p>
 <pre><code>POST https://api-dev.rainingdreams.to/oauth/token HTTP/1.1
 Host: YOUR_HOST_URL
@@ -602,7 +602,7 @@ The expiration date of the new token you receive is <em>one month</em> from when
 
 </span>
 
-<h2 id="call-rainingdreams-api">Call Raining Dreams API</h2>
+<h2 id="call-rainingdreams-api">Call RutsuKun Accounts API</h2>
 <!-- [rainingdreams API](https://rainingdreams.github.io/mal-api-docs/) -->
 <p>Example:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="ex">curl</span> <span class="st">&#39;https://api-dev.rainingdreams.to/v1/me&#39;</span> \</span>

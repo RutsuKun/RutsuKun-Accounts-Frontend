@@ -524,21 +524,6 @@ export class OAuth2Service {
 
           ctx.logger.success("Access Token generated: " + access_token);
 
-          // const fields = [
-          //     { name: "Grant Type", value: "Client Credentials" },
-          //     { name: "Client ID", value: client.client_id },
-          //     { name: "Scopes", value: scope.split(" ").join(", ") },
-          // ];
-          // const embed = ctx.discord.createEmbed(
-          //     null,
-          //     "A new token generated",
-          //     "00931f",
-          //     fields,
-          //     "https://cdn-dev.rainingdreams.to/clients/logo/" + client.client_id,
-          //     "Raining Dreams Notifier"
-          // );
-          // ctx.discord.sendMessageToChannel("737764646299238561", embed);
-
           return resolve({
             access_token: access_token,
             type: "Bearer",

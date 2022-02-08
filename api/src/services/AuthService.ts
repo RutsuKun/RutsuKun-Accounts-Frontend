@@ -521,7 +521,7 @@ export class AuthService {
   //             "00931f",
   //             loginFields,
   //             "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //             "Raining Dreams Notifier"
+  //             "RutsuKun Accounts Notifier"
   //           );
   //           ctx.discord.sendMessageToChannel("737721370921664652", embed);
 
@@ -596,7 +596,7 @@ export class AuthService {
   //             "00931f",
   //             loginFields,
   //             "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //             "Raining Dreams Notifier"
+  //             "RutsuKun Accounts Notifier"
   //           );
   //           ctx.discord.sendMessageToChannel("737721370921664652", embed);
 
