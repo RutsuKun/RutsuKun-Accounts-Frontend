@@ -1,0 +1,32 @@
+<header class="header">
+    <!-- <img src="/assets/images/logo/logo-light.svg" height="50px" /> -->
+
+    <ng-container *ngIf="session$ | async as session">
+        <div class="user-box flex flex-row relative" *ngIf="session.logged">
+            <div class="user-box-content flex flex-row align-items-center justify-content-center font-medium">
+                <img class="avatar mr-2" [src]="session.picture" /> {{ session.username }} <i class="pi pi-angle-down ml-2"></i>
+            </div>
+    
+            <div class="user-box-menu rounded-sm">
+                <div class="p-3 flex flex-column border-bottom-1 border-white-alpha-20">
+                    <span class="font-medium">{{ session.username }}</span>
+                    <small class="font-medium text-white-alpha-50" *ngIf="isDevelop">ID: {{ session.id }}</small>
+                    <small class="font-medium text-white-alpha-50" *ngIf="isDevelop">ROLE: {{ session.role }}</small>
+                    <span class="text-sm">{{ session.email }}</span>
+                </div>
+                <div class="flex flex-column p-3 font-medium">
+                    <div class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" (click)="logout()">Logout</div>
+                    <div class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" routerLink="/admin">
+                        Admin Portal <i class="pi pi-external-link text-sm ml-2"></i>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </ng-container>
+
+
+
+
+
+</header>

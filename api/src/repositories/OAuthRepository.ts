@@ -1,26 +1,24 @@
 import { EntityRepository, Repository } from "typeorm";
-import {
-  OAuthDeviceCodeEntity,
-  OAuthRevokedTokenEntity,
-} from "../entities/OAuth";
+import { OAuthRevokedToken } from "@entities/OAuthRevokedToken";
+import { OAuthDeviceCode } from "@entities/OAuthDeviceCode";
 
-@EntityRepository(OAuthRevokedTokenEntity)
-export class OAuthRevokedTokenRepository extends Repository<OAuthRevokedTokenEntity> {
-  getOneByJTI(jti: string): Promise<OAuthRevokedTokenEntity | undefined> {
+@EntityRepository(OAuthRevokedToken)
+export class OAuthRevokedTokenRepository extends Repository<OAuthRevokedToken> {
+  getOneByJTI(jti: string): Promise<OAuthRevokedToken | undefined> {
     return this.findOne({ jti });
   }
   saveRevokedToken(
-    item: OAuthRevokedTokenEntity
-  ): Promise<OAuthRevokedTokenEntity | undefined> {
+    item: OAuthRevokedToken
+  ): Promise<OAuthRevokedToken | undefined> {
     return this.save(item);
   }
 }
 
-@EntityRepository(OAuthDeviceCodeEntity)
-export class OAuthDeviceCodeRepository extends Repository<OAuthDeviceCodeEntity> {
+@EntityRepository(OAuthDeviceCode)
+export class OAuthDeviceCodeRepository extends Repository<OAuthDeviceCode> {
   getOneByClientID(
     client_id: string
-  ): Promise<OAuthDeviceCodeEntity | undefined> {
+  ): Promise<OAuthDeviceCode | undefined> {
     return this.findOne({ client_id });
   }
 }

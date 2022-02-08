@@ -5,7 +5,7 @@ import { UseConnection } from "@tsed/typeorm";
 import { LogRepository } from "../repositories/LogRepository";
 
 @Injectable()
-class LoggerService {
+export class LoggerService {
   private name: string;
   private type: string;
 
@@ -33,7 +33,12 @@ class LoggerService {
   // INFO LOG
   public info(message: string, payload?: any, supressDB = false) {
     //if (Config.Environment.NODE_ENV !== 'test')
-    this.logger.info(message);
+    if(payload) {
+      this.logger.info(message, payload);
+    } else {
+      this.logger.info(message);
+    }
+    
 
     if (supressDB !== true) {
       //this.db.dbInterface.logs.create({
@@ -145,4 +150,4 @@ interface LoggerOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // if(Config.Environment.NODE_ENV != 'test')  console.log = function() {}
 
-export { LoggerService, LoggerLabelOptions, LoggerOptions };
+

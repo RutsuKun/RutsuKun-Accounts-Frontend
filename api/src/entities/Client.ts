@@ -8,17 +8,18 @@ import {
   PrimaryColumn,
 } from "typeorm";
 import { AccountEntity } from "./Account";
+import { OAuthClientACL } from "./OAuthClientACL";
+import { OAuthScope } from "./OAuthScope";
 
 @Entity({
   name: "oauth_clients",
-  engine: "MyISAM",
+  engine: "InnoDB",
 })
 export class ClientEntity {
   constructor(client: ClientEntity) {
     Object.assign(this, client);
   }
 
-  @Column({ type: "uuid" })
   @Generated("uuid")
   uuid?: string;
 
@@ -44,10 +45,7 @@ export class ClientEntity {
   @Column({ type: "varchar", nullable: true })
   secret?: string;
 
-  @Column({
-    type: "varchar",
-    default: "/assets/images/logo/app-default-logo.png",
-  })
+  @Column({ type: "varchar", default: "/assets/images/logo/app-default-logo.png" })
   logo?: string;
 
   @Column({ type: "varchar", nullable: true })
@@ -65,7 +63,7 @@ export class ClientEntity {
   @Column({ type: "json" })
   grant_types: string[];
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", default: 'hybrid' })
   type: string;
 
   @Column({ type: "boolean" })
@@ -75,9 +73,17 @@ export class ClientEntity {
   verified?: string;
 
   @ManyToOne(() => AccountEntity, (account) => account.clients)
-  @JoinColumn({
-    name: "account_uuid",
-    referencedColumnName: "uuid",
-  })
+  @JoinColumn({ name: "account_uuid", referencedColumnName: "uuid" })
   account?: AccountEntity;
+
+  @OneToOne(() => OAuthClientACL, (acl) => acl.client, { cascade: true  })
+  acl?: OAuthClientACL;
+
+  addAcl?(scopes: OAuthScope[]) {
+    this.acl = {
+      client: this,
+      scopes: scopes
+    };
+  }
+
 }

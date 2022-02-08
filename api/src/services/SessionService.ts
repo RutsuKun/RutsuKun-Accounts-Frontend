@@ -1,16 +1,15 @@
-import {
-  Injectable,
-  Request,
-} from "@tsed/common";
+import { Injectable, ProviderScope, Request } from "@tsed/common";
 import { LoggerService } from "./LoggerService";
-
-@Injectable()
+@Injectable({
+  scope: ProviderScope.REQUEST
+})
 export class SessionService {
   public session;
   private clientQuery: SessionClientQuery;
   private client: SessionClient;
   private user: SessionUser;
-  private idc: SessionIDC;
+  private idp: SessionIDP;
+  private sso: ISessionSSO[] = [];
   private action: any;
   private flow: "auth" | "oauth";
   private oauth: {
@@ -19,24 +18,24 @@ export class SessionService {
   private passport: any;
   private error: any;
 
+  private logger;
+
   constructor(private loggerService: LoggerService) {
-    this.loggerService.child({
+    this.logger = this.loggerService.child({
       label: {
         type: "session",
         name: "Session Serivice",
       },
     });
-
     return this;
   }
 
-  needReAuth() {
-    const ctx = this;
-    return new Promise<void>(async (resolve, reject) => {
+  needReAuth(): Promise<boolean> {
+    return new Promise<boolean>(async (resolve, reject) => {
       const currentTime = Math.floor(Date.now() / 1000);
 
-      const authTime = this.getIDC.auth_time;
-      const reauthTime = this.getIDC.reauth_time;
+      const authTime = this.getIDP.auth_time;
+      const reauthTime = this.getIDP.reauth_time;
 
       const timeDifferenceAuth = currentTime - authTime;
       const timeDifferenceReAuth = currentTime - reauthTime;
@@ -56,39 +55,35 @@ export class SessionService {
         " sekund"
       );
 
+      return resolve(false);
+
       // 1 h after full auth
       if (timeDifferenceAuth > 3600) {
-        reject({
-          type: "auth",
-        });
+        resolve(true);
       }
       // 10 min after reauth or first auth
-      if (timeDifferenceReAuth > 600) {
-        ctx.loggerService.info(ctx.getUser.username + " needs reauth.");
-        reject({
-          type: "reauth",
-        });
+      if (timeDifferenceReAuth > 6090000) {
+        this.loggerService.info(this.getUser.username + " needs reauth.");
+        resolve(true);
       }
 
-      resolve();
+      resolve(false);
     });
   }
 
   setSession(req: Request) {
-    this.loggerService.info("function setSession");
-
+    this.logger.info('sessionID', req['sessionID']);
+    
     this.session = req.session;
-
-    this.loggerService.info("session_id: " + this.session.id);
-
     const clientQuery = req.session.clientFromQuery;
     const client = req.session.client;
     const user = req.session.user;
-    const idc = req.session.idc;
+    const idp = req.session.idp;
+    const sso = req.session.sso;
     const action = req.session.action;
     const error = req.session.error;
 
-    const flow = req.body.flow || "oauth";
+    const flow = req.body.flow || req.session.flow || "auth";
 
     if (clientQuery) this.setClientQuery(clientQuery);
     if (client) this.setClient(client);
@@ -97,7 +92,8 @@ export class SessionService {
     } else {
       this.setUser({ logged: false });
     }
-    if (idc) this.setIDC(idc);
+    if (idp) this.setIDP(idp);
+    if(sso) this.setSSO(sso);
     if (action) this.setAction(action);
     this.setFlow(flow);
     if (error) this.setError(error);
@@ -110,58 +106,66 @@ export class SessionService {
   }
 
   async saveSession() {
-    this.loggerService.info("function saveSession");
-    const ctx = this;
 
-    return new Promise(async (resolve, reject) => {
-      if (ctx.clientQuery) {
-        ctx.session.clientFromQuery = ctx.clientQuery;
-      } else {
-        delete ctx.session.clientFromQuery;
-      }
 
-      if (ctx.client) {
-        ctx.session.client = ctx.client;
-      } else {
-        delete ctx.session.client;
-      }
-
-      if (ctx.user) {
-        ctx.session.user = ctx.user;
-      } else {
-        delete ctx.session.user;
-      }
-
-      if (ctx.idc) {
-        ctx.session.idc = ctx.idc;
-      } else {
-        delete ctx.session.idc;
-      }
-
-      if (ctx.action) {
-        ctx.session.action = ctx.action;
-      } else {
-        delete ctx.session.action;
-      }
-
-      if (ctx.flow) {
-        ctx.session.flow = ctx.flow;
-      } else {
-        delete ctx.session.flow;
-      }
-
-      if (ctx.passport) {
-        ctx.session.passport = ctx.passport;
-      } else {
-        delete ctx.session.passport;
-      }
-
-      ctx.session.save(() => {
-        this.loggerService.info("Session saved: " + ctx.session.id);
-
-        resolve(true);
+    try {
+      return new Promise(async (resolve, reject) => {
+        if (this.clientQuery) {
+          this.session.clientFromQuery = this.clientQuery;
+        } else {
+          delete this.session.clientFromQuery;
+        }
+  
+        if (this.client) {
+          this.session.client = this.client;
+        } else {
+          delete this.session.client;
+        }
+  
+        if (this.user) {
+          this.session.user = this.user;
+        } else {
+          delete this.session.user;
+        }
+  
+        if (this.idp) {
+          this.session.idp = this.idp;
+        } else {
+          delete this.session.idp;
+        }
+  
+        if (this.sso) {
+          this.session.sso = this.sso;
+        } else {
+          delete this.session.sso;
+        }
+  
+        if (this.action) {
+          this.session.action = this.action;
+        } else {
+          delete this.session.action;
+        }
+  
+        if (this.flow) {
+          this.session.flow = this.flow;
+        } else {
+          delete this.session.flow;
+        }
+  
+        if (this.passport) {
+          this.session.passport = this.passport;
+        } else {
+          delete this.session.passport;
+        }
+  
+        this.session.save(() => {
+          this.loggerService.info("Session saved: " + this.session.id);
+          resolve(true);
+        });
       });
-    });
+    } catch(err) {
+      console.log('important error', err);
+    }
   }
 
   // CLIENT QUERY //
@@ -193,7 +197,6 @@ export class SessionService {
   }
 
   delClient() {
-    this.loggerService.info("function delClient");
     this.client = undefined;
     return this;
   }
@@ -215,21 +218,46 @@ export class SessionService {
     return this;
   }
 
-  // IDC //
+  // IDP - Identity Provider //
 
-  setIDC(idc) {
-    this.idc = idc;
+  setIDP(idp: SessionIDP) {
+    this.idp = idp;
     return this;
   }
 
-  get getIDC(): SessionIDC {
-    return this.idc;
+  get getIDP(): SessionIDP {
+    return this.idp;
   }
 
-  delIDC() {
-    this.loggerService.info("function delIDC");
-    this.idc = undefined;
+  delIDP() {
+    this.loggerService.info("function delIDP");
+    this.idp = undefined;
     return this;
+  }
+
+  // SSO
+
+  setSSO(sso: ISessionSSO[]) {
+    this.sso = sso;
+    return this;
+  }
+
+  addSSO(sso: ISessionSSO) {
+    this.loggerService.info("function addSSO", sso);
+    this.sso.push(sso);
+    return sso;
+  }
+
+  deleteSso(nameId: string, serviceProviderId: string) {
+    this.sso = this.sso.filter((sso)=>sso.nameId !== nameId && sso.serviceProviderId !== serviceProviderId);
+  }
+
+  get getSso() {
+    return this.sso;
+  }
+
+  getSsoByNameId(nameId: string) {
+    return this.sso.find((ssoSession)=> ssoSession.nameId === nameId);
   }
 
   // ACTION //
@@ -324,7 +352,7 @@ export interface SessionData {
   client: SessionClient;
   cookie: any;
   user: SessionUser;
-  idc: SessionIDC;
+  idp: SessionIDP;
   action: {
     type: string;
     [index: string]: any;
@@ -377,8 +405,9 @@ export interface SessionUser {
   role?: string;
 }
 
-export interface SessionIDC {
+export interface SessionIDP {
   session_id: string;
+  session_state: string;
   session_issued: Date;
   session_expires: Date;
   sub: string; // user id
@@ -387,4 +416,19 @@ export interface SessionIDC {
   amr: Array<string>;
   auth_time: number;
   reauth_time: number;
+  used_authn_methods: IUsedAuthnMethod[];
+}
+
+export interface IUsedAuthnMethod {
+  method: 'OTP';
+  first_used_date: Date;
+  last_used_date: Date;
+}
+
+export interface ISessionSSO {
+  serviceProviderId: string;
+  nameId: string;
+  nameIdFormat: string;
+  sessionIndex: string;
+  serviceProviderLogoutURL: string;
 }

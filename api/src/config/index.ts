@@ -3,15 +3,6 @@ import fs from "fs";
 import keys from "./keys";
 import { env } from "process";
 
-const accessTokenPrivateKey = jose.JWK.importKey(keys.accessTokenPrivateKey());
-const accessTokenPublicKey = jose.JWK.importKey(keys.accessTokenPublicKey());
-const idTokenPrivateKey = jose.JWK.importKey(keys.idTokenPrivateKey());
-const idTokenPublicKey = jose.JWK.importKey(keys.idTokenPublicKey());
-const codeTokenPrivateKey = jose.JWK.importKey(keys.codeTokenPrivateKey());
-const codeTokenPublicKey = jose.JWK.importKey(keys.codeTokenPublicKey());
-const emailCodePrivateKey = jose.JWK.importKey(keys.emailTokenPrivateKey());
-const emailCodePublicKey = jose.JWK.importKey(keys.emailTokenPublicKey());
-
 const processEnv = {
   NODE_ENV: process.env.NODE_ENV || "development",
   API_URL: process.env.API_URL,
@@ -42,7 +33,8 @@ const processEnv = {
     process.env.OAUTH2_UI_LOCALES_SUPPORTED.split(",") || [],
   OAUTH2_OP_POLICY_URI: process.env.OAUTH2_OP_POLICY_URI || "",
   OAUTH2_OP_TOS_URI: process.env.OAUTH2_OP_TOS_URI || "",
-  ACCESS_TOKEN_EXP: process.env.ACCESS_TOKEN_EXP || 3600,
+  ACCESS_TOKEN_EXP: process.env.ACCESS_TOKEN_EXP || 3600, // 1 hour
+  REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN || 2678400, // 31 days
 
   OPENID_CLAIMS_PARAMETER_SUPORTED: Boolean(
     process.env.OPENID_CLAIMS_PARAMETER_SUPORTED
@@ -89,7 +81,7 @@ export class Config {
   }
 
   static get isLocal() {
-    return processEnv.NODE_ENV === NodeEnvironment.Development;
+    return processEnv.NODE_ENV === NodeEnvironment.Local;
   }
 
   static get isDevelop() {
@@ -130,6 +122,12 @@ export class Config {
       cookieDomain: processEnv.COOKIE_DOMAIN,
       cookieSecret: processEnv.COOKIE_SECRET
     };
+  }
+
+  static get AUTHN() {
+    return {
+      supported_authn_methods: ["otp"]
+    }
   }
 
   static get AUTH() {
@@ -204,14 +202,19 @@ export class Config {
   static get Token() {
     return {
       AccessTokenExp: processEnv.ACCESS_TOKEN_EXP,
-      AccessTokenPrivateKey: accessTokenPrivateKey,
-      AccessTokenPublicKey: accessTokenPublicKey,
-      IDTokenPrivateKey: idTokenPrivateKey,
-      IDTokenPublicKey: idTokenPublicKey,
-      CodeTokenPrivateKey: codeTokenPrivateKey,
-      CodeTokenPublicKey: codeTokenPublicKey,
-      EmailCodePrivateKey: emailCodePrivateKey,
-      EmailCodePublicKey: emailCodePublicKey,
+      AccessTokenPrivateKey: jose.JWK.importKey(keys.accessTokenPrivateKey()),
+      AccessTokenPublicKey: jose.JWK.importKey(keys.accessTokenPublicKey()),
+      RefreshTokenPrivateKey: jose.JWK.importKey(keys.accessTokenPrivateKey()),
+      RefreshTokenPublicKey: jose.JWK.importKey(keys.accessTokenPublicKey()),
+      RefreshTokenExpiresIn: processEnv.REFRESH_TOKEN_EXPIRES_IN,
+      IDTokenPrivateKey: jose.JWK.importKey(keys.idTokenPrivateKey()),
+      IDTokenPublicKey: jose.JWK.importKey(keys.idTokenPublicKey()),
+      CodeTokenPrivateKey: jose.JWK.importKey(keys.codeTokenPrivateKey()),
+      CodeTokenPublicKey: jose.JWK.importKey(keys.codeTokenPublicKey()),
+      EmailCodePrivateKey: jose.JWK.importKey(keys.emailTokenPrivateKey()),
+      EmailCodePublicKey: jose.JWK.importKey(keys.emailTokenPublicKey()),
+      MfaTokenPrivateKey: jose.JWK.importKey(keys.mfaTokenPrivateKey()),
+      MfaTokenPublicKey: jose.JWK.importKey(keys.mfaTokenPublicKey()),
     };
   }
 

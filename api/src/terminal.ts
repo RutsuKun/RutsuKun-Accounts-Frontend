@@ -1,5 +1,3 @@
-
-
 import { CommandPrompt } from './terminal/CommandPrompt';
 import { App } from './app';
 

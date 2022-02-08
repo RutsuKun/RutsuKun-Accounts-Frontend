@@ -1,24 +1,47 @@
-import { Req, Res } from "@tsed/common";
-import { SessionService } from "@services/SessionService";
-import { AuthService } from "@services/AuthService";
-import { HTTPCodes } from "@utils";
+import { Controller, Inject } from "@tsed/di";
+import { Get } from "@tsed/schema";
 import { AccountsService } from "@services/AccountsService";
-import { ProviderIdentity } from "@providers/IProvider";
-import { Config } from "@config";
+import { AuthService } from "@services/AuthService";
+import { SessionService } from "@services/SessionService";
+import { Context, Req, Res, UseBefore } from "@tsed/common";
+import { SessionMiddleware } from "@middlewares/session.middleware";
 import { LoggerService } from "@services/LoggerService";
 
-export const GET_AuthProviderRoute = (
-  session: SessionService,
-  auth: AuthService
-) => {
-  return async (req: Req, res: Res) => {
-    const providerId = req.params.providerId || "unknown";
-    const redirectTo = (req.query.redirectTo as string) || null;
+import { Config } from "@config";
+import { HTTPCodes } from "@utils";
+import { ProviderIdentity } from "@providers/IProvider";
 
-    const provider = auth.getProviders().find((p) => p.id === providerId);
+@Controller("/auth/providers")
+export class AuthProvidersRoute {
+  public logger = this.loggerService.child({
+    label: {
+      name: "Auth Endpoint",
+      type: "auth",
+    },
+  });
+
+  constructor(
+    @Inject() private accountsService: AccountsService,
+    @Inject() private authService: AuthService,
+    @Inject() private loggerService: LoggerService
+  ) {}
+
+  @Get("/:providerId")
+  @UseBefore(SessionMiddleware)
+  public async getProvider(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
+    const providerId = request.params.providerId || "unknown";
+    const redirectTo = (request.query.redirectTo as string) || null;
+
+    const provider = this.authService
+      .getProviders()
+      .find((p) => p.id === providerId);
 
     if (!provider) {
-      return res.redirect(
+      return response.redirect(
         `${Config.FRONTEND.url}/signin?${new URLSearchParams({
           error: "invalid_request",
           error_description: `Requested provider '${providerId}' does not exist`,
@@ -26,7 +49,7 @@ export const GET_AuthProviderRoute = (
       );
     }
 
-    const callbackUrl = provider.getCallbackUrl(req.id, [
+    const callbackUrl = provider.getCallbackUrl(request.id, [
       "openid",
       "profile",
       "email",
@@ -37,34 +60,31 @@ export const GET_AuthProviderRoute = (
         type: "connect-provider",
         connectProvider: {
           providerId: providerId,
-          requestId: req.id,
+          requestId: request.id,
           redirectTo: redirectTo,
         },
       });
       await session.saveSession();
     }
 
-    return res.redirect(callbackUrl);
-  };
-};
+    return response.redirect(callbackUrl);
+  }
 
-export const GET_AuthProviderCallbackRoute = (
-  session: SessionService,
-  account: AccountsService,
-  auth: AuthService,
-  logger: LoggerService
-) => {
-  return async (req: Req, res: Res) => {
-    const providerId = req.params.providerId || "unknown";
-    const provider = auth.getProviders().find((p) => p.id === providerId);
-    const state = req.query.state || null;
-    const redirectTo =
-      session.getAction && session.getAction.connectProvider
-        ? session.getAction.connectProvider.redirectTo
-        : null;
+  // need refactor
+  @Get("/:providerId/callback")
+  @UseBefore(SessionMiddleware)
+  public async getProviderCallback(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
+    const providerId = request.params.providerId || "unknown";
+    const provider = this.authService.getProviders().find((p) => p.id === providerId);
+    const state = request.query.state || null;
+    const redirectTo = session.getAction && session.getAction.connectProvider ? session.getAction.connectProvider.redirectTo : null;
 
     if (!provider) {
-      return res.redirect(
+      return response.redirect(
         `${Config.FRONTEND.url}/signin?${new URLSearchParams({
           error: "invalid_request",
           error_description: "Requested provider does not exist",
@@ -76,13 +96,13 @@ export const GET_AuthProviderCallbackRoute = (
 
     if (connectProviderAction) {
       if (connectProviderAction.type !== "connect-provider") {
-        return res.status(HTTPCodes.BadRequest).json({
+        return response.status(HTTPCodes.BadRequest).json({
           error: "invalid_request",
           error_description: "Invalid action",
         });
       }
       if (connectProviderAction.connectProvider.requestId !== state) {
-        return res.redirect(
+        return response.redirect(
           `${Config.FRONTEND.url}/signin?${new URLSearchParams({
             error: "invalid_request",
             error_description: "Requested state is invalid",
@@ -96,7 +116,7 @@ export const GET_AuthProviderCallbackRoute = (
       ) {
         session.delAction();
         session.saveSession();
-        return res.redirect(
+        return response.redirect(
           `${Config.FRONTEND.url}/signin?${new URLSearchParams({
             error: "invalid_request",
             error_description: "Requested provider is invalid",
@@ -106,7 +126,7 @@ export const GET_AuthProviderCallbackRoute = (
     } else {
       session.delAction();
       session.saveSession();
-      return res.redirect(
+      return response.redirect(
         `${Config.FRONTEND.url}/signin?${new URLSearchParams({
           error: "invalid_request",
           error_description: "Requested action is invalid",
@@ -114,20 +134,16 @@ export const GET_AuthProviderCallbackRoute = (
       );
     }
 
-    const originalUrl = req.originalUrl;
+    const originalUrl = request.originalUrl;
 
     let providerIdentity: ProviderIdentity;
 
     try {
-      providerIdentity = (await provider.handleCallback(
-        connectProviderAction.connectProvider.requestId,
-        ["openid", "profile", "email"],
-        originalUrl
-      )) as ProviderIdentity;
+      providerIdentity = (await provider.handleCallback(connectProviderAction.connectProvider.requestId, ["openid", "profile", "email"], originalUrl)) as ProviderIdentity;
     } catch (err) {
       session.delAction();
       session.saveSession();
-      return res.redirect(
+      return response.redirect(
         `${Config.FRONTEND.url}/signin?${new URLSearchParams({
           error: "invalid_request",
           error_description: "Invalid request",
@@ -136,25 +152,18 @@ export const GET_AuthProviderCallbackRoute = (
     }
 
     if (providerIdentity["error"]) {
-      res.status(500);
+      response.status(500);
       session.delAction();
       session.saveSession();
-      return res.render("error", { error: providerIdentity["error"] });
+      return response.render("error", { error: providerIdentity["error"] });
     }
 
-    const findedAccount =
-      (await account.getAccountByPrimaryEmail(providerIdentity.email)) ||
-      (await account.getAccountByProvider(providerId, providerIdentity.id));
+    const findedAccount = (await this.accountsService.getAccountByProvider(providerId, providerIdentity.id)) || (await this.accountsService.getAccountByPrimaryEmail(providerIdentity.email));
 
-    console.log("findedAccount", findedAccount);
+    const loggedAccount = await this.accountsService.getByUUIDWithRelations(session.getUser.logged ? session.getUser.id : null, ["providers"]);
 
-    if (findedAccount) {
-      if (
-        !findedAccount.providers ||
-        !findedAccount.providers.find(
-          (p) => p.provider === providerId && p.id === providerIdentity.id
-        )
-      ) {
+    if (findedAccount && !session.getUser.logged) {
+      if (!findedAccount.providers || !findedAccount.providers.find((p) => p.provider === providerId && p.id === providerIdentity.id)) {
         findedAccount.addProvider({
           provider: providerId,
           id: providerIdentity.id,
@@ -163,19 +172,25 @@ export const GET_AuthProviderCallbackRoute = (
           picture: providerIdentity.picture,
           account: findedAccount,
         });
-        const savedAccount = await account.saveAccount(findedAccount);
+        const savedAccount = await this.accountsService.saveAccount(
+          findedAccount
+        );
 
         delete savedAccount.password;
 
         const auth_time = Math.floor(Date.now() / 1000);
 
-        if (session.session && session.getUser && session.getUser.logged) {
+        if (
+          session.session &&
+          session.getUser &&
+          session.getUser.logged
+        ) {
           if (redirectTo) {
             session.delAction();
             session.saveSession();
-            return res.redirect(`${Config.FRONTEND.url}${redirectTo}`);
+            return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
           } else {
-            return res.redirect(`${Config.FRONTEND.url}/account/general`);
+            return response.redirect(`${Config.FRONTEND.url}/account/general`);
           }
         } else {
           console.log("savedAccount", savedAccount);
@@ -189,8 +204,9 @@ export const GET_AuthProviderCallbackRoute = (
               picture: savedAccount.avatar,
               role: savedAccount.role,
             })
-            .setIDC({
+            .setIDP({
               session_id: session.getSession.id,
+              session_state: session.getSession.id,
               session_issued: new Date(),
               session_expires: session.getSession.cookie.expires,
               sub: savedAccount.uuid,
@@ -199,23 +215,24 @@ export const GET_AuthProviderCallbackRoute = (
               amr: [providerId],
               auth_time: auth_time,
               reauth_time: auth_time,
+              used_authn_methods: []
             })
             .saveSession();
 
           if (redirectTo) {
             session.delAction();
             session.saveSession();
-            return res.redirect(`${Config.FRONTEND.url}${redirectTo}`);
+            return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
           } else {
-            return res.redirect(`${Config.FRONTEND.url}/account/general`);
+            return response.redirect(`${Config.FRONTEND.url}/account/general`);
           }
         }
       } else {
         if (!findedAccount.isPrimaryEmailVerified()) {
-          logger.error("Account email doesn't verified", null, true);
+          this.logger.error("Account email doesn't verified", null, true);
           session.delAction();
           session.saveSession();
-          return res.redirect(
+          return response.redirect(
             `${Config.FRONTEND.url}/signin?${new URLSearchParams({
               error: "invalid_login",
               error_description: "ACCOUNT_EMAIL_NOT_VERIFIED",
@@ -224,10 +241,10 @@ export const GET_AuthProviderCallbackRoute = (
         }
 
         if (findedAccount.banned) {
-          logger.error("Account banned", null, true);
+          this.logger.error("Account banned", null, true);
           session.delAction();
           session.saveSession();
-          return res.redirect(
+          return response.redirect(
             `${Config.FRONTEND.url}/signin?${new URLSearchParams({
               error: "invalid_login",
               error_description: "ACCOUNT_BANNED",
@@ -236,7 +253,7 @@ export const GET_AuthProviderCallbackRoute = (
         }
 
         if (findedAccount.enabled2fa) {
-          logger.info("Account have 2fa", null, true);
+          this.logger.info("Account have 2fa", null, true);
 
           session.delAction();
           session.saveSession();
@@ -250,20 +267,24 @@ export const GET_AuthProviderCallbackRoute = (
             })
             .saveSession();
           if (redirectTo) {
-            return res.redirect(
+            return response.redirect(
               `${Config.FRONTEND.url}/signin?redirectTo=${redirectTo}`
             );
           } else {
-            return res.redirect(`${Config.FRONTEND.url}/signin`);
+            return response.redirect(`${Config.FRONTEND.url}/signin`);
           }
         }
 
-        if (session.session && session.getUser && session.getUser.logged) {
-          return res.redirect(`${Config.FRONTEND.url}/account/general`);
+        if (
+          session.session &&
+          session.getUser &&
+          session.getUser.logged
+        ) {
+          return response.redirect(`${Config.FRONTEND.url}/account/general`);
         } else {
           // IN THIS MOMENT USER IS LOGGED SUCCESSFUL
 
-          logger.success(
+          this.logger.success(
             findedAccount.username + " logged successful in system",
             null,
             true
@@ -280,8 +301,9 @@ export const GET_AuthProviderCallbackRoute = (
               picture: findedAccount.avatar,
               role: findedAccount.role,
             })
-            .setIDC({
+            .setIDP({
               session_id: session.getSession.id,
+              session_state: session.getSession.id,
               session_issued: new Date(),
               session_expires: session.getSession.cookie.expires,
               sub: findedAccount.uuid,
@@ -290,6 +312,7 @@ export const GET_AuthProviderCallbackRoute = (
               amr: [providerId],
               auth_time: auth_time,
               reauth_time: auth_time,
+              used_authn_methods: []
             })
             .saveSession();
 
@@ -297,19 +320,20 @@ export const GET_AuthProviderCallbackRoute = (
           session.saveSession();
 
           if (redirectTo) {
-            return res.redirect(`${Config.FRONTEND.url}${redirectTo}`);
+            return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
           } else {
-            return res.redirect(`${Config.FRONTEND.url}/account/general`);
+            return response.redirect(`${Config.FRONTEND.url}/account/general`);
           }
         }
       }
     } else {
-      if (session.session && session.getUser && session.getUser.logged) {
-        const loggedAccount = await account.getByUUIDWithRelations(
-          session.getUser.id,
-          ["providers"]
-        );
-        account.addProvider({
+      if (
+        session.session &&
+        session.getUser &&
+        session.getUser.logged
+      ) {
+
+        this.accountsService.addProvider({
           provider: providerId,
           id: providerIdentity.id,
           name: providerIdentity.name,
@@ -321,10 +345,10 @@ export const GET_AuthProviderCallbackRoute = (
         session.delAction();
         session.saveSession();
 
-        return res.redirect(`${Config.FRONTEND.url}/account/general`);
+        return response.redirect(`${Config.FRONTEND.url}/account/general`);
       } else {
-        account
-          .signupByProvider({
+        try {
+          const account = await this.accountsService.signupByProvider({
             provider: providerId,
             email: providerIdentity.email,
             username: providerIdentity.name.toLowerCase().split(" ").join("."),
@@ -332,69 +356,74 @@ export const GET_AuthProviderCallbackRoute = (
             id: providerIdentity.id,
             picture: providerIdentity.picture,
             email_verified: providerIdentity.email_verified,
-          })
-          .then((account) => {
-            const auth_time = Math.floor(Date.now() / 1000);
-
-            session
-              .setUser({
-                logged: true,
-                id: account.uuid,
-                username: account.username,
-                email: account.getPrimaryEmail(),
-                picture: account.avatar,
-                role: account.role,
-              })
-              .setIDC({
-                session_id: session.getSession.id,
-                session_issued: new Date(),
-                session_expires: session.getSession.cookie.expires,
-                sub: account.uuid,
-                idp: providerId, // identity provider
-                username: account.username,
-                amr: [providerId],
-                auth_time: auth_time,
-                reauth_time: auth_time,
-              })
-              .saveSession();
-
-            logger.success(
-              account.username + " logged successful in system",
-              null,
-              true
-            );
-
-            session.delAction();
-            session.saveSession();
-
-            if (redirectTo) {
-              return res.redirect(`${Config.FRONTEND.url}${redirectTo}`);
-            } else {
-              return res.redirect(`${Config.FRONTEND.url}/account/general`);
-            }
-          })
-          .catch((error) => {
-            session.delAction();
-            session.saveSession();
-            return res.redirect(`${Config.FRONTEND.url}/signin?error=${error}`);
           });
+
+          const auth_time = Math.floor(Date.now() / 1000);
+
+          session
+            .setUser({
+              logged: true,
+              id: account.uuid,
+              username: account.username,
+              email: account.getPrimaryEmail(),
+              picture: account.avatar,
+              role: account.role,
+            })
+            .setIDP({
+              session_id: session.getSession.id,
+              session_state: session.getSession.id,
+              session_issued: new Date(),
+              session_expires: session.getSession.cookie.expires,
+              sub: account.uuid,
+              idp: providerId, // identity provider
+              username: account.username,
+              amr: [providerId],
+              auth_time: auth_time,
+              reauth_time: auth_time,
+              used_authn_methods: []
+            })
+            .saveSession();
+
+          this.logger.success(
+            account.username + " logged successful in system",
+            null,
+            true
+          );
+
+          session.delAction();
+          session.saveSession();
+
+          if (redirectTo) {
+            return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
+          } else {
+            return response.redirect(`${Config.FRONTEND.url}/account/general`);
+          }
+        } catch (error) {
+          session.delAction();
+          session.saveSession();
+          return response.redirect(
+            `${Config.FRONTEND.url}/signin?error=${error}`
+          );
+        }
       }
     }
-  };
-};
+  }
 
-export const GET_AuthProviderDisconnectRoute = (
-  session: SessionService,
-  accounts: AccountsService,
-  auth: AuthService
-) => {
-  return async (req: Req, res: Res) => {
-    const providerId = req.params.providerId || "unknown";
+  @Get("/:providerId/disconnect")
+  @UseBefore(SessionMiddleware)
+  public async getProviderDisconnect(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
+    const providerId = request.params.providerId || "unknown";
 
-    const provider = auth.getProviders().find((p) => p.id === providerId);
+    const provider = this.authService
+      .getProviders()
+      .find((p) => p.id === providerId);
 
     if (!provider) {
-      return res.redirect(
+      return response.redirect(
         `${Config.FRONTEND.url}/signin?${new URLSearchParams({
           error: "invalid_request",
           error_description: `Requested provider '${providerId}' does not exist`,
@@ -403,7 +432,7 @@ export const GET_AuthProviderDisconnectRoute = (
     }
 
     try {
-      const account = await accounts.getByUUIDWithRelations(
+      const account = await this.accountsService.getByUUIDWithRelations(
         session.getUser.id,
         ["providers"]
       );
@@ -411,13 +440,13 @@ export const GET_AuthProviderDisconnectRoute = (
         (provider) => provider.provider === providerId
       );
       if (account && findProvider) {
-        accounts.removeProvider(findProvider);
-        return res.redirect(`${Config.FRONTEND.url}/account/general`);
+        this.accountsService.removeProvider(findProvider);
+        return response.redirect(`${Config.FRONTEND.url}/account/general`);
       } else {
-        return res.redirect(`${Config.FRONTEND.url}/account/general`);
+        return response.redirect(`${Config.FRONTEND.url}/account/general`);
       }
     } catch (err) {
       console.log("err", err);
     }
-  };
-};
+  }
+}

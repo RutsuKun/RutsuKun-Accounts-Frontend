@@ -4,20 +4,25 @@ import poweredby from "poweredby";
 import morgan from "morgan";
 import session from "express-session";
 import MemoryStore from "memorystore";
+import FileStore from 'session-file-store';
+
+
 import express from "express";
-const memoryStore = MemoryStore(session);
+const fileStore = FileStore(session);
 
 import { Configuration, Inject as DInjected } from "@tsed/di";
 import { PlatformApplication } from "@tsed/common";
 
-import routes from "./routes";
 import { cwd } from "process";
+import fs from "fs";
 import { Config } from "./config";
 import cors from "cors";
 import methodOverride from "method-override";
 import path from "path";
 import "@tsed/typeorm";
 import { LoggerService } from "./services/LoggerService";
+import { WellKnownRoute } from "./routes/wellknown";
+import { V1IndexRoute } from "./routes/v1";
 
 const apiDir = __dirname;
 
@@ -25,12 +30,18 @@ const apiDir = __dirname;
   rootDir: cwd(),
   acceptMimes: ["application/json"],
   port: Config.API.port,
+  // httpsPort: 443,
+  httpsOptions: {
+    cert: fs.readFileSync(path.join(__dirname, "config", "keys", "server-cert.pem")),
+    key: fs.readFileSync(path.join(__dirname, "config", "keys", "server-key.pem")),
+    passphrase: "pass:gsahdg"
+  },
   mount: {
-    "/": [routes.routes.IndexRoute, routes.routes.WellKnownRoute],
+    "/": [V1IndexRoute, WellKnownRoute],
     "/v1": path.join(apiDir, "routes", "v1", "**", "*.ts"),
   },
   debug: false,
-  middlewares: [express.json(), express.urlencoded({ extended: true })],
+  middlewares: [express.json(), express.urlencoded({ extended: true }), methodOverride()],
   typeorm: [
     {
       name: "default",
@@ -40,7 +51,7 @@ const apiDir = __dirname;
       username: Config.Database.user,
       password: Config.Database.pass,
       database: Config.Database.database,
-      logging: Config.isLocal,
+      logging: !Config.isLocal,
       synchronize: Config.isLocal,
       driver: require("mysql2"),
       entities: [`${apiDir}/entities/*{.ts,.js}`],
@@ -66,24 +77,30 @@ export class APIServer {
   }
 
   public $beforeRoutesInit(): void | Promise<any> {
-    this.app
-      .use(cors({ origin: Config.FRONTEND.url, credentials: true }))
-      .use(methodOverride());
 
+
+
+
+    this.app.use(cors({ origin: Config.FRONTEND.url, credentials: true }));
+    this.app.getApp().set("trust proxy", 1);
+    this.app.getApp().set('etag', false); // turn off
     this.app.use(
       session({
         name: "rsid",
         secret: Config.API.cookieSecret,
         saveUninitialized: false,
-        resave: false,
-        store: new memoryStore({
-          checkPeriod: 86400000, // prune expired entries every 24h
+        // store: new memoryStore({
+        //   checkPeriod: 86400000, // prune expired entries every 24h
+        // }),
+        store: new fileStore({
+          path: './sessions'
         }),
+        // proxy: true,
         cookie: {
           path: "/",
           domain: Config.API.cookieDomain,
           httpOnly: false,
-          secure: false,
+          secure: true,
           expires: new Date(Date.now() + 86400 * 1000),
           maxAge: 86400 * 1000,
           //sameSite: 'strict'
@@ -100,5 +117,6 @@ export class APIServer {
     );
     this.app.use(expressip().getIpInfoMiddleware);
     this.app.getApp().set("json spaces", 2);
+    
   }
 }

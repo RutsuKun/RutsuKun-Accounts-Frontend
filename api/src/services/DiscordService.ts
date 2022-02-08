@@ -143,7 +143,7 @@ export class DiscordService {
     //     { "name": "Accounts", "value": "2137" },
     //     { "name": "Clients", "value": "2137" }
     // ];
-    // const embed = this.createEmbed(null, null, 4071065, fields, null, "Raining Dreams Status")
+    // const embed = this.createEmbed(null, null, 4071065, fields, null, "RutsuKun Accounts Status")
     // this.sendMessageToChannel("737765585735385210", embed);
   }
 
@@ -161,7 +161,7 @@ export class DiscordService {
     //     { "name": "Clients", "value": allClients.length || "0" },
     //     { "name": "RAM", "value": Math.round(usedRam) + " MB" }
     // ];
-    // const embed = this.createEmbed(null, null, 4071065, fields, null, "Raining Dreams Status")
+    // const embed = this.createEmbed(null, null, 4071065, fields, null, "RutsuKun Accounts Status")
     // this.updateMessageInChannel("737765585735385210", "761016114384994305", embed);
   }
 
@@ -211,13 +211,13 @@ export class DiscordService {
       timestamp: Date.now(),
       footer: {
         icon_url: bot_avatar,
-        text: "Raining Dreams",
+        text: "RutsuKun Accounts",
       },
       thumbnail: {
         url: thumbnail,
       },
       author: {
-        name: authorName || "Raining Dreams DEV",
+        name: authorName || "RutsuKun Accounts DEV",
         url: authorUrl || "https://rainingdreams.to",
         icon_url: authorAvatar || bot_avatar,
       },

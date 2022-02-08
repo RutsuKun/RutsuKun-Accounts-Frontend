@@ -5,13 +5,12 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
-  PrimaryGeneratedColumn,
 } from "typeorm";
 import { AccountEntity } from "./Account";
 
 @Entity({
   name: "oauth_accounts_providers",
-  engine: "MyISAM",
+  engine: "InnoDB",
 })
 export class AccountProvider {
   constructor(provider: AccountProvider) {
@@ -20,39 +19,24 @@ export class AccountProvider {
 
   @PrimaryColumn()
   @Generated("uuid")
-  private uuid?: number;
+  uuid?: number;
 
-  @Column({
-    type: "varchar",
-  })
+  @Column({ type: "varchar" })
   provider: string;
 
-  @Column({
-    type: "varchar",
-  })
+  @Column({ type: "varchar" })
   id?: string;
 
-  @Column({
-    type: "varchar",
-  })
+  @Column({ type: "varchar" })
   name?: string;
 
-  @Column({
-    type: "varchar",
-  })
+  @Column({ type: "varchar" })
   email?: string;
 
-  @Column({
-    type: "varchar",
-  })
+  @Column({ type: "varchar" })
   picture?: string;
 
-  @ManyToOne(() => AccountEntity, (account) => account.emails, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn({
-    name: "account_uuid",
-    referencedColumnName: "uuid",
-  })
-  account: AccountEntity;
+  @ManyToOne(() => AccountEntity, (account) => account.emails, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "account_uuid", referencedColumnName: "uuid" })
+  account?: AccountEntity;
 }

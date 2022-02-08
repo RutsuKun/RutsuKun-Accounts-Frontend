@@ -51,8 +51,8 @@ export class MailService {
         )
         .then((result) => {
           const mailOptions = {
-            sender: "Account - Raining Dreams",
-            from: "Raining Dreams <account@rainingdreams.to>",
+            sender: "Account - RutsuKun Accounts",
+            from: "RutsuKun Accounts <account@rainingdreams.to>",
             to: username + " <" + email + ">",
             subject: "Confirm your Raining account",
             text:
@@ -62,7 +62,7 @@ export class MailService {
               email +
               "\r\n\r\nAccount confirmation link: https://auth.rainingdreams.to/confirm-email?code=" +
               token +
-              "\r\nThe link is valid for 24 hours.\r\n\r\nEnjoy using our services, Raining Dreams",
+              "\r\nThe link is valid for 24 hours.\r\n\r\nEnjoy using our services, RutsuKun Accounts",
             html: result,
           };
 

@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "lib": ["es2018"],
-    "module": "commonjs",
+    "module": "CommonJS",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2018",
+    "target": "ES2019",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noImplicitAny": false,
@@ -27,14 +27,21 @@
       "@models/*": ["models/*"],
       "@entities/*": ["entities/*"],
       "@repositories/*": ["repositories/*"],
-      "@routes": ["routes/index"],
+      "@routes": ["routes/"],
+      "@routes/*": ["routes/*"],
       "@services/*": ["services/*"],
       "@utils": ["utils"]
-    }
+    },
+    "plugins": [
+      {
+          "transform": "@zerollup/ts-transform-paths",
+      }
+    ],
   },
   "include": [
     "src/**/*",
     "src/**/*.json",
+    "src/**/.gitkeep"
   ],
   "exclude": [
     "dist/"

@@ -14,8 +14,12 @@ mysql/*/*
 
 !mysql/**/.gitkeep
 
+api/sessions/*.json
 api/**/*.pem
 api/**/*.key
+api/**/*.crt
 !api/**/env.example
 
 cdn/**/node_modules
+
+.vscode

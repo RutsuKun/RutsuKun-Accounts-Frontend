@@ -21,28 +21,27 @@ export class App extends EventEmitter {
   // INIT ALL COMPONENTS
   public async init() {
     const ctx = this;
-    showBanner();
-    devModeCheck();
-
-    if (process.argv[2] == "--setup") {
+    if (process.argv.find((a) => a === "--setup")) {
       await initSetup();
       process.exit(0);
     } else {
-      try {
-        await checkSetup();
-      } catch (error) {
-        console.log(chalk.red(error));
-        return process.exit(0);
-      }
-    }
-
-    try {
-      ctx.emit("InitSuccess");
-      ctx.emit("SystemInit");
-      const platform = await PlatformExpress.bootstrap(APIServer);
-      await platform.listen();
-    } catch (error) {
-      console.log(error);
+      checkSetup()
+        .then(async () => {
+          showBanner();
+          devModeCheck();
+          try {
+            ctx.emit("InitSuccess");
+            ctx.emit("SystemInit");
+            const platform = await PlatformExpress.bootstrap(APIServer);
+            await platform.listen();
+          } catch (error) {
+            console.log(error);
+          }
+        })
+        .catch((error) => {
+          console.log(chalk.red(error));
+          return process.exit(0);
+        });
     }
   }
 

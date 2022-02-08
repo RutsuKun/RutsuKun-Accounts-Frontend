@@ -1,5 +1,5 @@
 {
-    "watch": ["./src", "config.json"],
+    "watch": ["./src", "config.json", "./data/check-session-iframe.html"],
     "ext": "ts,json",
     "ignore": ["src/**/*.spec.ts"],
     "exec": "ts-node ./src/index.ts --env=local"
