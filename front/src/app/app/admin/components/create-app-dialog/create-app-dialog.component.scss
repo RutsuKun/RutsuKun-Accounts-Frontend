@@ -1,0 +1,10 @@
+.form-chips {
+     ::ng-deep {
+        .p-chips {
+            ul {
+                width: 100%;
+                gap: 10px;
+            }
+        }
+    }
+}
