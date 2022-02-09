@@ -57,7 +57,7 @@ export class LocalStorage {
     OidcAuthModule.forRoot({
       config: {
         configId: "default",
-        authority: "https://api.rutsukun.pl",
+        authority: environment.api,
         redirectUrl: window.location.origin + "/admin/signin/callback",
         postLogoutRedirectUri: window.location.origin + "/admin",
         postLoginRoute: "/admin/dashboard",
