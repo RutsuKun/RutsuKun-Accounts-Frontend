@@ -30,12 +30,6 @@ const apiDir = __dirname;
   rootDir: cwd(),
   acceptMimes: ["application/json"],
   port: Config.API.port,
-  // httpsPort: 443,
-  httpsOptions: {
-    cert: fs.readFileSync(path.join(__dirname, "config", "keys", "server-cert.pem")),
-    key: fs.readFileSync(path.join(__dirname, "config", "keys", "server-key.pem")),
-    passphrase: "pass:gsahdg"
-  },
   mount: {
     "/": [V1IndexRoute, WellKnownRoute],
     "/v1": path.join(apiDir, "routes", "v1", "**", "*.ts"),
