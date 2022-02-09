@@ -16,7 +16,6 @@ import { ReCaptchaV3Service } from "ng-recaptcha";
     ],
 })
 export class AuthorizeCardComponent implements OnInit {
-    @Output() auth: EventEmitter<any> = new EventEmitter();
     @Output() authorize: EventEmitter<any> = new EventEmitter();
     @Output() setLoading: EventEmitter<any> = new EventEmitter();
 
