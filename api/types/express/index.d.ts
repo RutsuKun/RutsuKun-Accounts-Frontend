@@ -15,6 +15,7 @@ declare global {
       ipInfo?: any,
       userSession: SessionData;
       oauthClient: any;
+      user: any;
     }
     export interface User {
       sub?: string;

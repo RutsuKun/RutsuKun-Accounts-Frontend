@@ -1,6 +1,5 @@
 .main {
     max-width: 1800px;
-    height: 680px;
     min-height: calc(100vh - 160px - 64px);
     margin: 0 auto;
     padding-top: 0 !important;
@@ -44,65 +43,37 @@
     }
 }
 
-.page-box {
-    min-height: 230px;
-    box-sizing: border-box;
-    .page-header {
-        background: linear-gradient( 121.55deg, #0b30a9 17.34%, #052283 113.19%);
-        width: 100%;
-        z-index: 0;
-        position: absolute;
-        height: 200px;
-        left: 0;
+.page-nav {
+    min-width: 200px;
+    .nav-link {
+        padding: 0.7rem 1rem;
+        border-left: 4px solid transparent;
+        margin-bottom: 5px;
+        cursor: pointer;
+        border-radius: 8px;
+        color: white;
+        &.active {
+            border-left: 4px solid var(--primary-color);
+            font-weight: 800 !important;
+        }
+        &:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
     }
-}
-
-::ng-deep {
-    .page-card {
-        margin-top: -100px;
-        padding: 0;
-        .p-card-body {
-            padding: 0;
-            .card-nav {
-                min-width: 250px;
-                margin-left: -1px;
-                padding-top: 1rem;
-            }
-            .card-content {
-                padding: 1rem;
-            }
-            .card-link {
-                padding: 0.7rem 1rem;
-                border-left: 4px solid transparent;
-                margin-bottom: 5px;
-                cursor: pointer;
-                margin-left: 1rem;
-                border-radius: 8px;
-                &.active {
-                    border-left: 4px solid #0b30a9;
-                    font-weight: 800 !important;
-                    color: #0b30a9;
-                }
-                &:hover {
-                    background: rgba(0, 0, 0, 0.1);
-                }
-            }
-            .card-sub-link {
-                padding: 0.4rem 1rem;
-                border-left: 4px solid transparent;
-                margin-bottom: 5px;
-                cursor: pointer;
-                margin-left: 3rem;
-                border-radius: 8px;
-                &.active {
-                    border-left: 4px solid #0b30a9;
-                    font-weight: 800 !important;
-                    color: #0b30a9;
-                }
-                &:hover {
-                    background: rgba(0, 0, 0, 0.1);
-                }
-            }
+    .nav-sub-link {
+        padding: 0.4rem 1rem;
+        border-left: 4px solid transparent;
+        margin-bottom: 5px;
+        cursor: pointer;
+        margin-left: 3rem;
+        border-radius: 8px;
+        color: white;
+        &.active {
+            border-left: 4px solid #6f6aef;
+            font-weight: 800 !important;
+        }
+        &:hover {
+            background: rgba(0, 0, 0, 0.1);
         }
     }
 }

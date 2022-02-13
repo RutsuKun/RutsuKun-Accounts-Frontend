@@ -1,8 +1,10 @@
 import {
     Component,
+    Input,
     OnDestroy,
     OnInit,
 } from "@angular/core";
+import { AuthService } from "@app/admin/services/auth.service";
 import { AuthFacade } from "@core/store/auth/auth.facade";
 import { environment } from "@env/environment";
 import { Subject } from "rxjs";
@@ -15,10 +17,13 @@ import { Subject } from "rxjs";
 export class AppHeaderComponent implements OnInit {
     public session$ = this.authFacade.session$;
 
-    isDevelop = environment.envName === "DEV";
+    isDev = environment.envName === "DEV";
+    isProd = environment.envName === "PROD";
+    @Input() isAdmin = false;
 
     constructor(
-        private authFacade: AuthFacade
+        private authFacade: AuthFacade,
+        private auth: AuthService
     ) {}
 
     ngOnInit() {
@@ -29,5 +34,11 @@ export class AppHeaderComponent implements OnInit {
         this.authFacade.endSession();
     }
 
-
+    logoutLocal() {
+        this.auth.logoutLocal();
+    }
+    
+    logoutSession() {
+        this.auth.logout();
+    }
 }

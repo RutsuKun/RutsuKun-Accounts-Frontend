@@ -34,6 +34,10 @@ export class SignInCardComponent implements OnInit, OnDestroy {
     password: [null, [Validators.required]],
   });
 
+  ssoForm = this.fb.group({
+    organization: [null, [Validators.required]],
+  });
+
   @Input() clientError: { error: string; error_description: string } = null;
 
 
@@ -88,6 +92,10 @@ export class SignInCardComponent implements OnInit, OnDestroy {
     });
   }
 
+  ssoClick() {
+    // todo
+  }
+
   redirectSignUp() {
     this.activatedRoute.queryParams.subscribe((params) => {
       this.router.navigate(["signup"], {
@@ -103,6 +111,14 @@ export class SignInCardComponent implements OnInit, OnDestroy {
       });
     });
   }
+
+  switchToSamlSSO() {
+    this.type = "sso";
+  }
+  switchToAuth() {
+    this.type = "auth";
+  }
+
 
   authWithProvider(provider: string) {
     if (this.redirectTo) {

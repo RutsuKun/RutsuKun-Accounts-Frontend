@@ -2,6 +2,7 @@ import { Routes, CanActivate } from "@angular/router";
 import { MainComponent } from "./shared/layouts/main/main.component";
 import { NotfoundComponent } from "./app/notfound/notfound.component";
 import { AuthComponent } from "./app/auth/auth.component";
+import { AdminLayoutComponent } from "@shared/layouts/admin/admin.component";
 
 export const AppRoutes: Routes = [
   {
@@ -28,6 +29,7 @@ export const AppRoutes: Routes = [
   },
   {
     path: "admin",
+    component: AdminLayoutComponent,
     children: [
       {
         path: "",

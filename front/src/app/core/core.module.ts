@@ -66,11 +66,10 @@ export class LocalStorage {
         responseType: "code",
         silentRenew: true,
         silentRenewUrl: `${window.location.origin}/silent-renew.html`,
-        logLevel: LogLevel.None,
+        logLevel: LogLevel.Debug,
         storage: new LocalStorage(),
-        unauthorizedRoute:
-          "/admin/signin?error=Admin portal access denied by authorization server",
-        startCheckSession: true
+        unauthorizedRoute: "/admin/signin?error=Admin portal access denied by authorization server",
+        startCheckSession: false
       },
     }),
     StoreModule.forRoot(reducers, {

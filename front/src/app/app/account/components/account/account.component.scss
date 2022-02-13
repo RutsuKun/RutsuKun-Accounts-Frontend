@@ -1,15 +1,8 @@
 @import "~primeflex/src/_variables.scss";
 
-::ng-deep body {
-    background: #0c0c0c;
-    overflow-x: initial;
-    height: 100%;
-}
-
 .page-box {
     height: 100px;
     box-sizing: border-box;
-    margin-top: 85px;
     .page-header {
         // background: linear-gradient( 121.55deg, #0b30a9 17.34%, #052283 113.19%);
         background: url(https://static.crunchyroll.com/assets/wallpaper/1920x400/16-zombieland-saga-revenge-v2.png);
@@ -30,9 +23,6 @@
 @media screen and (min-width: $md) {
     .page-box {
         height: 200px;
-        .page-header {
-
-        }
     }
 }
 
@@ -147,17 +137,3 @@
     }
 }
 
-::ng-deep {
-    .page-content {
-        width: 100%;
-         ::ng-deep {
-            .p-card {
-                padding: 0;
-                background: #23252b;
-                border: none;
-                color: white;
-                width: 100%;
-            }
-        }
-    }
-}

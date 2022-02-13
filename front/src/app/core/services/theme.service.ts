@@ -29,6 +29,12 @@ export class ThemeService {
         } else {
           document.body.classList.remove("page-account");
         }
+
+        if (child && child.url[0] && child.url[0].path.includes("admin")) {
+          document.body.classList.add("page-admin");
+        } else {
+          document.body.classList.remove("page-admin");
+        }
       });
   }
 }
