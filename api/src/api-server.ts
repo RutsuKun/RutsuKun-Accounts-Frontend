@@ -23,6 +23,7 @@ import "@tsed/typeorm";
 import { LoggerService } from "./services/LoggerService";
 import { WellKnownRoute } from "./routes/wellknown";
 import { V1IndexRoute } from "./routes/v1";
+import { IndexRoute } from "./routes";
 
 const apiDir = __dirname;
 
@@ -31,7 +32,7 @@ const apiDir = __dirname;
   acceptMimes: ["application/json"],
   port: Config.API.port,
   mount: {
-    "/": [V1IndexRoute, WellKnownRoute],
+    "/": [IndexRoute, V1IndexRoute, WellKnownRoute],
     "/v1": path.join(apiDir, "routes", "v1", "**", "*.ts"),
   },
   debug: false,

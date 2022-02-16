@@ -6,8 +6,7 @@ import { Config } from "@config";
 
 @Injectable()
 export class MailService {
-  private running = false;
-  private options;
+  private options: any;
   private mailer: any;
   constructor() {
     this.options = {
@@ -23,17 +22,8 @@ export class MailService {
       },
       ignoreTLS: true,
     };
-  }
 
-  public healthy() {
-    const ctx = this;
-    // ctx.logger.info('Requested Mail Component Healthy Check');
-    const healthy = {
-      name: "Mail",
-      slug: "mail",
-      healthy: ctx.running,
-    };
-    return healthy;
+    this.mailer = nodemailer.createTransport(this.options);
   }
 
   public sendAccountVerificationEmail(email, username, token): Promise<any> {
@@ -41,28 +31,23 @@ export class MailService {
     return new Promise(async (resolve, reject) => {
       const url = `${Config.FRONTEND.url}/verify-email?code=${token}`;
 
-      ejs
-        .renderFile(
-          path.join(process.cwd(), "src", "views", "welcome.email.ejs"),
-          {
-            username: username,
-            url: url,
-          }
+      ejs.renderFile(path.join(process.cwd(), "src", "views", "welcome.email.ejs"),
+        { username: username, url: url }
         )
         .then((result) => {
           const mailOptions = {
             sender: "Account - RutsuKun Accounts",
-            from: "RutsuKun Accounts <account@rainingdreams.to>",
+            from: "RutsuKun Accounts <accounts@rutsukun.pl>",
             to: username + " <" + email + ">",
-            subject: "Confirm your Raining account",
+            subject: "Confirm your RutsuKun Account",
             text:
-              "Your account has been created.\r\nAccount information:\r\nUsername: " +
-              username +
-              "\r\nEmail: " +
-              email +
-              "\r\n\r\nAccount confirmation link: https://auth.rainingdreams.to/confirm-email?code=" +
-              token +
-              "\r\nThe link is valid for 24 hours.\r\n\r\nEnjoy using our services, RutsuKun Accounts",
+              `Your account has been created.\r\n
+              Account information:\r\n
+              Username: ${username}\r\n
+              Email: ${email} \r\n\r\n
+              Account confirmation link: ${Config.FRONTEND.url}/confirm-email?code=${token}\r\n
+              The link is valid for 24 hours.\r\n\r\n
+              Enjoy using our services, RutsuKun Accounts`,
             html: result,
           };
 

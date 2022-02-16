@@ -5,27 +5,16 @@ import { IProvider } from "./../providers/IProvider";
 // providers
 import DiscordProvider from "@providers/DiscordProvider";
 import GoogleProvider from "@providers/GoogleProvider";
+import TwitterProvider from "@providers/TwitterProvider";
 
 export const initializeProviders = (): IProvider<any>[] => {
   return Config.AUTH.providers.map((p) => {
     assert(p.id, `id is not specified for provider '${p.type}'.`);
     assert(p.name, `name is not specified for provider '${p.type}'.`);
-    assert(
-      p.config,
-      `config parameters are not specified for provider '${p.type}'.`
-    );
-    assert(
-      p.config.clientId,
-      `config parameter 'clientId' is not specified for provider '${p.type}'.`
-    );
-    assert(
-      p.config.clientSecret,
-      `config parameter 'clientSecret' are not specified for provider '${p.type}'.`
-    );
-    assert(
-      p.config.clientRedirectUri,
-      `config parameter 'clientRedirectUri' are not specified for provider '${p.type}'.`
-    );
+    assert(p.config, `config parameters are not specified for provider '${p.type}'.`);
+    assert(p.config.clientId, `config parameter 'clientId' is not specified for provider '${p.type}'.`);
+    assert(p.config.clientSecret, `config parameter 'clientSecret' are not specified for provider '${p.type}'.`);
+    assert(p.config.clientRedirectUri,`config parameter 'clientRedirectUri' are not specified for provider '${p.type}'.`);
     switch (p.type) {
       case "google":
         {
@@ -40,6 +29,15 @@ export const initializeProviders = (): IProvider<any>[] => {
         break;
       case "discord": {
         return new DiscordProvider(
+          p.id,
+          p.name,
+          p.config.clientId,
+          p.config.clientSecret,
+          p.config.clientRedirectUri
+        );
+      }
+      case "twitter": {
+        return new TwitterProvider(
           p.id,
           p.name,
           p.config.clientId,

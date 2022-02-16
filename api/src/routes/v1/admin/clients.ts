@@ -32,7 +32,7 @@ export class AdminClientsRoute {
   @UseBefore(AccessTokenMiddleware)
   @UseBefore(new ScopeMiddleware().use(["admin:clients"]))
   public async getAdminClients(@Req() request: Req, @Res() response: Res) {
-    const clients = await this.clientService.getAdminClients(["account"]);
+    const clients = await this.clientService.getAdminClients(["account", "organization"]);
 
     const filtered = clients.map((client)=>{
         return {

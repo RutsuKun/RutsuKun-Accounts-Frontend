@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { AccountEntity } from "./Account";
 import { OAuthClientACL } from "./OAuthClientACL";
+import { OAuthClientOrganization } from "./OAuthClientOrganization";
 import { OAuthScope } from "./OAuthScope";
 
 @Entity({
@@ -78,6 +79,9 @@ export class ClientEntity {
 
   @OneToOne(() => OAuthClientACL, (acl) => acl.client, { cascade: true  })
   acl?: OAuthClientACL;
+
+  @OneToOne(() => OAuthClientOrganization, (org) => org.client, { cascade: true  })
+  organization?: OAuthClientOrganization;
 
   addAcl?(scopes: OAuthScope[]) {
     this.acl = {

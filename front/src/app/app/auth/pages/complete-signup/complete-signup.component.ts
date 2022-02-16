@@ -18,24 +18,18 @@ import { AuthFacade } from "@core/store/auth/auth.facade";
 
 
 @Component({
-  templateUrl: "./signin.component.html",
-  styleUrls: ["./signin.component.scss"],
+  templateUrl: "./complete-signup.component.html",
+  styleUrls: ["./complete-signup.component.scss"],
   animations: [
     fadeInOnEnterAnimation({ anchor: "enter", duration: 1000 }),
     fadeOutOnLeaveAnimation({ anchor: "leave", duration: 1000 }),
   ],
 })
-export class SignInComponent implements OnInit, OnDestroy {
+export class CompleteSignUpComponent implements OnInit, OnDestroy {
   uns$ = new Subject();
 
   clientFromQuery: Array<any>;
 
-  public prompt: "login" | "reauth" | "signup" = null;
-  public formError: string = null;
-  public formShow: boolean = false;
-  public clientError: { error: string; error_description: string } = null;
-
-  redirectTo: string = null;
   flow: "auth" | "oauth" = null;
 
   appInfoData$ = this.authFacade.appInfoData$;
@@ -61,27 +55,20 @@ export class SignInComponent implements OnInit, OnDestroy {
          this.flow = "auth";
        }
  
-       if (query.get("error")) {
-         this.clientError = {
-           error: query.get("error"),
-           error_description: query.get("error_description"),
-         };
-         return;
-       }
        console.log("client from url query", query);
  
        this.clientFromQuery = query.keys;
    
  
-       this.checkAuthorization();
+      //  this.checkAuthorization();
      });
   }
 
-  checkAuthorization() {
-    this.recaptchaV3Service.execute("check").subscribe(() => {
-      this.authFacade.check(this.flow);
-    });
-  }
+  // checkAuthorization() {
+  //   this.recaptchaV3Service.execute("check").subscribe(() => {
+  //     this.authFacade.check(this.flow);
+  //   });
+  // }
 
   ngOnDestroy(): void {
     this.uns$.next();

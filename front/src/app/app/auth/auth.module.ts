@@ -29,6 +29,8 @@ import { CallbackDebugComponent } from "./pages/callback-debug/callback-debug.co
 import { OAuth2DeviceCodeComponent } from "./pages/device-code/device-code.component";
 import { MultifactorComponent } from './pages/multifactor/multifactor.component';
 import { AuthMultifactorCardComponent } from "./components/multifactor-card/multifactor-card.component";
+import { CompleteSignUpComponent } from "./pages/complete-signup/complete-signup.component";
+import { CompleteSignUpCardComponent } from "./components/complete-signup-card/complete-signup-card.component";
 
 @NgModule({
   imports: [
@@ -53,6 +55,8 @@ import { AuthMultifactorCardComponent } from "./components/multifactor-card/mult
     NotfoundComponent,
     AuthMultifactorCardComponent,
     MultifactorComponent,
+    CompleteSignUpComponent,
+    CompleteSignUpCardComponent
   ],
 })
 export class AuthModule {}

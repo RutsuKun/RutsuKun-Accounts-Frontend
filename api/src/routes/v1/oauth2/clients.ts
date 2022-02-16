@@ -133,6 +133,10 @@ export class OAuth2ClientsRoute {
           username: client.account.username,
           avatar: client.account.avatar,
         },
+        organization: client.organization ? {
+          name: client.organization.name,
+          domain: client.organization.domain
+        } : null
       });
     } catch (error) {
       response.status(HTTPCodes.BadRequest).json({

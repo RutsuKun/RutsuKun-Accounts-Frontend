@@ -18,7 +18,6 @@ import { Req, Res } from "@tsed/common";
 
 @Injectable()
 export class TokenService {
-  private running: boolean;
 
   @Inject()
   @UseConnection("default")
@@ -33,15 +32,6 @@ export class TokenService {
     });
   }
 
-  public healthy() {
-    const ctx = this;
-    const healthy = {
-      name: "Token",
-      slug: "token",
-      healthy: ctx.running,
-    };
-    return healthy;
-  }
 
   public checkToken(req: Req, res: Res): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -290,6 +280,35 @@ export class TokenService {
 
 
     return { valid: !!verify, data: verify };
+
+  }
+
+  public createGeneralToken(type: string, metadata: { [key: string]: any }): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const general_token = jose.JWT.sign(
+        {
+          type,
+          metadata
+        },
+        Config.Token.GeneralTokenPrivateKey,
+        {
+          algorithm: "RS256",
+          expiresIn: "30m",
+        }
+      );
+      resolve(general_token);
+    });
+  }
+
+  public verifyGeneralToken(type: string, token: string): { valid: boolean, metadata: { [key: string]: any } } {
+    let verify;
+    try {
+      verify = jose.JWT.verify(token, Config.Token.GeneralTokenPublicKey);
+    } catch(error) {
+      verify = false;
+    }
+
+    return { valid: !!verify && verify.type === type, metadata: verify.metadata };
 
   }
 }

@@ -227,7 +227,7 @@
                     <div class="flex flex-column align-items-start mb-3 w-full" *ngIf="account.providers.length">
                         <h2>Connected</h2>
 
-                        <div class="discord-bg provider-linked-box mb-3 w-full" *ngIf="getProviderByName('discord')">
+                        <div class="discord-bg provider-linked-box w-full" *ngIf="getProviderByName('discord')">
                             <div class="flex flex-row align-items-center">
                                 <div class="flex justify-content-center align-items-center w-3rem h-full">
                                     <i class="pi pi-discord text-xl"></i>
@@ -247,7 +247,7 @@
                             </div>
                         </div>
 
-                        <div class="google-bg provider-linked-box w-full" *ngIf="getProviderByName('google')">
+                        <div class="google-bg provider-linked-box w-full mt-3" *ngIf="getProviderByName('google')">
                             <div class="flex flex-row align-items-center">
                                 <div class="flex justify-content-center align-items-center w-3rem h-full">
                                     <i class="pi pi-google text-xl"></i>
@@ -264,6 +264,26 @@
 
                             <div class="flex justify-content-center align-items-center w-3rem h-full cursor-pointer">
                                 <i class="pi pi-minus-circle text-2xl" (click)="disconnectProvider('google')"></i>
+                            </div>
+                        </div>
+
+                        <div class="twitter-bg provider-linked-box w-full mt-3" *ngIf="getProviderByName('twitter')">
+                            <div class="flex flex-row align-items-center">
+                                <div class="flex justify-content-center align-items-center w-3rem h-full">
+                                    <i class="pi pi-twitter text-xl"></i>
+                                </div>
+
+                                <div class="flex flex-row align-items-center">
+                                    <img [src]="getProviderByName('twitter').picture" />
+                                    <div class="flex flex-column">
+                                        <span>{{ getProviderByName("twitter").name }}</span>
+                                        <span>{{ getProviderByName("twitter").email }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-content-center align-items-center w-3rem h-full cursor-pointer">
+                                <i class="pi pi-minus-circle text-2xl" (click)="disconnectProvider('twitter')"></i>
                             </div>
                         </div>
                     </div>

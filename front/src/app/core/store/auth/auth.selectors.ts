@@ -24,6 +24,7 @@ export const selectAuthAuthorizeConsent = createSelector( selectAuthState, (stat
 export const selectAuthMultifactor = createSelector( selectAuthState, (state: AuthState) => state.mfa);
 
 export const selectAuthAppInfoData = createSelector( selectAuthState, (state: AuthState) => state.appInfo.data);
+export const selectAuthAppInfoOrganization = createSelector( selectAuthState, (state: AuthState) => state.appInfo.data ? state.appInfo.data.organization : null);
 export const selectAuthAppInfoLoading = createSelector( selectAuthState, (state: AuthState) => state.appInfo.loading);
 export const selectAuthAppInfoLoaded = createSelector( selectAuthState, (state: AuthState) => state.appInfo.loaded);
 export const selectAuthAppInfoError = createSelector( selectAuthState, (state: AuthState) => state.appInfo.error);

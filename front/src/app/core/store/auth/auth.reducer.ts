@@ -28,6 +28,12 @@ export const initialState: AuthState = {
     loaded: false,
     error: null,
   },
+  completeConnectProvider: {
+    loading: false,
+    message: null,
+    error: null,
+    type: null
+  }
 };
 
 const reducer = createReducer(
@@ -36,6 +42,14 @@ const reducer = createReducer(
   on(a.authSessionFetchSuccess, (state: AuthState, { data }) => ({
     ...state,
     session: data,
+  })),
+
+  on(a.authSessionEndRequest, (state: AuthState) => ({
+    ...state,
+    signin:{
+      ...state.signin,
+      showForm: false,
+    }
   })),
 
   on(a.authSessionEndSuccess, (state: AuthState, { data }) => ({
