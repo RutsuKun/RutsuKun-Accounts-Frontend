@@ -28,6 +28,12 @@ export interface AuthState {
     loaded: boolean;
     error: string;
   };
+  completeConnectProvider: {
+    loading: boolean;
+    message: string;
+    error: string;
+    type: string;
+  }
 }
 
 export interface ISession {

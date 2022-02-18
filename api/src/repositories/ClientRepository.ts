@@ -10,7 +10,7 @@ export class ClientRepository extends Repository<ClientEntity> {
     return this.findOne({ uuid: uuid });
   }
   findByClientID(client_id: string) {
-    return this.findOne({ client_id }, { relations: ["account"] });
+    return this.findOne({ client_id }, { relations: ["account", "organization"] });
   }
   createAccount(client: ClientEntity): Promise<ClientEntity | undefined> {
     return this.save(client);

@@ -27,6 +27,7 @@ import { AdminActivate } from "@app/admin/admin.activate";
 import { AuthService } from "@core/services/auth.service";
 import { CoreModule } from './core/core.module';
 import { ThemeService } from "@core/services/theme.service";
+import { AdminLayoutComponent } from "@shared/layouts/admin/admin.component";
 
 
 
@@ -38,6 +39,7 @@ import { ThemeService } from "@core/services/theme.service";
   declarations: [
     AppComponent,
     MainComponent,
+    AdminLayoutComponent,
     AppHeaderComponent,
     AdminComponent,
   ],

@@ -5,9 +5,11 @@
     "scripts": {
         "ng": "ng",
         "start": "npm run start:dev",
+        "build": "ng build",
         "start:dev": "ng serve -c dev --disable-host-check --port 4200",
-        "build:dev": "ng build -c dev",
+        "build:dev": "npm run build -- -c dev",
         "build:prod": "ng build -c production",
+        "build:vercel-prod": "npm run build -- -c vercel-prod",
         "test": "ng test",
         "lint": "ng lint",
         "e2e": "ng e2e"

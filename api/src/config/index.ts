@@ -36,15 +36,10 @@ const processEnv = {
   ACCESS_TOKEN_EXP: process.env.ACCESS_TOKEN_EXP || 3600, // 1 hour
   REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN || 2678400, // 31 days
 
-  OPENID_CLAIMS_PARAMETER_SUPORTED: Boolean(
-    process.env.OPENID_CLAIMS_PARAMETER_SUPORTED
-  ),
-  OPENID_CLAIMS_SUPPORTED:
-    process.env.OPENID_CLAIMS_SUPPORTED.replace(" ", "").split(",") || [],
-  OPENID_ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED:
-    process.env.OPENID_ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED.split(",") || [],
-  OPENID_SUBJECT_TYPES_SUPPORTED:
-    process.env.OPENID_SUBJECT_TYPES_SUPPORTED.split(",") || [],
+  OPENID_CLAIMS_PARAMETER_SUPORTED: Boolean(process.env.OPENID_CLAIMS_PARAMETER_SUPORTED),
+  OPENID_CLAIMS_SUPPORTED: process.env.OPENID_CLAIMS_SUPPORTED.replace(" ", "").split(",") || [],
+  OPENID_ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED: process.env.OPENID_ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED.split(",") || [],
+  OPENID_SUBJECT_TYPES_SUPPORTED: process.env.OPENID_SUBJECT_TYPES_SUPPORTED.split(",") || [],
 
   MAIL_HOST: process.env.MAIL_HOST,
   MAIL_PORT: process.env.MAIL_PORT,
@@ -64,6 +59,10 @@ const processEnv = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_CLIENT_REDIRECT_URI: process.env.GOOGLE_CLIENT_REDIRECT_URI,
+
+  TWITTER_CLIENT_ID: process.env.TWITTER_CLIENT_ID,
+  TWITTER_CLIENT_SECRET: process.env.TWITTER_CLIENT_SECRET,
+  TWITTER_CLIENT_REDIRECT_URI: process.env.TWITTER_CLIENT_REDIRECT_URI,
 
   AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
   AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
@@ -153,6 +152,16 @@ export class Config {
             clientRedirectUri: processEnv.DISCORD_CLIENT_REDIRECT_URI,
           },
         },
+        {
+          type: "twitter",
+          id: "twitter",
+          name: "Twitter",
+          config: {
+            clientId: processEnv.TWITTER_CLIENT_ID,
+            clientSecret: processEnv.TWITTER_CLIENT_SECRET,
+            clientRedirectUri: processEnv.TWITTER_CLIENT_REDIRECT_URI,
+          },
+        },
       ],
     };
   }
@@ -193,8 +202,7 @@ export class Config {
       end_session_endpoint: `${processEnv.API_URL}/v1/auth/session/end`,
       claims_parameter_supported: processEnv.OPENID_CLAIMS_PARAMETER_SUPORTED,
       claims_supported: processEnv.OPENID_CLAIMS_SUPPORTED,
-      id_token_signing_alg_values_supported:
-        processEnv.OPENID_ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED,
+      id_token_signing_alg_values_supported: processEnv.OPENID_ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED,
       subject_types_supported: processEnv.OPENID_SUBJECT_TYPES_SUPPORTED,
     };
   }
@@ -215,6 +223,8 @@ export class Config {
       EmailCodePublicKey: jose.JWK.importKey(keys.emailTokenPublicKey()),
       MfaTokenPrivateKey: jose.JWK.importKey(keys.mfaTokenPrivateKey()),
       MfaTokenPublicKey: jose.JWK.importKey(keys.mfaTokenPublicKey()),
+      GeneralTokenPrivateKey: jose.JWK.importKey(keys.generalTokenPrivateKey()),
+      GeneralTokenPublicKey: jose.JWK.importKey(keys.generalTokenPublicKey()),
     };
   }
 

@@ -2,10 +2,11 @@ import { Controller } from "@tsed/di";
 import { Get } from "@tsed/schema";
 import { Config } from "@config";
 import { Request, Response } from "express";
+import { MailService } from "@services/MailService";
 
-@Controller("")
+@Controller("/")
 export class IndexRoute {
-  constructor() {}
+  constructor(private mailService: MailService) {}
 
   @Get("")
   getIndex(req: Request, res: Response) {

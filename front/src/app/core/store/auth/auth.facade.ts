@@ -24,6 +24,7 @@ export class AuthFacade {
   mfa$ = this.store.pipe(select(s.selectAuthMultifactor));
 
   appInfoData$ = this.store.pipe(select(s.selectAuthAppInfoData));
+  appInfoOrganization$ = this.store.pipe(select(s.selectAuthAppInfoOrganization));
   appInfoLoading$ = this.store.pipe(select(s.selectAuthAppInfoLoading));
   appInfoLoaded$ = this.store.pipe(select(s.selectAuthAppInfoLoaded));
   appInfoError$ = this.store.pipe(select(s.selectAuthAppInfoError));
@@ -78,5 +79,9 @@ export class AuthFacade {
 
   fetchAppInfo(client_id: string) {
     this.store.dispatch(a.authAppInfoRequest({ client_id }));
+  }
+
+  completeConnectProvider(email: string, code?: string) {
+    this.store.dispatch(a.authCompleteConnectProviderRequest({ email, code }));
   }
 }

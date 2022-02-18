@@ -70,6 +70,44 @@
                             "extractLicenses": false,
                             "vendorChunk": true,
                             "buildOptimizer": false
+                        },
+                        "vercel-prod": {
+                            "budgets": [{
+                                "type": "anyComponentStyle",
+                                "maximumWarning": "6kb"
+                            }],
+                            "optimization": true,
+                            "outputHashing": "all",
+                            "sourceMap": false,
+                            "extractCss": true,
+                            "namedChunks": false,
+                            "aot": true,
+                            "extractLicenses": true,
+                            "vendorChunk": false,
+                            "buildOptimizer": true,
+                            "fileReplacements": [{
+                                "replace": "src/environments/environment.ts",
+                                "with": "src/environments/environment.vercel-prod.ts"
+                            }]
+                        },
+                        "vercel-dev": {
+                            "budgets": [{
+                                "type": "anyComponentStyle",
+                                "maximumWarning": "6kb"
+                            }],
+                            "optimization": false,
+                            "outputHashing": "all",
+                            "sourceMap": true,
+                            "extractCss": true,
+                            "namedChunks": true,
+                            "aot": false,
+                            "extractLicenses": false,
+                            "vendorChunk": true,
+                            "buildOptimizer": false,
+                            "fileReplacements": [{
+                                "replace": "src/environments/environment.ts",
+                                "with": "src/environments/environment.vercel-dev.ts"
+                            }]
                         }
                     }
                 },
@@ -84,6 +122,12 @@
                         },
                         "dev": {
                             "browserTarget": "Auth:build:dev"
+                        },
+                        "vercel-prod": {
+                            "browserTarget": "Auth:build:vercel-prod"
+                        },
+                        "vercel-dev": {
+                            "browserTarget": "Auth:build:vercel-dev"
                         }
                     }
                 },

@@ -40,7 +40,7 @@ export class AccountComponent implements OnInit, OnDestroy {
         }
       ]
     }
-  ]
+  ];
 
   constructor(
     private accountFacade: AccountFacade

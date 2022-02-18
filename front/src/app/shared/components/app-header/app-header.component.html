@@ -1,27 +1,43 @@
 <header class="header flex flex-row fixed top-0 z-5">
     <div class="header-wrapper w-12 lg:w-10">
-        <img class="cursor-pointer" src="./../../../assets/images/logo/logo-light-dev.svg" height="40px" routerLink="/account/general" />
+        <img *ngIf="isAdmin && isDev" class="cursor-pointer" src="./../../../assets/images/logo/admin/logo-light-admin-dev.svg" height="40px" routerLink="/admin" />
+        <img *ngIf="isAdmin && isProd" class="cursor-pointer" src="./../../../assets/images/logo/admin/logo-light-admin-prod.svg" height="40px" routerLink="/admin" />
+        <img *ngIf="!isAdmin && isDev" class="cursor-pointer" src="./../../../assets/images/logo/logo-light-dev.svg" height="40px" routerLink="/account/general" />
+        <img *ngIf="!isAdmin && isProd" class="cursor-pointer" src="./../../../assets/images/logo/logo-light-prod.svg" height="40px" routerLink="/account/general" />
 
-        <div class="user-box flex flex-row relative" *ngIf="session$ | async as session">
-            <div class="user-box-content flex flex-row align-items-center justify-content-center font-medium">
-                <img class="avatar mr-2" [src]="session.picture" /> {{ session.username }} <i class="pi pi-angle-down ml-2"></i>
-            </div>
-
-            <div class="user-box-menu rounded-sm">
-                <div class="p-3 flex flex-column border-bottom-1 border-white-alpha-20">
-                    <span class="font-medium">{{ session.username }}</span>
-                    <small class="font-medium text-white-alpha-50" *ngIf="isDevelop">ID: {{ session.id }}</small>
-                    <small class="font-medium text-white-alpha-50" *ngIf="isDevelop">ROLE: {{ session.role }}</small>
-                    <span class="text-sm">{{ session.email }}</span>
+        <ng-container *ngIf="session$ | async as session">
+            <div *ngIf="session.logged" class="user-box flex flex-row relative" >
+                <div class="user-box-content flex flex-row align-items-center justify-content-center font-medium">
+                    <img class="avatar mr-2" [src]="session.picture" /> {{ session.username }} <i class="pi pi-angle-down ml-2"></i>
                 </div>
-                <div class="flex flex-column p-3 font-medium">
-                    <div class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" (click)="logout()">Logout</div>
-                    <div class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" routerLink="/admin">
-                        Admin Portal <i class="pi pi-external-link text-sm ml-2"></i>
+    
+                <div class="user-box-menu rounded-sm">
+                    <div class="p-3 flex flex-column border-bottom-1 border-white-alpha-20">
+                        <span class="font-medium">{{ session.username }}</span>
+                        <small class="font-medium text-white-alpha-50" *ngIf="isDev">ID: {{ session.id }}</small>
+                        <small class="font-medium text-white-alpha-50" *ngIf="isDev">ROLE: {{ session.role }}</small>
+                        <span class="text-sm">{{ session.email }}</span>
                     </div>
+                    <div class="flex flex-column p-3 font-medium">
+                        <div *ngIf="!isAdmin" class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" (click)="logout()">Logout</div>
+    
+                        <div *ngIf="isAdmin" class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" (click)="logoutLocal()">Logout Local</div>
+                        <div *ngIf="isAdmin" class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" (click)="logoutSession()">End Session</div>
+    
+    
+    
+                        <div *ngIf="!isAdmin" class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" routerLink="/admin">
+                            Admin Portal <i class="pi pi-external-link text-sm ml-2"></i>
+                        </div>
+                        <div *ngIf="isAdmin" class="w-full py-2 px-3 rounded-sm hover:bg-black-alpha-10 cursor-pointer" routerLink="/account">
+                            Account Portal <i class="pi pi-external-link text-sm ml-2"></i>
+                        </div>
+                    </div>
+                    
                 </div>
-                
             </div>
-        </div>
+        </ng-container>
+
+
     </div>
 </header>

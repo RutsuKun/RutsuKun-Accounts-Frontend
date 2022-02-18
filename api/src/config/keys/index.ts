@@ -43,6 +43,13 @@ const mfaTokenPublicKey = () => {
   return fs.readFileSync(path.join(__dirname, "MfaTokenPublic.pem")).toString();
 };
 
+const generalTokenPrivateKey = () => {
+  return fs.readFileSync(path.join(__dirname, "GeneralTokenPrivate.key")).toString();
+};
+const generalTokenPublicKey = () => {
+  return fs.readFileSync(path.join(__dirname, "GeneralTokenPublic.pem")).toString();
+};
+
 export default {
   accessTokenPrivateKey,
   accessTokenPublicKey,
@@ -55,5 +62,7 @@ export default {
   emailTokenPrivateKey,
   emailTokenPublicKey,
   mfaTokenPrivateKey,
-  mfaTokenPublicKey
+  mfaTokenPublicKey,
+  generalTokenPrivateKey,
+  generalTokenPublicKey
 };

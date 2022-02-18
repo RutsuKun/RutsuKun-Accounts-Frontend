@@ -27,34 +27,9 @@ import { AuthFacade } from "@core/store/auth/auth.facade";
 })
 export class SignInComponent implements OnInit, OnDestroy {
   uns$ = new Subject();
-  account: any;
-  logged: boolean;
-  hide: boolean;
-
-  data: any;
-  token: any;
-  error = false;
-  message: string;
-
-  loading: boolean;
-  formLoading: boolean;
 
   clientFromQuery: Array<any>;
 
-  scopes: any;
-  state: string;
-  connection: boolean;
-  connectionProvider: string;
-
-  multifactor: boolean;
-  multifactorType: string;
-
-  lang: string;
-  title: string;
-  debug: boolean;
-  successAlert: string;
-
-  // new
   public prompt: "login" | "reauth" | "signup" = null;
   public formError: string = null;
   public formShow: boolean = false;
@@ -71,48 +46,35 @@ export class SignInComponent implements OnInit, OnDestroy {
     public translate: TranslateService,
     private route: ActivatedRoute,
     private authFacade: AuthFacade
-  ) {
-    if (!localStorage.getItem("debug")) {
-      localStorage.setItem("debug", "false");
-      this.debug = false;
-    }
-    if (localStorage.getItem("debug") === "true") {
-      this.debug = true;
-    }
+  ) {}
 
-    this.loading = true;
-    this.formLoading = false;
-
-    this.route.queryParamMap.subscribe((query) => {
-     if (!!query.get("client_id")) {
-        this.flow = "oauth";
-        this.authFacade.fetchAppInfo(query.get("client_id"));
-      } else {
-        this.flow = "auth";
-      }
-
-      if (query.get("error")) {
-        this.clientError = {
-          error: query.get("error"),
-          error_description: query.get("error_description"),
-        };
-        this.loading = false;
-        return;
-      }
-      console.log("client from url query", query);
-
-      this.clientFromQuery = query.keys;
-  
-
-      this.checkAuthorization();
-    });
+  ngOnInit(): void {
+    this.subscribeQuery();
   }
 
-  ngOnInit(): void {}
-
-
-  setLoadingForm() {
-    this.formLoading = true;
+  subscribeQuery() {
+    this.route.queryParamMap.subscribe((query) => {
+      if (!!query.get("client_id")) {
+         this.flow = "oauth";
+         this.authFacade.fetchAppInfo(query.get("client_id"));
+       } else {
+         this.flow = "auth";
+       }
+ 
+       if (query.get("error")) {
+         this.clientError = {
+           error: query.get("error"),
+           error_description: query.get("error_description"),
+         };
+         return;
+       }
+       console.log("client from url query", query);
+ 
+       this.clientFromQuery = query.keys;
+   
+ 
+       this.checkAuthorization();
+     });
   }
 
   checkAuthorization() {
@@ -127,12 +89,3 @@ export class SignInComponent implements OnInit, OnDestroy {
   }
 }
 
-export interface UserLoginData {
-  email: string;
-  password: string;
-  captcha?: string;
-}
-export interface UserLoggedData {
-  status: string;
-  error: string;
-}

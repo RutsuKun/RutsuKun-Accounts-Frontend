@@ -19,6 +19,11 @@ export interface IOAuth2Client {
   state: IOAuth2ClientState;
   third_party: boolean;
   verified: boolean;
+
+  organization: {
+    name: string;
+    domain: string;
+  }
 }
 
 export enum IOAuth2ClientState {

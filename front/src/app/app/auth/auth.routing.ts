@@ -9,6 +9,7 @@ import { AuthorizeComponent } from "./pages/authorize/authorize.component";
 import { CallbackDebugComponent } from "./pages/callback-debug/callback-debug.component";
 import { OAuth2DeviceCodeComponent } from "./pages/device-code/device-code.component";
 import { MultifactorComponent } from "./pages/multifactor/multifactor.component";
+import { CompleteSignUpComponent } from "./pages/complete-signup/complete-signup.component";
 
 export const AuthRoutes: Routes = [
   {
@@ -45,6 +46,13 @@ export const AuthRoutes: Routes = [
     component: MultifactorComponent,
     data: {
       title: "Multifactor",
+    },
+  },
+  {
+    path: "complete-signup",
+    component: CompleteSignUpComponent,
+    data: {
+      title: "complete-signup",
     },
   },
   {

@@ -167,7 +167,7 @@ export class AuthEffects {
   authSuccess = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(a.authCheckSuccess, a.authSigninSuccess, a.authSignupSuccess,  a.authReAuthSuccess, a.authMultifactorSuccess, a.authAuthorizeSuccess),
+        ofType(a.authCheckSuccess, a.authSigninSuccess, a.authSignupSuccess,  a.authReAuthSuccess, a.authMultifactorSuccess, a.authAuthorizeSuccess, a.authCompleteConnectProviderSuccess),
         tap(({ data })=>{
           const type = data.type;
 
@@ -229,6 +229,20 @@ export class AuthEffects {
             catchError((res: HttpErrorResponse) =>
               of(a.authAppInfoFail({ error: res.error }))
             )
+          )
+        )
+      ),
+    { dispatch: true }
+  );
+
+  authCompleteConnectProviderRequest = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(a.authCompleteConnectProviderRequest),
+        switchMap(({ email, code }) =>
+          this.http.post(`${environment.auth}/providers/complete-connect`, { email, code }, { withCredentials: true }).pipe(
+            map((res: any) => a.authCompleteConnectProviderSuccess({ data: res })),
+            catchError((res: HttpErrorResponse) => of(a.authCompleteConnectProviderFail({ error: res.error })))
           )
         )
       ),

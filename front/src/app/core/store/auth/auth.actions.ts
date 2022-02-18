@@ -61,7 +61,7 @@ export const authSigninFail = createAction(
   props<{ error: string, errors: any[] }>()
 );
 
-// auth signin
+// auth signup
 
 export const authSignupRequest = createAction(
   "[Auth] Signup - Request",
@@ -91,7 +91,7 @@ export const authMultifactorFail = createAction(
   props<{ error: any }>()
 );
 
-// auth re auth
+// auth reauth
 
 export const authReAuthRequest = createAction(
   "[Auth] Re Auth - Request",
@@ -133,5 +133,20 @@ export const authAppInfoSuccess = createAction(
 );
 export const authAppInfoFail = createAction(
   "[Auth] App Info - Fail",
+  props<{ error: any }>()
+);
+
+// auth complete connect provider
+
+export const authCompleteConnectProviderRequest = createAction(
+  "[Auth] Complete Connect Provider - Request",
+  props<{ email: string, code?: string }>()
+);
+export const authCompleteConnectProviderSuccess = createAction(
+  "[Auth] Complete Connect Provider - Success",
+  props<{ data: any }>()
+);
+export const authCompleteConnectProviderFail = createAction(
+  "[Auth] Complete Connect Provider - Fail",
   props<{ error: any }>()
 );
