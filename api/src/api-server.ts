@@ -73,9 +73,6 @@ export class APIServer {
 
   public $beforeRoutesInit(): void | Promise<any> {
 
-
-
-
     this.app.use(cors({ origin: Config.FRONTEND.url, credentials: true }));
     this.app.getApp().set("trust proxy", 1);
     this.app.getApp().set('etag', false); // turn off
