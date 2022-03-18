@@ -16,6 +16,7 @@ import { AccountGroup } from "./AccountGroup";
 import { OAuthClientACL } from "./OAuthClientACL";
 import { OAuthScope } from "./OAuthScope";
 import { AccountAuthnMethod } from "./AccountAuthnMethod";
+import { AccountSession } from "./AccountSession";
 
 @Entity({
   name: "oauth_accounts",
@@ -36,7 +37,10 @@ export class AccountEntity {
   @Column({ type: "varchar", nullable: true, default: null })
   password?: string;
 
-  @Column({ type: "varchar", default: "/assets/images/avatars/default-avatar.png" })
+  @Column({
+    type: "varchar",
+    default: "/assets/images/avatars/default-avatar.png",
+  })
   avatar?: string;
 
   @Column({ type: "varchar", default: "user" })
@@ -69,32 +73,35 @@ export class AccountEntity {
 
   @ManyToMany(() => AccountGroup, (group) => group.accounts, { cascade: true })
   @JoinTable({
-    name: 'AccountToGroup',
+    name: "AccountToGroup",
     joinColumn: {
-      name: 'account_uuid',
-      referencedColumnName: 'uuid'
+      name: "account_uuid",
+      referencedColumnName: "uuid",
     },
     inverseJoinColumn: {
-      name: 'group_name',
-      referencedColumnName: 'name'
-    }
+      name: "group_name",
+      referencedColumnName: "name",
+    },
   })
   groups?: AccountGroup[];
+
+  @OneToMany(() => AccountSession, (session) => session.account_uuid, { cascade: true })
+  sessions?: AccountSession[];
 
   @ManyToMany(() => OAuthClientACL, (acl) => acl.accounts, { cascade: true })
   acl?: OAuthClientACL[];
 
   @ManyToMany(() => OAuthScope, (scope) => scope.accounts)
   @JoinTable({
-    name: 'AccountToScope',
+    name: "AccountToScope",
     joinColumn: {
-      name: 'account_uuid',
-      referencedColumnName: 'uuid'
+      name: "account_uuid",
+      referencedColumnName: "uuid",
     },
     inverseJoinColumn: {
-      name: 'scope_name',
-      referencedColumnName: 'name'
-    }
+      name: "scope_name",
+      referencedColumnName: "name",
+    },
   })
   scopes?: OAuthScope[];
 

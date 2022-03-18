@@ -13,6 +13,8 @@ import bcrypt from "bcryptjs";
 import { AccountAuthnMethodRepository } from "@repositories/AccountAuthnMethod.repository";
 import { AuthenticationMethods } from "common/interfaces/authentication.interface";
 import { AccountAuthnMethod } from "@entities/AccountAuthnMethod";
+import { AccountSessionRepository } from "@repositories/AccountSessionRepository";
+import { AccountSession } from "@entities/AccountSession";
 
 @Injectable()
 export class AccountsService {
@@ -31,6 +33,10 @@ export class AccountsService {
   @Inject()
   @UseConnection("default")
   private accountsAuthnMethodRepository: AccountAuthnMethodRepository;
+
+  @Inject()
+  @UseConnection("default")
+  private accountsSessionRepository: AccountSessionRepository;
 
   constructor(
     private logger: LoggerService,
@@ -363,18 +369,18 @@ export class AccountsService {
   public getAccountAuthnMethods(uuid: string) {
     return this.accountsAuthnMethodRepository.find({
       account: {
-        uuid
-      }
-    })
+        uuid,
+      },
+    });
   }
 
   public getAccountAuthnMethod(uuid: string, method: AuthenticationMethods) {
     return this.accountsAuthnMethodRepository.findOne({
       type: method,
       account: {
-        uuid
-      }
-    })
+        uuid,
+      },
+    });
   }
 
   public removeAccountAuthnMethod(method: AccountAuthnMethod) {
@@ -442,8 +448,6 @@ export class AccountsService {
     return this.emailRepository.save(email);
   }
 
-
-
   public deleteEmail(emailUuid: string, accountUUID: string) {
     return this.emailRepository.delete({
       uuid: emailUuid,
@@ -455,5 +459,17 @@ export class AccountsService {
 
   public saveAccount(account: AccountEntity) {
     return this.accountRepository.save(account);
+  }
+
+  public addSession(session: AccountSession) {
+    return this.accountsSessionRepository.save(session);
+  }
+
+  public revokeSession(uuid: string, account_uuid: string) {
+    return this.accountsSessionRepository.update({ uuid, account_uuid }, { revoked: true });
+  }
+
+  public deleteSession(uuid: string, account_uuid: string) {
+    return this.accountsSessionRepository.delete({ uuid, account_uuid });
   }
 }
