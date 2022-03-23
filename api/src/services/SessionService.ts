@@ -263,9 +263,10 @@ export class SessionService {
     }
   }
 
-  deleteCurrentBrowserSession() {
-    const currentBrowserSession = this.browserSessions.find((session) => session.session_id === this.getCurrentSessionUuid)
-    this.browserSessions = this.browserSessions.filter((session) => session.session_id !== currentBrowserSession.session_id);
+  async deleteCurrentBrowserSession() {
+    const currentBrowserSession = this.browserSessions.find((session) => session.uuid === this.getCurrentSessionUuid);
+    await this.accountsService.deleteAccountSession(currentBrowserSession.uuid, currentBrowserSession.account.uuid);
+    this.browserSessions = this.browserSessions.filter((session) => session.uuid !== currentBrowserSession.uuid);
     this.currentSessionUuid = null;
     return this;
   }

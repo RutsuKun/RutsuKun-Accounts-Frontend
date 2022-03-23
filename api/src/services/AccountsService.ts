@@ -514,9 +514,9 @@ export class AccountsService {
     return this.accountsSessionRepository.save(session);
   }
 
-  public deleteAccountSession(session_id: string, account_uuid: string) {
+  public deleteAccountSession(session_uuid: string, account_uuid: string) {
     return this.accountsSessionRepository.delete({
-      session_id: session_id,
+      uuid: session_uuid,
       account: { uuid: account_uuid },
     });
   }

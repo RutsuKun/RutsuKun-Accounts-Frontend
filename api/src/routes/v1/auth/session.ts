@@ -61,11 +61,8 @@ export class AuthSessionRoute {
 
     if (session.getCurrentSessionAccount && session.getCurrentSessionAccount.uuid) 
     {
-      await session
-        .deleteCurrentBrowserSession()
-        .delPassport()
-        .delAction()
-        .saveSession();
+      const newSession = await session.deleteCurrentBrowserSession();
+      await newSession.delPassport().delAction().saveSession();
     }
 
     return response.redirect(post_logout_redirect_uri as string);
@@ -87,7 +84,8 @@ export class AuthSessionRoute {
 				})
 			}**/
 
-      const newSession = session.deleteCurrentBrowserSession().delPassport().delAction().delIDP();
+      const newSession = await session.deleteCurrentBrowserSession();
+      newSession.delPassport().delAction();
       await newSession.saveSession();
       
 
