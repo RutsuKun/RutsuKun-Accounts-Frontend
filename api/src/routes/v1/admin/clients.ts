@@ -52,7 +52,6 @@ export class AdminClientsRoute {
   @UseBefore(AccessTokenMiddleware)
   @UseBefore(new ScopeMiddleware().use(["admin:clients"]))
   public async postClients(@Req() request: Req, @Res() response: Res) {
-    const session = this.sessionService.getUser;
     const data = request.body;
     try {
       const client = await this.clientService.addAdminClient(response.user.sub, data);
@@ -69,14 +68,14 @@ export class AdminClientsRoute {
   @Delete("/:clientId")
   @UseBefore(SessionMiddleware)
   public deleteClients(@Req() request: Req, @Res() response: Res) {
-    const session = this.sessionService.getUser;
+    const currentAccount = this.sessionService.getCurrentSessionAccount;
 
     const clientId = request.params.clientId;
 
     this.clientService
       .getClientByClientId(clientId)
       .then((client) => {
-        if (session.id === client.account.uuid) {
+        if (currentAccount.uuid === client.account.uuid) {
           this.clientService
             .deleteClient(clientId)
             .then(() => {

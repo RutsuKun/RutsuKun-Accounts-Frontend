@@ -33,7 +33,7 @@ export class AccountsRoute {
     @Context("session") session: SessionService
   ) {
     const currentAccount = await this.accountsService.getByUUIDWithRelations(
-      session.getUser.id,
+      session.getCurrentSessionAccount.uuid,
       ["emails", "providers", "groups", "authn_methods"]
     );
     delete currentAccount.password;
@@ -61,7 +61,7 @@ export class AccountsRoute {
     @Context("session") session: SessionService
   ) {
     const currentAccount = await this.accountsService.getAccountByUUID(
-      session.getUser.id
+      session.getCurrentSessionAccount.uuid
     );
 
     const email: string = request.body.email;
@@ -98,7 +98,7 @@ export class AccountsRoute {
     @Context("session") session: SessionService
   ) {
     const currentAccount = await this.accountsService.getAccountByUUID(
-      session.getUser.id
+      session.getCurrentSessionAccount.uuid
     );
 
     const emailUuid: string = request.params.uuid;

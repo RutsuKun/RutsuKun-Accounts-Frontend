@@ -461,15 +461,67 @@ export class AccountsService {
     return this.accountRepository.save(account);
   }
 
+  public getAccountSessions(account_uuid: string): Promise<AccountSession[]> {
+    return this.accountsSessionRepository.find({
+      relations: ["account"],
+      where: {
+        account: { uuid: account_uuid },
+      },
+    });
+  }
+
+  public getBrowserSessions(session_id: string): Promise<AccountSession[]> {
+    return this.accountsSessionRepository.find({
+      relations: ["account", "account.emails"],
+      where: {
+        session_id,
+      },
+    });
+  }
+
+  public async getMeSessionsEndpoint(account_uuid: string) {
+    const sessions = await this.getAccountSessions(account_uuid);
+
+    return sessions.map((session) => {
+      return {
+        uuid: session.uuid,
+        session_id: session.session_id,
+        account_uuid: session.account.uuid,
+      };
+    });
+  }
+
+  public async getBrowserSessionsEndpoint(session_id: string) {
+    if (!session_id) return [];
+    const sessions = await this.getBrowserSessions(session_id);
+
+    return sessions.map((session) => {
+      return {
+        uuid: session.uuid,
+        session_id: session.session_id,
+        account: {
+          uuid: session.account.uuid,
+          username: session.account.username,
+          email: session.account.getPrimaryEmail(),
+          picture: session.account.avatar,
+          role: session.account.role
+        },
+      };
+    });
+  }
+
   public addSession(session: AccountSession) {
     return this.accountsSessionRepository.save(session);
   }
 
-  public revokeSession(uuid: string, account_uuid: string) {
-    return this.accountsSessionRepository.update({ uuid, account_uuid }, { revoked: true });
+  public deleteAccountSession(session_id: string, account_uuid: string) {
+    return this.accountsSessionRepository.delete({
+      session_id: session_id,
+      account: { uuid: account_uuid },
+    });
   }
 
-  public deleteSession(uuid: string, account_uuid: string) {
-    return this.accountsSessionRepository.delete({ uuid, account_uuid });
+  public deleteBrowserSession(session_id: string) {
+    return this.accountsSessionRepository.delete({ session_id });
   }
 }

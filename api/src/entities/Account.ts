@@ -85,7 +85,7 @@ export class AccountEntity {
   })
   groups?: AccountGroup[];
 
-  @OneToMany(() => AccountSession, (session) => session.account_uuid, { cascade: true })
+  @OneToMany(() => AccountSession, (session) => session.account, { cascade: true })
   sessions?: AccountSession[];
 
   @ManyToMany(() => OAuthClientACL, (acl) => acl.accounts, { cascade: true })

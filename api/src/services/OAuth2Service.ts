@@ -65,8 +65,7 @@ export class OAuth2Service {
     return healthy;
   }
 
-  public checkConsent(req: Request, res: Response) {
-    const session = this.sessionService.setSession(req);
+  public checkConsent(req: Request, res: Response, session: SessionService) {
     const clientFromSession = session.getClient;
     const clientFromQuery = session.getClientQuery;
     const { ip, country, city, eu } = req.ipInfo;
@@ -94,8 +93,8 @@ export class OAuth2Service {
       } else {
         //TEST!!!!
 
-        const userId = session.getUser.id;
-        const userUsername = session.getUser.username;
+        const userId = session.getCurrentSessionAccount.uuid;
+        const userUsername = session.getCurrentSessionAccount.username;
 
         this.logger.info(
           "Authorization in progress for " + userUsername + " (" + userId + ")"

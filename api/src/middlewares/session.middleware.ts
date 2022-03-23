@@ -1,13 +1,4 @@
-import {
-  Context,
-  Logger,
-  Middleware,
-  Next,
-  ProviderScope,
-  Req,
-  Res,
-  Scope,
-} from "@tsed/common";
+import { Context, Logger, Middleware, Next, ProviderScope, Req, Res, Scope } from "@tsed/common";
 
 import { SessionService } from "@services/SessionService";
 import { HTTP } from "@utils";
@@ -25,15 +16,14 @@ export class SessionMiddleware {
     @Context() context: Context
   ) {
 
-    const session = this.sessionService.setSession(req);
+    const session = await this.sessionService.setSession(req);
 
     if (!req.session.user || !req.session.user.logged) {
-      session.setUser({ logged: false });
       req.user = null;
     } else {
       req.user = {
-        emails: [{ value: session.getUser.email }],
-        displayName: session.getUser.username,
+        emails: [{ value: session.getCurrentSessionAccount.email }],
+        displayName: session.getCurrentSessionAccount.username,
         name: {
           givenName: null,
           familyName: null,
@@ -64,7 +54,7 @@ export class SessionLoggedMiddleware {
     @Context("logger") logger: Logger,
   ) {
 
-    if (!request.session.user || !request.session.user.logged) return HTTP.Unauthorized(request, response, logger);
+    if (!request.session.currentSessionUuid) return HTTP.Unauthorized(request, response, logger);
 
     next();
 

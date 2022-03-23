@@ -1,5 +1,5 @@
 import { Controller, Inject } from "@tsed/di";
-import { Post } from "@tsed/schema";
+import { Get, Post } from "@tsed/schema";
 import { AccountsService } from "@services/AccountsService";
 import { AuthService } from "@services/AuthService";
 import { SessionService } from "@services/SessionService";
@@ -9,7 +9,6 @@ import { BodyParams, Context, Req, Res, Use, UseBefore } from "@tsed/common";
 import { LoggerService } from "@services/LoggerService";
 import { HTTPCodes } from "@utils";
 import { SessionMiddleware } from "@middlewares/session.middleware";
-import { TokenService } from "@services/TokenService";
 
 @Controller("/auth")
 export class AuthRoute {
@@ -46,31 +45,39 @@ export class AuthRoute {
 
     session.saveSession();
 
-    if (session.getUser.logged) {
+    if (session.getCurrentSessionAccount.logged) {
       const needReauth = await session.needReAuth();
       if (needReauth) {
         return response.status(400).json({ type: "reauth" });
       }
 
       if (session.getFlow === "auth") {
+        const multifactorRequired =
+          await this.authService.checkMfaAuthnRequired(
+            session.getCurrentSessionAccount.uuid,
+            session,
+            "urn:rutsukun:gold"
+          );
 
-        const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getUser.id, session, 'urn:rutsukun:gold');
-
-        if(multifactorRequired && multifactorRequired.type === 'multifactor') {
+        if (multifactorRequired && multifactorRequired.type === "multifactor") {
           return response.status(200).json(multifactorRequired);
         }
 
         return response.status(200).json({ type: "logged-in" });
       } else if (session.getFlow === "oauth") {
-
         // refactor
-        const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getUser.id, session, session.getClientQuery.acr_values);
+        const multifactorRequired =
+          await this.authService.checkMfaAuthnRequired(
+            session.getCurrentSessionAccount.uuid,
+            session,
+            session.getClientQuery.acr_values
+          );
 
-        if(multifactorRequired && multifactorRequired.type === 'multifactor') {
+        if (multifactorRequired && multifactorRequired.type === "multifactor") {
           return response.status(200).json(multifactorRequired);
         }
 
-        this.oauthService.checkConsent(request, response);
+        this.oauthService.checkConsent(request, response, session);
       }
     } else {
       if (session.getError) {
@@ -82,10 +89,7 @@ export class AuthRoute {
         });
       }
 
-      if (
-        session.getAction &&
-        session.getAction.type === "signup"
-      ) {
+      if (session.getAction && session.getAction.type === "signup") {
         const email = session.getAction.email;
         session.setAction({ type: "signup-connection" });
         session.saveSession();
@@ -118,7 +122,7 @@ export class AuthRoute {
 
         if (session.getFlow === "auth") {
 
-          const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getUser.id, session, "urn:rutsukun:gold");
+          const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getCurrentSessionAccount.uuid, session, "urn:rutsukun:gold");
 
           if(multifactorRequired && multifactorRequired.type === 'multifactor') {
             return response.status(200).json(multifactorRequired);
@@ -128,7 +132,7 @@ export class AuthRoute {
             type: "logged-in",
           });
         } else if (session.getFlow === "oauth") {
-          this.oauthService.checkConsent(request, response);
+          this.oauthService.checkConsent(request, response, session);
         }
         break;
       case "multifactor":
@@ -185,12 +189,12 @@ export class AuthRoute {
     const { password, captcha } = request.body;
     const { ip, country, city, eu } = request.ipInfo;
 
-    if(!session.getUser.logged) {
+    if(!session.getCurrentSessionAccount.logged) {
       return response.status(HTTPCodes.OK).json({ type: 'auth' });
     }
 
     const data = await this.authService.reauth(
-      { ip, country, city, email: session.getUser.email, captcha, password },
+      { ip, country, city, email: session.getCurrentSessionAccount.email, captcha, password },
       session
     );
     switch (data.type) {
@@ -200,7 +204,7 @@ export class AuthRoute {
             type: "logged-in",
           });
         } else if (session.getFlow === "oauth") {
-          this.oauthService.checkConsent(request, response);
+          this.oauthService.checkConsent(request, response, session);
         }
         break;
       case "error":
@@ -246,7 +250,7 @@ export class AuthRoute {
     if (findClient && !findClient.consent) {
       this.oauthService
         .authorize({
-          accountId: session.getUser.id,
+          accountId: session.getCurrentSessionAccount.uuid,
           client: findClient,
           consentGiven: true,
           deviceCodeData: deviceToken,
@@ -304,7 +308,7 @@ export class AuthRoute {
             type: "logged-in",
           });
         } else if (session.getFlow === "oauth") {
-          this.oauthService.checkConsent(request, response);
+          this.oauthService.checkConsent(request, response, session);
         }
         break;
       case "error":
@@ -322,5 +326,18 @@ export class AuthRoute {
         });
         break;
     }
+  }
+
+  @Get("/switch-session/:uuid")
+  @UseBefore(SessionMiddleware)
+  public async postSwitchAccount(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
+    const uuid = request.params.uuid;
+    session.setCurrentSessionUuid(uuid);
+    await session.saveSession();
+    response.status(200).json({ status: "ok" });
   }
 }

@@ -1,13 +1,14 @@
 import { Injectable, ProviderScope, Request } from "@tsed/common";
+import { AccountsService } from "./AccountsService";
 import { LoggerService } from "./LoggerService";
 @Injectable({
-  scope: ProviderScope.REQUEST
+  scope: ProviderScope.REQUEST,
 })
 export class SessionService {
   public session;
   private clientQuery: SessionClientQuery;
   private client: SessionClient;
-  private user: SessionUser;
+  private currentSessionUuid: string;
   private idp: SessionIDP;
   private sso: ISessionSSO[] = [];
   private action: any;
@@ -15,12 +16,16 @@ export class SessionService {
   private oauth: {
     client_id: string;
   };
+  private browserSessions: SessionBrowserSession[] = [];
   private passport: any;
   private error: any;
 
   private logger;
 
-  constructor(private loggerService: LoggerService) {
+  constructor(
+    private loggerService: LoggerService,
+    private accountsService: AccountsService
+  ) {
     this.logger = this.loggerService.child({
       label: {
         type: "session",
@@ -63,7 +68,7 @@ export class SessionService {
       }
       // 10 min after reauth or first auth
       if (timeDifferenceReAuth > 6090000) {
-        this.loggerService.info(this.getUser.username + " needs reauth.");
+        this.loggerService.info(this.getCurrentSessionAccount.username + " needs reauth.");
         resolve(true);
       }
 
@@ -71,13 +76,14 @@ export class SessionService {
     });
   }
 
-  setSession(req: Request) {
-    this.logger.info('sessionID', req['sessionID']);
-    
+  async setSession(req: Request) {
+    const session_id = req["sessionID"];
+    this.logger.info("session_id", session_id);
+
     this.session = req.session;
+    const currentSessionUuid = req.session.currentSessionUuid;
     const clientQuery = req.session.clientFromQuery;
     const client = req.session.client;
-    const user = req.session.user;
     const idp = req.session.idp;
     const sso = req.session.sso;
     const action = req.session.action;
@@ -85,15 +91,14 @@ export class SessionService {
 
     const flow = req.body.flow || req.session.flow || "auth";
 
+    const browserSessions = await this.accountsService.getBrowserSessionsEndpoint(session_id);
+    this.setBrowserSessions(browserSessions);
+
+    if (currentSessionUuid) this.setCurrentSessionUuid(currentSessionUuid);
     if (clientQuery) this.setClientQuery(clientQuery);
     if (client) this.setClient(client);
-    if (user) {
-      this.setUser(user);
-    } else {
-      this.setUser({ logged: false });
-    }
     if (idp) this.setIDP(idp);
-    if(sso) this.setSSO(sso);
+    if (sso) this.setSSO(sso);
     if (action) this.setAction(action);
     this.setFlow(flow);
     if (error) this.setError(error);
@@ -106,66 +111,93 @@ export class SessionService {
   }
 
   async saveSession() {
-
-
     try {
       return new Promise(async (resolve, reject) => {
+        if (this.browserSessions) {
+          this.session.browserSessions = this.browserSessions;
+        } else {
+          delete this.session.browserSessions;
+        }
+
+        if (this.currentSessionUuid) {
+          this.session.currentSessionUuid = this.currentSessionUuid;
+        } else {
+          this.session.currentSessionUuid = null;
+        }
+
         if (this.clientQuery) {
           this.session.clientFromQuery = this.clientQuery;
         } else {
           delete this.session.clientFromQuery;
         }
-  
+
         if (this.client) {
           this.session.client = this.client;
         } else {
           delete this.session.client;
         }
-  
-        if (this.user) {
-          this.session.user = this.user;
-        } else {
-          delete this.session.user;
-        }
-  
+
         if (this.idp) {
           this.session.idp = this.idp;
         } else {
           delete this.session.idp;
         }
-  
+
         if (this.sso) {
           this.session.sso = this.sso;
         } else {
           delete this.session.sso;
         }
-  
+
         if (this.action) {
           this.session.action = this.action;
         } else {
           delete this.session.action;
         }
-  
+
         if (this.flow) {
           this.session.flow = this.flow;
         } else {
           delete this.session.flow;
         }
-  
+
         if (this.passport) {
           this.session.passport = this.passport;
         } else {
           delete this.session.passport;
         }
-  
+
         this.session.save(() => {
           this.loggerService.info("Session saved: " + this.session.id);
           resolve(true);
         });
       });
-    } catch(err) {
-      console.log('important error', err);
+    } catch (err) {
+      console.log("important error", err);
     }
+  }
+
+  // BROWSER SESSIONS //
+
+  setBrowserSessions(sessions) {
+    this.browserSessions = sessions;
+    return this;
+  }
+
+  addBrowserSession(session: SessionBrowserSession) {
+    this.browserSessions.push(session);
+    return this;
+  }
+
+  get getBrowserSessions() {
+    return this.browserSessions;
+  }
+
+  get getCurrentBrowserSession(): SessionBrowserSession {
+    const currentSession = this.browserSessions.find((session) => session && session.uuid === this.getCurrentSessionUuid)
+    if (!currentSession) return null;
+
+    return currentSession;
   }
 
   // CLIENT QUERY //
@@ -201,21 +233,46 @@ export class SessionService {
     return this;
   }
 
-  // USER //
+  // SESSION //
 
-  setUser(user: SessionUser) {
-    this.user = user;
+  setCurrentSessionUuid(uuid: string) {
+    console.log("setCurrentSessionUuid ", uuid);
+    const checkSessionExists = this.browserSessions.find((session) => session.uuid === uuid)
+    if (!!checkSessionExists) {
+      this.currentSessionUuid = uuid;
+    }
     return this;
   }
 
-  get getUser(): SessionUser {
-    return this.user;
+  get getCurrentSessionUuid(): string {
+    return this.currentSessionUuid;
   }
 
-  delUser() {
-    this.loggerService.info("function delUser");
-    this.user = undefined;
+  // SESSION ACCOUNT //
+
+  get getCurrentSessionAccount(): SessionUser {
+    const currentAccount = this.browserSessions.find((session) => session.uuid === this.getCurrentSessionUuid);
+    
+    if (!currentAccount) {
+      return { logged: false };
+    }
+
+    return {
+      ...currentAccount.account,
+      logged: true
+    }
+  }
+
+  deleteCurrentBrowserSession() {
+    const currentBrowserSession = this.browserSessions.find((session) => session.session_id === this.getCurrentSessionUuid)
+    this.browserSessions = this.browserSessions.filter((session) => session.session_id !== currentBrowserSession.session_id);
+    this.currentSessionUuid = null;
     return this;
+  }
+
+  checkAccountSessionExists(account_uuid: string) {
+    const findSession = this.browserSessions.find((session) => session && session.account.uuid === account_uuid);
+    return findSession;
   }
 
   // IDP - Identity Provider //
@@ -249,7 +306,10 @@ export class SessionService {
   }
 
   deleteSso(nameId: string, serviceProviderId: string) {
-    this.sso = this.sso.filter((sso)=>sso.nameId !== nameId && sso.serviceProviderId !== serviceProviderId);
+    this.sso = this.sso.filter(
+      (sso) =>
+        sso.nameId !== nameId && sso.serviceProviderId !== serviceProviderId
+    );
   }
 
   get getSso() {
@@ -257,7 +317,7 @@ export class SessionService {
   }
 
   getSsoByNameId(nameId: string) {
-    return this.sso.find((ssoSession)=> ssoSession.nameId === nameId);
+    return this.sso.find((ssoSession) => ssoSession.nameId === nameId);
   }
 
   // ACTION //
@@ -348,6 +408,7 @@ export class SessionService {
 
 export interface SessionData {
   id: string;
+  browserSessions: SessionBrowserSession[];
   clientFromQuery: SessionClientQuery;
   client: SessionClient;
   cookie: any;
@@ -360,6 +421,16 @@ export interface SessionData {
   oauth: {
     client_id: string;
   };
+}
+
+export interface SessionBrowserSession {
+  uuid: string;
+  session_id: string;
+  session_issued: Date;
+  session_expires: Date;
+  amr: string[];
+  idp: string; // identity provider
+  account: SessionUser;
 }
 
 export interface SessionClientQuery {
@@ -397,8 +468,8 @@ export interface SessionClient {
 }
 
 export interface SessionUser {
-  logged: boolean;
-  id?: string;
+  logged?: boolean;
+  uuid?: string;
   username?: string;
   email?: string;
   picture?: string;
@@ -406,14 +477,6 @@ export interface SessionUser {
 }
 
 export interface SessionIDP {
-  session_id: string;
-  session_state: string;
-  session_issued: Date;
-  session_expires: Date;
-  sub: string; // user id
-  idp: string; // identity provider
-  username: string;
-  amr: Array<string>;
   auth_time: number;
   reauth_time: number;
   used_authn_methods: IUsedAuthnMethod[];

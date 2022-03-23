@@ -35,7 +35,7 @@ export class OAuth2ClientsRoute {
     @Context("session") session: SessionService
   ) {
 
-    const clients = await this.clientService.getAccountClients(session.getUser.id);
+    const clients = await this.clientService.getAccountClients(session.getCurrentSessionAccount.uuid);
 
     return timer(2000).pipe(map(() => clients));
 
@@ -51,7 +51,7 @@ export class OAuth2ClientsRoute {
   ) {
     const data = request.body;
     try {
-      const client = await this.clientService.addClient(session.getUser.id, data);
+      const client = await this.clientService.addClient(session.getCurrentSessionAccount.uuid, data);
       response.status(HTTPCodes.Created).json(client);
     } catch (err) {
       response.status(HTTPCodes.BadRequest).json({
@@ -92,7 +92,7 @@ export class OAuth2ClientsRoute {
     this.clientService
       .getClientByClientId(clientId)
       .then((client) => {
-        if (session.getUser.id === client.account.uuid) {
+        if (session.getCurrentSessionAccount.uuid === client.account.uuid) {
           this.clientService
             .deleteClient(clientId)
             .then(() => {
