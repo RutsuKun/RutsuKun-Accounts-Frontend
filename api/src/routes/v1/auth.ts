@@ -8,7 +8,7 @@ import { ClientService } from "@services/ClientService";
 import { BodyParams, Context, Req, Res, Use, UseBefore } from "@tsed/common";
 import { LoggerService } from "@services/LoggerService";
 import { HTTPCodes } from "@utils";
-import { SessionMiddleware } from "@middlewares/session.middleware";
+import { SessionLoggedMiddleware, SessionMiddleware } from "@middlewares/session.middleware";
 
 @Controller("/auth")
 export class AuthRoute {
@@ -34,7 +34,6 @@ export class AuthRoute {
     @Res() response: Res,
     @Context("session") session: SessionService
   ) {
-    
     if (session.getAction === "signup") {
       session.delAction();
       session.saveSession();
@@ -43,7 +42,7 @@ export class AuthRoute {
       });
     }
 
-    session.saveSession();
+    await session.saveSession();
 
     if (session.getCurrentSessionAccount.logged) {
       const needReauth = await session.needReAuth();
@@ -112,19 +111,29 @@ export class AuthRoute {
     @Res() response: Res,
     @Context("session") session: SessionService
   ) {
-
     const { email, password, captcha } = request.body;
 
-    const data = await this.authService.signin({ email, password, captcha }, session);
+    const data = await this.authService.signin(
+      { email, password, captcha },
+      session
+    );
 
     switch (data.type) {
       case "logged-in":
-
         if (session.getFlow === "auth") {
+          console.log("a", session.getCurrentSessionAccount.uuid);
 
-          const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getCurrentSessionAccount.uuid, session, "urn:rutsukun:gold");
+          const multifactorRequired =
+            await this.authService.checkMfaAuthnRequired(
+              session.getCurrentSessionAccount.uuid,
+              session,
+              "urn:rutsukun:gold"
+            );
 
-          if(multifactorRequired && multifactorRequired.type === 'multifactor') {
+          if (
+            multifactorRequired &&
+            multifactorRequired.type === "multifactor"
+          ) {
             return response.status(200).json(multifactorRequired);
           }
 
@@ -189,12 +198,19 @@ export class AuthRoute {
     const { password, captcha } = request.body;
     const { ip, country, city, eu } = request.ipInfo;
 
-    if(!session.getCurrentSessionAccount.logged) {
-      return response.status(HTTPCodes.OK).json({ type: 'auth' });
+    if (!session.getCurrentSessionAccount.logged) {
+      return response.status(HTTPCodes.OK).json({ type: "auth" });
     }
 
     const data = await this.authService.reauth(
-      { ip, country, city, email: session.getCurrentSessionAccount.email, captcha, password },
+      {
+        ip,
+        country,
+        city,
+        email: session.getCurrentSessionAccount.email,
+        captcha,
+        password,
+      },
       session
     );
     switch (data.type) {
@@ -225,6 +241,7 @@ export class AuthRoute {
   }
 
   @Post("/device")
+  @UseBefore(SessionLoggedMiddleware)
   @Use(SessionMiddleware)
   public async postDevice(
     @Req() request: Req,
@@ -289,6 +306,7 @@ export class AuthRoute {
   }
 
   @Post("/multifactor")
+  @UseBefore(SessionLoggedMiddleware)
   @UseBefore(SessionMiddleware)
   public async postMultifactor(
     @Req() request: Req,
@@ -297,12 +315,10 @@ export class AuthRoute {
     @BodyParams("code") code: string,
     @BodyParams("token") token: string
   ) {
-
     const data = await this.authService.multifactor(code, token, session);
 
     switch (data.type) {
       case "logged-in":
-
         if (session.getFlow === "auth") {
           return response.status(200).json({
             type: "logged-in",
@@ -328,16 +344,31 @@ export class AuthRoute {
     }
   }
 
-  @Get("/switch-session/:uuid")
+  @Get("/sessions")
+  @UseBefore(SessionLoggedMiddleware)
   @UseBefore(SessionMiddleware)
-  public async postSwitchAccount(
+  public async getSwitchSession(
     @Req() request: Req,
     @Res() response: Res,
     @Context("session") session: SessionService
   ) {
-    const uuid = request.params.uuid;
-    session.setCurrentSessionUuid(uuid);
+    const sessions = await this.accountsService.getBrowserSessionsEndpoint(
+      session.getSession.id
+    );
+    return response.status(HTTPCodes.OK).json(sessions);
+  }
+
+  @Post("/sessions")
+  @UseBefore(SessionLoggedMiddleware)
+  @UseBefore(SessionMiddleware)
+  public async postSwitchSession(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
+    const uuid = request.body.uuid;
+    const changed = session.changeSession(uuid);
     await session.saveSession();
-    response.status(200).json({ status: "ok" });
+    response.status(200).json({ success: changed });
   }
 }

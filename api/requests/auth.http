@@ -4,6 +4,19 @@
 GET {{hostname}}/v1/auth/session HTTP/1.1
 Content-Type: application/json
 
+### fetch browser sessions
+GET {{hostname}}/v1/auth/sessions HTTP/1.1
+Content-Type: application/json
+
+### auth switch browser session
+POST https://api.rutsukun.pl/v1/auth/switch-session HTTP/1.1
+Content-Type: application/json
+
+{
+    "uuid": "260abc06-ac73-11ec-b069-525400889930"
+}
+
+
 ### check auth session details
 GET {{hostname}}/v1/auth/session/details HTTP/1.1
 Content-Type: application/json

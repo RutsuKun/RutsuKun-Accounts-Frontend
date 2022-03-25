@@ -177,29 +177,6 @@ export class SessionService {
     }
   }
 
-  // BROWSER SESSIONS //
-
-  setBrowserSessions(sessions) {
-    this.browserSessions = sessions;
-    return this;
-  }
-
-  addBrowserSession(session: SessionBrowserSession) {
-    this.browserSessions.push(session);
-    return this;
-  }
-
-  get getBrowserSessions() {
-    return this.browserSessions;
-  }
-
-  get getCurrentBrowserSession(): SessionBrowserSession {
-    const currentSession = this.browserSessions.find((session) => session && session.uuid === this.getCurrentSessionUuid)
-    if (!currentSession) return null;
-
-    return currentSession;
-  }
-
   // CLIENT QUERY //
 
   setClientQuery(client) {
@@ -235,13 +212,43 @@ export class SessionService {
 
   // SESSION //
 
+  setBrowserSessions(sessions) {
+    this.browserSessions = sessions;
+    return this;
+  }
+
+  addBrowserSession(session: SessionBrowserSession) {
+    this.browserSessions.push(session);
+    return this;
+  }
+
+  get getBrowserSessions() {
+    return this.browserSessions;
+  }
+
+  get getCurrentBrowserSession(): SessionBrowserSession {
+    const currentSession = this.browserSessions.find((session) => session && session.uuid === this.getCurrentSessionUuid)
+    if (!currentSession) return null;
+
+    return currentSession;
+  }
+
+  checkSessionExists(uuid: string) {
+    return !!this.browserSessions.find((session) => session.uuid === uuid);
+  }
+
   setCurrentSessionUuid(uuid: string) {
     console.log("setCurrentSessionUuid ", uuid);
-    const checkSessionExists = this.browserSessions.find((session) => session.uuid === uuid)
-    if (!!checkSessionExists) {
+    if (this.checkSessionExists(uuid)) {
       this.currentSessionUuid = uuid;
     }
     return this;
+  }
+
+  changeSession(uuid: string): boolean {
+    if (!this.browserSessions.length || !this.checkSessionExists(uuid) || uuid === this.currentSessionUuid) return false;
+    this.setCurrentSessionUuid(uuid);
+    return true;
   }
 
   get getCurrentSessionUuid(): string {
