@@ -345,7 +345,6 @@ export class AuthRoute {
   }
 
   @Get("/sessions")
-  @UseBefore(SessionLoggedMiddleware)
   @UseBefore(SessionMiddleware)
   public async getSwitchSession(
     @Req() request: Req,
@@ -359,7 +358,6 @@ export class AuthRoute {
   }
 
   @Post("/sessions")
-  @UseBefore(SessionLoggedMiddleware)
   @UseBefore(SessionMiddleware)
   public async postSwitchSession(
     @Req() request: Req,
