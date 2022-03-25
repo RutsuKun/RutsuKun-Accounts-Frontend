@@ -3,6 +3,7 @@ import { Validate } from './validate';
 import { HTTPCodes, HTTP } from './http';
 import { SessionParticipants } from './saml';
 import { generateDataURLQRCode } from './qrcode';
+import { Format } from './format';
 
 export {
 	JSONParse,
@@ -11,5 +12,6 @@ export {
 	HTTPCodes,
 	HTTP,
 	SessionParticipants,
-	generateDataURLQRCode
+	generateDataURLQRCode,
+	Format
 };
