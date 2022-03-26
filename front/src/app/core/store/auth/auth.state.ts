@@ -4,6 +4,7 @@ import { IOAuth2Client } from "@core/interfaces/IOAuth2Client";
 export interface AuthState {
   isAuthenticated: boolean;
   session: ISession;
+  sessions: IBrowserSession[];
   type: "auth" | "reauth" | "multifactor" | "consent";
   authorizeConsent: IAuthConsent;
   mfa: {
@@ -38,9 +39,16 @@ export interface AuthState {
 
 export interface ISession {
   logged: boolean;
-  id: string;
+  uuid: string;
   username: string;
   email: string;
   picture: string;
   role: string;
+}
+
+export interface IBrowserSession {
+  uuid: string;
+  session_id: string;
+  current: boolean;
+  account: ISession;
 }

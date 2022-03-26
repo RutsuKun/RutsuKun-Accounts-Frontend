@@ -354,7 +354,12 @@ export class AuthRoute {
     const sessions = await this.accountsService.getBrowserSessionsEndpoint(
       session.getSession.id
     );
-    return response.status(HTTPCodes.OK).json(sessions);
+    return response.status(HTTPCodes.OK).json(sessions.map((s) => {
+      return {
+        ...s,
+        current: s.uuid === session.getCurrentSessionUuid
+      };
+    }));
   }
 
   @Post("/sessions")

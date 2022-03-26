@@ -6,7 +6,8 @@ export const selectAuthState = createFeatureSelector<AppState, AuthState>('auth'
 
 export const selectIsAuthenticated = createSelector(selectAuthState, (state: AuthState) => state.isAuthenticated);
 
-export const selectSession = createSelector( selectAuthState, (state: AuthState) => state.session);
+export const selectSession = createSelector(selectAuthState, (state: AuthState) => state.session);
+export const selectSessions = createSelector( selectAuthState, (state: AuthState) => state.sessions);
 
 export const selectAuthSigninError = createSelector( selectAuthState, (state: AuthState) => state.signin.error);
 export const selectAuthSigninErrors = createSelector(selectAuthState, (state: AuthState) => state.signin.errors);

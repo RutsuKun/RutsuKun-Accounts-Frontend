@@ -9,7 +9,7 @@ GET {{hostname}}/v1/auth/sessions HTTP/1.1
 Content-Type: application/json
 
 ### auth switch browser session
-POST https://api.rutsukun.pl/v1/auth/switch-session HTTP/1.1
+POST https://api.rutsukun.pl/v1/auth/sessions HTTP/1.1
 Content-Type: application/json
 
 {

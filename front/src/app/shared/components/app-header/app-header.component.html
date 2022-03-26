@@ -14,7 +14,7 @@
                 <div class="user-box-menu rounded-sm">
                     <div class="p-3 flex flex-column border-bottom-1 border-white-alpha-20">
                         <span class="font-medium">{{ session.username }}</span>
-                        <small class="font-medium text-white-alpha-50" *ngIf="isDev">ID: {{ session.id }}</small>
+                        <small class="font-medium text-white-alpha-50" *ngIf="isDev">ID: {{ session.uuid }}</small>
                         <small class="font-medium text-white-alpha-50" *ngIf="isDev">ROLE: {{ session.role }}</small>
                         <span class="text-sm">{{ session.email }}</span>
                     </div>

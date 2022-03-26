@@ -63,8 +63,58 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(a.authSessionEndSuccess),
-        tap(()=>{
+        tap(() => {
+          this.store.dispatch(a.authSessionsFetchRequest());
           this.authService.redirectToSignIn();
+        })
+      ),
+    { dispatch: false }
+  );
+
+  authSessiosFetchRequest = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(a.authSessionsFetchRequest),
+        switchMap(() =>
+          this.http.get(`${environment.auth}/sessions`, { withCredentials: true }).pipe(
+            map((res: any) => a.authSessionsFetchSuccess({ data: res })),
+            catchError((res: HttpErrorResponse) =>
+              of(a.authSessionsFetchFail({ error: res.error }))
+            )
+          )
+        )
+      ),
+    { dispatch: true }
+  );
+
+  authSessiosChangeRequest = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(a.authSessionsChangeRequest),
+        switchMap(({ uuid }) =>
+          this.http.post(`${environment.auth}/sessions`, { uuid }, { withCredentials: true }).pipe(
+            map((res: any) => a.authSessionsChangeSuccess(res)),
+            catchError((res: HttpErrorResponse) =>
+              of(a.authSessionsChangeFail({ error: res.error }))
+            )
+          )
+        )
+      ),
+    { dispatch: true }
+  );
+
+  authSessiosChangeSuccess = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(a.authSessionsChangeSuccess),
+        tap(({ success }) => {
+          if (success) {
+            console.log("Change session success");
+            
+            this.store.dispatch(a.authSessionsFetchRequest());
+          } else {
+            console.log("Change session failed");
+          }
         })
       ),
     { dispatch: false }
@@ -168,9 +218,9 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(a.authCheckSuccess, a.authSigninSuccess, a.authSignupSuccess,  a.authReAuthSuccess, a.authMultifactorSuccess, a.authAuthorizeSuccess, a.authCompleteConnectProviderSuccess),
-        tap(({ data })=>{
+        tap(({ data }) => {
+          this.store.dispatch(a.authSessionsFetchRequest());
           const type = data.type;
-
           switch (type) {
             case "auth":
             break;

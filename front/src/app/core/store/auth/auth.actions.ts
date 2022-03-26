@@ -1,7 +1,7 @@
 import { IAuthConsent } from "@core/interfaces/IAuth";
 import { IOAuth2Client } from "@core/interfaces/IOAuth2Client";
 import { createAction, props } from "@ngrx/store";
-import { ISession } from "./auth.state"
+import { IBrowserSession, ISession } from "./auth.state"
 
 // fetch session
 
@@ -28,6 +28,35 @@ export const authSessionEndSuccess = createAction(
 );
 export const authSessionEndFail = createAction(
   "[Auth] Session End - Fail",
+  props<{ error: any }>()
+);
+
+// fetch sessions
+
+export const authSessionsFetchRequest = createAction(
+  "[Auth] Sessions Fetch - Request"
+);
+export const authSessionsFetchSuccess = createAction(
+  "[Auth] Sessions Fetch - Success",
+  props<{ data: IBrowserSession[] }>()
+);
+export const authSessionsFetchFail = createAction(
+  "[Auth] Sessions Fetch - Fail",
+  props<{ error: any }>()
+);
+
+// change session
+
+export const authSessionsChangeRequest = createAction(
+  "[Auth] Sessions Change - Request",
+  props<{ uuid: string }>()
+);
+export const authSessionsChangeSuccess = createAction(
+  "[Auth] Sessions Change - Success",
+  props<{ success: boolean }>()
+);
+export const authSessionsChangeFail = createAction(
+  "[Auth] Sessions Change - Fail",
   props<{ error: any }>()
 );
 
