@@ -24,7 +24,7 @@ export class AuthorizeComponent implements OnInit {
         private captcha: ReCaptchaV3Service,
         private auth: AuthService
     ) {
-        this.authFacade.fetchSession();
+        this.authFacade.fetchSessions();
     }
 
     ngOnInit(): void {

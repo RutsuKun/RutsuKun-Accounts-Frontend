@@ -31,10 +31,11 @@ export class AuthService {
 
   public authorize() {
 
-    this.oidcSecurityService.authorize('default', {
+    this.oidcSecurityService.authorize("default", {
       customParams: {
-        acr_values: "urn:rutsukun:bronze"
-      }
+        acr_values: "urn:rutsukun:bronze",
+        service: "admin-portal",
+      },
     });
     return;
     try {

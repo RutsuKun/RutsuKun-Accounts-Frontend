@@ -70,7 +70,7 @@ export class AdminPageComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.authFacade.fetchSession();
+    this.authFacade.fetchSessions();
   }
 
   logoutLocal() {

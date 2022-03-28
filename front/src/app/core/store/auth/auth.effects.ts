@@ -220,39 +220,45 @@ export class AuthEffects {
         ofType(a.authCheckSuccess, a.authSigninSuccess, a.authSignupSuccess,  a.authReAuthSuccess, a.authMultifactorSuccess, a.authAuthorizeSuccess, a.authCompleteConnectProviderSuccess),
         tap(({ data }) => {
           this.store.dispatch(a.authSessionsFetchRequest());
-          const type = data.type;
-          switch (type) {
-            case "auth":
-            break;
-            case "logged-in":
-              this.route.queryParamMap.subscribe((params)=>{
-                if(params.has('redirectTo')) {
-                  this.router.navigate([params.get('redirectTo')]);
-                } else if(params.has('sso')) {
-                  const decodedUrl = atob(params.get('sso'));
-                  return window.location.href = `${environment.api}${decodedUrl}`;
-                } else {
-                  this.router.navigate(["account"]);
-                }
-              })
-            break;
-            case "account_created":
-              this.authService.redirectToSignIn();
-            break;
-            case "reauth":
-            break;
-            case "multifactor":
-              this.authService.redirectToMultifactor();
-            break;
-            case "consent":
-              this.authService.redirectToAuthorize();
-            break;
-            case "response":
-              window.location.href = data.response.parameters.uri;
-            break;
-            case "error":
-            break;
-          }
+          this.route.queryParamMap.subscribe((params)=>{
+            if (params.has("prompt") && params.get("prompt") === "login") {
+              return;
+            }
+
+            const type = data.type;
+            switch (type) {
+              case "auth":
+              break;
+              case "logged-in":
+                this.route.queryParamMap.subscribe((params)=>{
+                  if(params.has('redirectTo')) {
+                    this.router.navigate([params.get('redirectTo')]);
+                  } else if(params.has('sso')) {
+                    const decodedUrl = atob(params.get('sso'));
+                    return window.location.href = `${environment.api}${decodedUrl}`;
+                  }
+                })
+              break;
+              case "account_created":
+                this.authService.redirectToSignIn();
+              break;
+              case "reauth":
+              break;
+              case "multifactor":
+                this.authService.redirectToMultifactor();
+              break;
+              case "consent":
+                this.authService.redirectToAuthorize();
+              break;
+              case "response":
+                window.location.href = data.response.parameters.uri;
+              break;
+              case "error":
+              break;
+            }
+
+          })
+
         })
       ),
     { dispatch: false }

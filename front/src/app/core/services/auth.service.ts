@@ -18,6 +18,16 @@ export class AuthService {
       });
     });
   }
+  redirectToSignInNextAccount() {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      this.router.navigate(["signin"], {
+        queryParams: {
+          ...params,
+          prompt: 'login'
+        },
+      });
+    });
+  }
   redirectToMultifactor() {
     this.activatedRoute.queryParams.subscribe((params) => {
       this.router.navigate(["multifactor"], {

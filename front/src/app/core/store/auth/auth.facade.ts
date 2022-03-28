@@ -12,6 +12,8 @@ export class AuthFacade {
   isAuthenticated$ = this.store.pipe(select(s.selectIsAuthenticated));
   session$ = this.store.pipe(select(s.selectSession));
   sessions$ = this.store.pipe(select(s.selectSessions));
+  sessionCurrent$ = this.store.pipe(select(s.selectSessionsCurrent));
+  sessionsOther$ = this.store.pipe(select(s.selectSessionsOther));
 
   signinShowForm$ = this.store.pipe(select(s.selectAuthSigninShowForm));
   signinError$ = this.store.pipe(select(s.selectAuthSigninError));
@@ -33,10 +35,6 @@ export class AuthFacade {
   appInfoError$ = this.store.pipe(select(s.selectAuthAppInfoError));
 
   constructor(private store: Store<AppState>) {}
-
-  fetchSession() {
-    this.store.dispatch(a.authSessionFetchRequest());
-  }
 
   endSession() {
     this.store.dispatch(a.authSessionEndRequest());

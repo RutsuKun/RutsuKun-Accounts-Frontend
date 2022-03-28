@@ -21,7 +21,8 @@ export class AuthorizeCardComponent implements OnInit {
 
     @Input() loading = false;
     @Input() consent = null;
-    public session$ = this.authFacade.session$;
+
+    sessionCurrent$ = this.authFacade.sessionCurrent$;
 
     constructor(
         private captcha: ReCaptchaV3Service,

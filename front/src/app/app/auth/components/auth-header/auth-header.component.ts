@@ -3,6 +3,7 @@ import {
     OnDestroy,
     OnInit,
 } from "@angular/core";
+import { AuthService } from "@core/services/auth.service";
 import { AuthFacade } from "@core/store/auth/auth.facade";
 import { IBrowserSession } from "@core/store/auth/auth.state";
 import { environment } from "@env/environment";
@@ -19,50 +20,13 @@ import { takeUntil } from "rxjs/operators";
 export class AuthHeaderComponent implements OnInit, OnDestroy {
     private uns$ = new Subject();
 
-    public sessions: IBrowserSession[] = [];
-
-    isDevelop = environment.envName === "DEV";
-
     constructor(
-        private authFacade: AuthFacade
+        private authFacade: AuthFacade,
+        private authService: AuthService
     ) {}
 
     ngOnInit(): void {
-        this.authFacade.fetchSession();
         this.authFacade.fetchSessions();
-        this.subscribeSessions();
-    }
-
-    subscribeSessions() {
-        this.authFacade.sessions$.pipe(takeUntil(this.uns$)).subscribe((sessions) => {
-            this.sessions = sessions;
-        })
-    }
-    
-    logout() {
-        this.authFacade.endSession();
-    }
-
-    getCurrentSession() {
-        const currentSession = this.sessions.find((s) => s && s.current);
-        if (!currentSession) return null;
-        return currentSession;
-    }
-
-    getCurrentSessionAccount() {
-        const currentSession = this.sessions.find((s) => s && s.current);
-        if (!currentSession) return null;
-        return currentSession.account;
-    }
-
-    getOtherSessions() {
-        const otherSessions = this.sessions.filter((s) => s && !s.current);
-        if (!otherSessions) return null;
-        return otherSessions;
-    }
-
-    changeSession(uuid: string) {
-        this.authFacade.changeSession(uuid);
     }
 
     ngOnDestroy(): void {
