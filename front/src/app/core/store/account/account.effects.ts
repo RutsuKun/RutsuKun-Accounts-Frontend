@@ -23,9 +23,23 @@ export class AccountEffects {
       this.actions$.pipe(
         ofType(a.accountMeRequest),
         switchMap(() =>
-          this.http.get(`${environment.api}/v1/accounts/me`, { withCredentials: true }).pipe(
+          this.http.get(`${environment.api}/v1/me`, { withCredentials: true }).pipe(
             map((res: any) => a.accountMeSuccess({ data: res})),
             catchError((res: HttpErrorResponse) =>of(a.accountMeFail({ error: res.error.message })))
+          )
+        )
+      ),
+    { dispatch: true }
+  );
+
+  accountSessionsRequest = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(a.accountSessionsRequest),
+        switchMap(() =>
+          this.http.get(`${environment.api}/v1/me/sessions`, { withCredentials: true }).pipe(
+            map((res: any) => a.accountSessionsSuccess({ data: res })),
+            catchError((res: HttpErrorResponse) =>of(a.accountSessionsFail({ error: res.error.message })))
           )
         )
       ),
@@ -37,7 +51,7 @@ export class AccountEffects {
       this.actions$.pipe(
         ofType(a.accountEmailsCreateRequest),
         switchMap(({ email }) =>
-          this.http.post(`${environment.api}/v1/accounts/me/emails`, { email }, { withCredentials: true }).pipe(
+          this.http.post(`${environment.api}/v1/me/emails`, { email }, { withCredentials: true }).pipe(
             map((res: any) => a.accountEmailsCreateSuccess({ data: res})),
             catchError((res: HttpErrorResponse) =>of(a.accountEmailsCreateFail({ error: res.error.message })))
           )
@@ -51,7 +65,7 @@ export class AccountEffects {
       this.actions$.pipe(
         ofType(a.accountEmailsDeleteRequest),
         switchMap(({ uuid }) =>
-          this.http.delete(`${environment.api}/v1/accounts/me/emails/${uuid}`,  { withCredentials: true }).pipe(
+          this.http.delete(`${environment.api}/v1/me/emails/${uuid}`,  { withCredentials: true }).pipe(
             map((res: any) => a.accountEmailsDeleteSuccess({ uuid })),
             catchError((res: HttpErrorResponse) =>of(a.accountEmailsDeleteFail({ error: res.error.message })))
           )

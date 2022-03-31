@@ -76,13 +76,6 @@ export class AuthSessionRoute {
     @Context('session') session: SessionService
   ) {
     if (session.getCurrentSessionAccount && session.getCurrentSessionAccount.uuid) {
-      /**if(req.session.user.impersonate){
-				delete req.session.user.impersonate;
-				return res.status(200).json({
-					type: "impersonate", 
-					action: "logged-out"
-				})
-			}**/
 
       const newSession = await session.deleteCurrentBrowserSession();
       newSession.delPassport().delAction();

@@ -7,7 +7,13 @@ export const initialState: AccountState = {
     data: null,
     loading: false,
     loaded: false,
-    error: null
+    error: null,
+  },
+  sessions: {
+    data: [],
+    loading: false,
+    loaded: false,
+    error: null,
   },
   mfa: {
     data: {
@@ -21,27 +27,27 @@ export const initialState: AccountState = {
   },
   createEmail: {
     loading: false,
-    error: null
+    error: null,
   },
   deleteEmail: {
     loading: false,
-    error: null
+    error: null,
   },
   clients: {
     data: [],
     loading: false,
     loaded: false,
-    error: null
+    error: null,
   },
   createClient: {
     loading: false,
-    error: null
+    error: null,
   },
   viewClient: {
     data: null,
     loading: false,
-    error: null
-  }
+    error: null,
+  },
 };
 
 const reducer = createReducer(
@@ -77,6 +83,36 @@ const reducer = createReducer(
     },
   })),
 
+  on(a.accountSessionsRequest, (state: AccountState) => ({
+    ...state,
+    sessions: {
+      ...state.sessions,
+      loading: true,
+      loaded: false,
+      error: null,
+    },
+  })),
+
+  on(a.accountSessionsSuccess, (state: AccountState, { data }) => ({
+    ...state,
+    sessions: {
+      data: data,
+      loading: false,
+      loaded: true,
+      error: null,
+    },
+  })),
+
+  on(a.accountSessionsFail, (state: AccountState, { error }) => ({
+    ...state,
+    sessions: {
+      data: [],
+      loading: false,
+      loaded: false,
+      error: error,
+    },
+  })),
+
   on(a.accountEmailsCreateRequest, (state: AccountState) => ({
     ...state,
     createEmail: {
@@ -91,8 +127,8 @@ const reducer = createReducer(
       ...state.me,
       data: {
         ...state.me.data,
-        emails: [...state.me.data.emails, data]
-      }
+        emails: [...state.me.data.emails, data],
+      },
     },
     createEmail: {
       loading: false,
@@ -122,8 +158,8 @@ const reducer = createReducer(
       ...state.me,
       data: {
         ...state.me.data,
-        emails: state.me.data.emails.filter((email)=>email.uuid !== uuid)
-      }
+        emails: state.me.data.emails.filter((email) => email.uuid !== uuid),
+      },
     },
     deleteEmail: {
       loading: false,
@@ -138,7 +174,7 @@ const reducer = createReducer(
       error: error,
     },
   })),
-  
+
   on(a.accountClientsRequest, (state: AccountState) => ({
     ...state,
     clients: {
@@ -269,7 +305,7 @@ const reducer = createReducer(
       error: error,
       loading: false,
     },
-  })),
+  }))
 );
 
 export function accountReducer(

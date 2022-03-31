@@ -515,6 +515,10 @@ export class AccountsService {
   }
 
   public deleteAccountSession(session_uuid: string, account_uuid: string) {
+    console.log(session_uuid);
+    console.log(account_uuid);
+    
+    
     return this.accountsSessionRepository.delete({
       uuid: session_uuid,
       account: { uuid: account_uuid },

@@ -8,6 +8,11 @@ export const selectMeLoading = createSelector(selectAccountState, (state: Accoun
 export const selectMeLoaded = createSelector(selectAccountState, (state: AccountState) => state.me.loaded);
 export const selectMeError = createSelector(selectAccountState, (state: AccountState) => state.me.error);
 
+export const selectSessionsData = createSelector(selectAccountState, (state: AccountState) => state.sessions.data);
+export const selectSessionsLoading = createSelector(selectAccountState, (state: AccountState) => state.sessions.loading);
+export const selectSessionsLoaded = createSelector(selectAccountState, (state: AccountState) => state.sessions.loaded);
+export const selectSessionsError = createSelector(selectAccountState, (state: AccountState) => state.sessions.error);
+
 export const selectEmailCreateLoading = createSelector(selectAccountState, (state: AccountState) => state.createEmail.loading);
 export const selectEmailCreateError = createSelector(selectAccountState, (state: AccountState) => state.createEmail.error);
 

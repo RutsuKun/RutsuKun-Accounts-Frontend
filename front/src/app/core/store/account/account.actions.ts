@@ -2,6 +2,7 @@ import { IAccount, IAccountEmail } from "@core/interfaces/IAccount";
 import { IOAuth2Client } from "@core/interfaces/IOAuth2Client";
 import { createAction, props } from "@ngrx/store";
 import { Subject } from "rxjs";
+import { IBrowserSession } from "../auth/auth.state";
 
 // fetch me
 
@@ -18,6 +19,23 @@ export const accountMeFail = createAction(
   "[Account] Me - Fail",
   props<{ error: any }>()
 );
+
+// fetch sessions
+
+export const accountSessionsRequest = createAction(
+  "[Account] Sessions - Request"
+);
+
+export const accountSessionsSuccess = createAction(
+  "[Account] Sessions - Success",
+  props<{ data: IBrowserSession[] }>()
+);
+
+export const accountSessionsFail = createAction(
+  "[Account] Sessions - Fail",
+  props<{ error: any }>()
+);
+
 
 // create email
 

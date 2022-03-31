@@ -6,9 +6,11 @@ import * as s from './account.selectors';
 import { MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { IOAuth2Client } from '@core/interfaces/IOAuth2Client';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '@env/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class AccountFacade {
   // me
@@ -16,6 +18,12 @@ export class AccountFacade {
   meLoading$ = this.store.pipe(select(s.selectMeLoading));
   meLoaded$ = this.store.pipe(select(s.selectMeLoaded));
   meError$ = this.store.pipe(select(s.selectMeError));
+
+  // sessions
+  sessionsData$ = this.store.pipe(select(s.selectSessionsData));
+  sessionsLoading$ = this.store.pipe(select(s.selectSessionsLoading));
+  sessionsLoaded$ = this.store.pipe(select(s.selectSessionsLoaded));
+  sessionsError$ = this.store.pipe(select(s.selectSessionsError));
 
   emailCreateLoading$ = this.store.pipe(select(s.selectEmailCreateLoading));
   emailCreateError$ = this.store.pipe(select(s.selectEmailCreateError));
@@ -41,21 +49,29 @@ export class AccountFacade {
   mfaLoading$ = this.store.pipe(select(s.selectMfaLoading));
   mfaError$ = this.store.pipe(select(s.selectMfaError));
 
-
   constructor(
-    private store: Store<AppState>
-  ) {}
+    private store: Store<AppState>,
+    private http: HttpClient,
+  ) { }
 
   fetchMe() {
     this.store.dispatch(a.accountMeRequest());
   }
 
+  fetchSessions() {
+    this.store.dispatch(a.accountSessionsRequest());
+  }
+
+  deleteSession(uuid: string) {
+    return this.http.delete<any>(`${environment.api}/v1/me/sessions/${uuid}`, { withCredentials: true });
+  }
+
   createEmail(email: string) {
-    this.store.dispatch(a.accountEmailsCreateRequest({ email }))
+    this.store.dispatch(a.accountEmailsCreateRequest({ email }));
   }
 
   deleteEmail(uuid: string) {
-    this.store.dispatch(a.accountEmailsDeleteRequest({ uuid }))
+    this.store.dispatch(a.accountEmailsDeleteRequest({ uuid }));
   }
 
   fetchClients() {
@@ -63,14 +79,14 @@ export class AccountFacade {
   }
 
   createClient(data) {
-    this.store.dispatch(a.accountClientsCreateRequest({ data }))
+    this.store.dispatch(a.accountClientsCreateRequest({ data }));
   }
 
   fetchClient(client_id: string) {
     this.store.dispatch(a.accountClientFetchRequest({ client_id }));
   }
 
-  mfaInitFlow(flow: 'otp') {
+  mfaInitFlow(flow: "otp") {
     this.store.dispatch(a.accountMfaInitFlowRequest({ flow }));
   }
 
@@ -81,5 +97,4 @@ export class AccountFacade {
   mfaDisable(mfa_type: string) {
     this.store.dispatch(a.accountMfaDisableRequest({ mfa_type }));
   }
-  
 }
