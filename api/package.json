@@ -6,6 +6,7 @@
     "description": "RutsuKun Accounts - Authorization and Authentication Server (OAuth2.0 + OpenID Connect)",
     "main": "dist/index.js",
     "scripts": {
+        "start": "nodemon --legacy-watch",
         "start:local": "nodemon --legacy-watch --  --env=local",
         "start:prod": "node ./dist --env=production",
         "start:dev": "nodemon --legacy-watch -- --env=development",

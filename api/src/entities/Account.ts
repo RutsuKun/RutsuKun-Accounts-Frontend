@@ -13,10 +13,9 @@ import { ClientEntity } from "./Client";
 import { Email } from "./Email";
 import { AccountProvider } from "./AccountProvider";
 import { AccountGroup } from "./AccountGroup";
-import { OAuthClientACL } from "./OAuthClientACL";
-import { OAuthScope } from "./OAuthScope";
 import { AccountAuthnMethod } from "./AccountAuthnMethod";
 import { AccountSession } from "./AccountSession";
+import { CrossAclAccountScopeEntity } from "./CrossAclAccountScope";
 
 @Entity({
   name: "oauth_accounts",
@@ -88,22 +87,8 @@ export class AccountEntity {
   @OneToMany(() => AccountSession, (session) => session.account, { cascade: true })
   sessions?: AccountSession[];
 
-  @ManyToMany(() => OAuthClientACL, (acl) => acl.accounts, { cascade: true })
-  acl?: OAuthClientACL[];
-
-  @ManyToMany(() => OAuthScope, (scope) => scope.accounts)
-  @JoinTable({
-    name: "AccountToScope",
-    joinColumn: {
-      name: "account_uuid",
-      referencedColumnName: "uuid",
-    },
-    inverseJoinColumn: {
-      name: "scope_name",
-      referencedColumnName: "name",
-    },
-  })
-  scopes?: OAuthScope[];
+  @OneToMany(() => CrossAclAccountScopeEntity, (scope) => scope.account)
+  accountScopes?: CrossAclAccountScopeEntity[];
 
   @OneToMany(() => AccountAuthnMethod, (authn) => authn.account, {
     cascade: true,

@@ -322,11 +322,11 @@ export class OAuth2Service {
   public filterAllowedScopes(acl: OAuthClientACL, scopes: string[]) {
     let allowed = scopes;
 
-    if(acl && acl.scopes.length) {
-      const unallowedScopes = allowed.filter(filteredScope => !acl.scopes.map(s=>s.name).includes(filteredScope));
-      console.log('unallowedScopes', unallowedScopes.join(", "));
-      allowed = allowed.filter(filteredScope => acl.scopes.map(s=>s.name).includes(filteredScope))
-    }
+    // if(acl && acl.scopes.length) {
+    //   const unallowedScopes = allowed.filter(filteredScope => !acl.scopes.map(s=>s.name).includes(filteredScope));
+    //   console.log('unallowedScopes', unallowedScopes.join(", "));
+    //   allowed = allowed.filter(filteredScope => acl.scopes.map(s=>s.name).includes(filteredScope))
+    // }
 
     return allowed;
   }

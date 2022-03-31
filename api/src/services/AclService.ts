@@ -13,11 +13,13 @@ export class AclService {
     return this.aclRepository.find({
       relations: [
         "client",
-        "accounts",
-        "accounts.scopes",
-        "groups",
-        "groups.scopes",
         "scopes",
+        "accountsWithScopes",
+        "accountsWithScopes.scope",
+        "accountsWithScopes.account",
+        "groupsWithScopes",
+        "groupsWithScopes.group",
+        "groupsWithScopes.scope",
       ],
     });
   }

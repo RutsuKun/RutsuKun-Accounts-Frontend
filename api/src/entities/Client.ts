@@ -84,10 +84,10 @@ export class ClientEntity {
   organization?: OAuthClientOrganization;
 
   addAcl?(scopes: OAuthScope[]) {
-    this.acl = {
-      client: this,
-      scopes: scopes
-    };
+    // this.acl = {
+    //   client: this,
+    //   scopes: scopes
+    // };
   }
 
 }

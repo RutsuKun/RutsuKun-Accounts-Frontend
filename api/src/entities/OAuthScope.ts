@@ -3,10 +3,11 @@ import {
     Entity,
     Generated,
     ManyToMany,
+    OneToMany,
     PrimaryColumn,
   } from "typeorm";
-import { AccountEntity } from "./Account";
-import { AccountGroup } from "./AccountGroup";
+import { CrossAclAccountScopeEntity } from "./CrossAclAccountScope";
+import { CrossAclGroupScopeEntity } from "./CrossAclGroupScope";
 import { OAuthClientACL } from "./OAuthClientACL";
   
 @Entity({
@@ -17,25 +18,24 @@ export class OAuthScope {
   constructor(scope: OAuthScope) {
     Object.assign(this, scope);
   }
-  
+
   @Generated("uuid")
   @Column()
   uuid?: string;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: "boolean" })
   default: boolean;
 
   @PrimaryColumn()
   name: string;
 
-  @ManyToMany(() => OAuthClientACL, (acl) => acl.scopes, { cascade: true })
-  acls?: OAuthClientACL[];
-  
-  @ManyToMany(() => AccountEntity, (account) => account.scopes, { cascade: true })
-  accounts?: AccountEntity[];
+  @ManyToMany(() => OAuthClientACL, (acl) => acl.scopes)
+  acls?: CrossAclAccountScopeEntity[];
 
-  @ManyToMany(() => AccountGroup, (group) => group.scopes, { cascade: true })
-  groups?: AccountGroup[];
+  @OneToMany(() => CrossAclAccountScopeEntity, (accountScope) => accountScope.account)
+  scopesAccounts?: CrossAclAccountScopeEntity[];
 
+  @OneToMany(() => CrossAclGroupScopeEntity, (groupScope) => groupScope.group)
+  scopesGroups?: CrossAclAccountScopeEntity[];
 }
   

@@ -1,13 +1,12 @@
 import {
   Column,
   Entity,
-  JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryColumn,
 } from "typeorm";
 import { AccountEntity } from "./Account";
-import { OAuthClientACL } from "./OAuthClientACL";
-import { OAuthScope } from "./OAuthScope";
+import { CrossAclGroupScopeEntity } from "./CrossAclGroupScope";
 
 @Entity({
   name: "oauth_accounts_groups",
@@ -31,20 +30,6 @@ export class AccountGroup {
   @ManyToMany(() => AccountEntity, (account)=> account.groups)
   accounts?: AccountEntity[];
 
-  @ManyToMany(() => OAuthClientACL, (acl) => acl.groups, { cascade: true })
-  acl?: OAuthClientACL[];
-
-  @ManyToMany(() => OAuthScope, (scope) => scope.groups)
-  @JoinTable({
-    name: 'GroupToScope',
-    joinColumn: {
-      name: 'group_name',
-      referencedColumnName: 'name'
-    },
-    inverseJoinColumn: {
-      name: 'scope_name',
-      referencedColumnName: 'name'
-    }
-  })
-  scopes?: OAuthScope[];
+  @OneToMany((type: any) => CrossAclGroupScopeEntity, (groupScopes: CrossAclGroupScopeEntity) => groupScopes.group)
+  groupScopes: CrossAclGroupScopeEntity[];
 }

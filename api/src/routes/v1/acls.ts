@@ -5,6 +5,7 @@ import { UseBefore } from "@tsed/common";
 import { AccessTokenMiddleware } from "@middlewares/security";
 import { ScopeMiddleware } from "@middlewares/scope.middleware";
 import { AclService } from "@services/AclService";
+import { CrossAclGroupScopeEntity } from "@entities/CrossAclGroupScope";
 
 @Controller("/acls")
 export class AclsRoute {
@@ -26,23 +27,69 @@ export class AclsRoute {
           uuid: acl.uuid,
           client_id: acl.client.client_id,
           allowedScopes: acl.scopes.map((scope) => scope.name),
-          allowedAccounts: acl.accounts.map((account) => {
-            return {
-              uuid: account.uuid,
-              username: account.username,
-              avatar: account.avatar,
-              allowedScopes: account.scopes.map((scope) => scope.name),
-            };
-          }),
-          allowedGroups: acl.groups.map((group) => {
-            return {
-              name: group.name,
-              enabled: group.enabled,
-              allowedScopes: group.scopes.map((scope) => scope.name)
-            };
-          }),
+          allowedAccounts: this.getAccounts(acl.accountsWithScopes),
+          allowedGroups: this.getGroups(acl.groupsWithScopes)
         };
       }),
     ]);
+  }
+
+  getAccounts(accountsWithScopes) {
+
+    const accounts = [];
+
+    accountsWithScopes.forEach(function (accountWithScope) {
+
+      const foundAccount = accounts.find((a) => a.uuid === accountWithScope.account.uuid);
+      if (!foundAccount) {
+        const newAccount = {
+          uuid: accountWithScope.account.uuid,
+          username: accountWithScope.account.username,
+          picture: accountWithScope.account.avatar,
+          allowedScopes: [accountWithScope.scope.name],
+        };
+        accounts.push(newAccount);
+      } else {
+        const index = accounts.findIndex((a)=>a.uuid === foundAccount.uuid);
+        accounts[index] = {
+          ...accounts[index],
+          allowedScopes: [...accounts[index].allowedScopes, accountWithScope.scope.name],
+        };
+      }
+
+    }, Object.create(null));
+
+    return accounts;
+
+  }
+
+  getGroups(groupsWithScopes: CrossAclGroupScopeEntity[]) {
+
+    const groups = [];
+
+    groupsWithScopes.forEach(function (groupWithScope) {
+
+      const foundGroup = groups.find((g) => g.name === groupWithScope.group.name);
+      if (!foundGroup) {
+        groups.push({
+          name: groupWithScope.group.name,
+          enabled: groupWithScope.group.enabled,
+          allowedScopes: [groupWithScope.scope.name],
+        });
+      } else {
+        const index = groups.findIndex((a) => a.name === foundGroup.name);
+        groups[index] = {
+          ...groups[index],
+          allowedScopes: [
+            ...groups[index].allowedScopes,
+            groupWithScope.scope.name,
+          ],
+        };
+      }
+
+    }, Object.create(null));
+
+    return groups;
+
   }
 }

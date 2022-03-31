@@ -4,12 +4,13 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
 } from "typeorm";
-import { AccountEntity } from "./Account";
-import { AccountGroup } from "./AccountGroup";
 import { ClientEntity } from "./Client";
+import { CrossAclAccountScopeEntity } from "./CrossAclAccountScope";
+import { CrossAclGroupScopeEntity } from "./CrossAclGroupScope";
 import { OAuthScope } from "./OAuthScope";
 
 @Entity({
@@ -18,7 +19,7 @@ import { OAuthScope } from "./OAuthScope";
 })
 export class OAuthClientACL {
   constructor(acl?: OAuthClientACL) {
-    if(acl) {
+    if (acl) {
       Object.assign(this, acl);
     }
   }
@@ -27,52 +28,39 @@ export class OAuthClientACL {
   @Generated("uuid")
   uuid?: string;
 
-  @OneToOne(() => ClientEntity, (client) => client.acl, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+  @OneToOne(() => ClientEntity, (client) => client.acl, {
+    onUpdate: "CASCADE",
+    onDelete: "CASCADE",
+  })
   @JoinColumn({
     name: "client_id",
     referencedColumnName: "client_id",
   })
   client?: ClientEntity;
 
-  @ManyToMany(() => AccountGroup, (group) => group.acl)
-  @JoinTable({
-    name: 'AclToGroup',
-    joinColumn: {
-      name: 'acl_uuid',
-      referencedColumnName: 'uuid'
-    },
-    inverseJoinColumn: {
-      name: 'group_name',
-      referencedColumnName: 'name'
-    }
-  })
-  groups?: AccountGroup[];
-
-  @ManyToMany(() => AccountEntity, (account) => account.acl)
-  @JoinTable({
-    name: 'AclToAccount',
-    joinColumn: {
-      name: 'acl_uuid',
-      referencedColumnName: 'uuid'
-    },
-    inverseJoinColumn: {
-      name: 'account_uuid',
-      referencedColumnName: 'uuid'
-    }
-  })
-  accounts?: AccountEntity[];
-
   @ManyToMany(() => OAuthScope, (scope) => scope.acls)
   @JoinTable({
-    name: 'AclToScope',
+    name: "oauth_clients_acls_scopes",
     joinColumn: {
-      name: 'acl_uuid',
-      referencedColumnName: 'uuid'
+      name: "acl_uuid",
+      referencedColumnName: "uuid",
     },
     inverseJoinColumn: {
-      name: 'scope_name',
-      referencedColumnName: 'name'
-    }
+      name: "scope_name",
+      referencedColumnName: "name",
+    },
   })
   scopes?: OAuthScope[];
+
+  @OneToMany(
+    () => CrossAclAccountScopeEntity,
+    (accountScope: CrossAclAccountScopeEntity) => accountScope.acl
+  )
+  accountsWithScopes: CrossAclAccountScopeEntity[];
+
+  @OneToMany(
+    () => CrossAclGroupScopeEntity,
+    (groupScope: CrossAclGroupScopeEntity) => groupScope.acl
+  )
+  groupsWithScopes: CrossAclGroupScopeEntity[];
 }
