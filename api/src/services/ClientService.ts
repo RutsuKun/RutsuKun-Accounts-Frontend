@@ -54,7 +54,7 @@ export class ClientService {
           uuid: accountUUID,
         },
       },
-      relations: ["acl", "acl.groups", "acl.accounts"]
+      relations: ["acl"]
     });
   }
 

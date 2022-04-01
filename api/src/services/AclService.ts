@@ -28,11 +28,20 @@ export class AclService {
     return this.aclRepository.findOne({
       where: {
         client: {
-          client_id
-        }
+          client_id,
+        },
       },
-      relations: ["scopes", "accounts", "groups"]
-    })
+      relations: [
+        "client",
+        "scopes",
+        "accountsWithScopes",
+        "accountsWithScopes.scope",
+        "accountsWithScopes.account",
+        "groupsWithScopes",
+        "groupsWithScopes.group",
+        "groupsWithScopes.scope",
+      ],
+    });
   }
 
   public addAcl(client: ClientEntity) {
