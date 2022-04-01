@@ -24,6 +24,10 @@ import { Config } from "@config";
 import crypto from "crypto";
 import { AccountsService } from "./AccountsService";
 import { OAuthClientACL } from "@entities/OAuthClientACL";
+import { AccountEntity } from "@entities/Account";
+import { IAcl } from "common/interfaces/acl.interface";
+
+import _ from 'lodash';
 
 @Injectable()
 export class OAuth2Service {
@@ -160,6 +164,9 @@ export class OAuth2Service {
         deviceCodeData,
       } = data;
 
+      console.log('state', state);
+      
+
       const scope = data.scope;
 
       if (deviceCodeData) {
@@ -275,6 +282,9 @@ export class OAuth2Service {
 
         const params = new URLSearchParams(res);
 
+        console.log('params', params);
+        
+
         if (response_types_check.includes("id_token")) {
           resolve({
             type: "response",
@@ -319,16 +329,68 @@ export class OAuth2Service {
     });
   }
 
-  public filterAllowedScopes(acl: OAuthClientACL, scopes: string[]) {
-    let allowed = scopes;
+  public filterAllowedScopes(account: AccountEntity, acl: IAcl, scopes: string[]) {
+    if (!acl || !acl.allowedScopes.length) return;
 
-    // if(acl && acl.scopes.length) {
-    //   const unallowedScopes = allowed.filter(filteredScope => !acl.scopes.map(s=>s.name).includes(filteredScope));
-    //   console.log('unallowedScopes', unallowedScopes.join(", "));
-    //   allowed = allowed.filter(filteredScope => acl.scopes.map(s=>s.name).includes(filteredScope))
-    // }
+    let aclAllowedScopes: string[] = [];
+    let accountAllowedScopes: string[] = [];
+    let groupsAllowedScopes: string[] = [];
 
-    return allowed;
+    const aclScopes = acl.allowedScopes;
+
+    const aclUnallowedScopes = scopes.filter(filteredScope => !aclScopes.includes(filteredScope));
+
+    console.log(
+      "aclUnallowedScopes",
+      aclUnallowedScopes.length ? aclUnallowedScopes.join(", ") : "none"
+    );
+
+    aclAllowedScopes = scopes.filter(filteredScope => acl.allowedScopes.includes(filteredScope));
+
+    const accountHasAccess = acl.allowedAccounts.find((a) => a.uuid === account.uuid);
+    if (acl.allowedAccounts.length && accountHasAccess) {
+      
+      const accountUnallowedScopes = scopes.filter(filteredScope => !accountHasAccess.allowedScopes.includes(filteredScope));
+
+      console.log(
+        "accountUnallowedScopes",
+        accountUnallowedScopes.length ? accountUnallowedScopes.join(", ") : 'none'
+      );
+
+      accountAllowedScopes = scopes.filter((filteredScope) => accountHasAccess.allowedScopes.includes(filteredScope));
+
+      console.log("accountAllowedScopes", accountAllowedScopes.length ? accountAllowedScopes.join(", ") : "none");
+    }
+
+    const groupsHasAccess = acl.allowedGroups.filter((a) => account.groups.find((accountGroup) => accountGroup.name === a.name));
+    if (acl.allowedGroups.length && groupsHasAccess.length) {
+      const arrayOfScopes = groupsHasAccess.map((group) => group.allowedScopes);
+      if (arrayOfScopes.length) {
+        let tempGroupsAllowedScopes = arrayOfScopes.join().split(',');
+        groupsAllowedScopes = _.union(tempGroupsAllowedScopes);
+        groupsAllowedScopes = scopes.filter(filteredScope => groupsAllowedScopes.includes(filteredScope));
+      }
+
+      console.log("groupsAllowedScopes", groupsAllowedScopes.length ? groupsAllowedScopes.join(", ") : "none");
+      
+    }
+    
+
+    let finalAllowedScopes;
+    if (!acl.allowedAccounts.length && !acl.allowedGroups.length) {
+      finalAllowedScopes = aclAllowedScopes;
+    } else {
+      finalAllowedScopes = [
+        ...accountAllowedScopes,
+        ...groupsAllowedScopes
+      ];
+
+      finalAllowedScopes = finalAllowedScopes.filter(filteredScope => aclAllowedScopes.includes(filteredScope));
+    }
+
+    console.log("finalAllowedScopes", finalAllowedScopes.length ? finalAllowedScopes.join(", ") : "none");
+
+    return finalAllowedScopes;
   }
 
   public getToken(data: GetTokenData) {

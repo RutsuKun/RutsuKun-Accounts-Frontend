@@ -3,6 +3,17 @@ import * as dotenv from "dotenv";
 import { Terminal } from "./terminal";
 import path from "path";
 
+Array.prototype["unique"] = function () {
+  var a = this.concat();
+  for (var i = 0; i < a.length; ++i) {
+    for (var j = i + 1; j < a.length; ++j) {
+      if (a[i] === a[j]) a.splice(j--, 1);
+    }
+  }
+
+  return a;
+};
+
 const hasEnv = process.argv.find((arg) => arg.startsWith("--env="));
 const env = hasEnv ? hasEnv.replace("--env=", "") : null;
 

@@ -293,9 +293,12 @@ export class OAuth2Route {
 
     let scopeToAuthorize = session.getClientQuery.scope.split(" ");
 
+    const account = await this.accountService.getByUUIDWithRelations(session.getCurrentSessionAccount.uuid, ["groups"]);
+
     const acl = await this.aclService.getAcl(session.getClientQuery.client_id);
 
-    scopeToAuthorize = this.oauthService.filterAllowedScopes(acl, scopeToAuthorize);
+    scopeToAuthorize = this.oauthService.filterAllowedScopes(account, acl, scopeToAuthorize);
+    scopeToAuthorize = scopeToAuthorize;
 
     try {
       const data = await this.oauthService.authorize({

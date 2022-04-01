@@ -68,23 +68,22 @@ export class AclsRoute {
     const groups = [];
 
     groupsWithScopes.forEach(function (groupWithScope) {
-
+      console.log(groupWithScope);
+      
       const foundGroup = groups.find((g) => g.name === groupWithScope.group.name);
       if (!foundGroup) {
         groups.push({
           name: groupWithScope.group.name,
           enabled: groupWithScope.group.enabled,
-          allowedScopes: [groupWithScope.scope.name],
+          allowedScopes: groupWithScope.scope ? [groupWithScope.scope.name] : [],
         });
       } else {
         const index = groups.findIndex((a) => a.name === foundGroup.name);
-        groups[index] = {
-          ...groups[index],
-          allowedScopes: [
-            ...groups[index].allowedScopes,
-            groupWithScope.scope.name,
-          ],
-        };
+        const newGroup = groups[index];
+        if (groupWithScope.scope) {
+          newGroup.allowedScopes.push(groupWithScope.scope.name);
+        }
+        groups[index] = newGroup;
       }
 
     }, Object.create(null));
