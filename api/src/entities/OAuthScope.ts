@@ -23,13 +23,16 @@ export class OAuthScope {
   @Column()
   uuid?: string;
 
-  @Column({ type: "boolean" })
+  @Column({ type: "boolean", default: false })
   default: boolean;
 
+  @Column({ type: "boolean", default: false })
+  system: boolean;
+    
   @PrimaryColumn()
   name: string;
 
-  @ManyToMany(() => OAuthClientACL, (acl) => acl.scopes)
+  @ManyToMany(() => OAuthClientACL, (acl) => acl.scopes, { onUpdate: "CASCADE" })
   acls?: CrossAclAccountScopeEntity[];
 
   @OneToMany(() => CrossAclAccountScopeEntity, (accountScope) => accountScope.account)

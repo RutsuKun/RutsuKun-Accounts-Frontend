@@ -348,7 +348,7 @@ export class OAuth2Route {
   @UseBefore(CheckClientMiddleware)
   public async postDevice(@Req() request: Req, @Res() response: Res) {
     // @ts-ignore
-    const client = req.oauthClient;
+    const client = request.oauthClient;
     const { scope } = request.body;
     const flow = await this.oauthService.runDeviceCodeFlow(
       client.client_id,

@@ -8,7 +8,7 @@ import {
 
 @Middleware()
 export class ScopeMiddleware {
-  use(expectedScopes, options?) {
+  use(expectedScopes: string[], options?) {
     if (!Array.isArray(expectedScopes)) {
       throw new Error(
         "Parameter expectedScopes must be an array of strings representing the scopes for the endpoint(s)"

@@ -20,15 +20,15 @@ export class AdminScopesRoute {
 
   @Get("/")
   @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["admin:scopes"]))
+  @UseBefore(new ScopeMiddleware().use(["admin:access", "admin:scopes:manage"]))
   public async getAdminScopes(@Req() request: Req, @Res() response: Res) {
-    const scopes = await this.scopeService.getScopes()
+    const scopes = await this.scopeService.getScopes();
     response.status(HTTPCodes.OK).json(scopes);
   }
 
   @Post("/")
   @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["admin:scopes"]))
+  @UseBefore(new ScopeMiddleware().use(["admin:access", "admin:scopes:manage"]))
   public async postAdminScopes(@Req() request: Req, @Res() response: Res) {
     const data: OAuthScope = request.body;
     const scope = await this.scopeService.createScope(data);
@@ -37,10 +37,17 @@ export class AdminScopesRoute {
 
   @Delete("/:scope")
   @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["admin:scopes", "admin:scopes:delete"], { checkAllScopes: false }))
-  public async deleteAdminScopes(@PathParams("scope") scope: string, @Res() response: Res) {
+  @UseBefore(
+    new ScopeMiddleware().use(["admin:access", "admin:scopes:manage", "admin:scopes:delete"], {
+      checkAllScopes: false,
+    })
+  )
+  public async deleteAdminScopes(
+    @PathParams("scope") scope: string,
+    @Res() response: Res
+  ) {
     const deleted = await this.scopeService.deleteScope(scope);
-    if(deleted.affected) {
+    if (deleted.affected) {
       response.status(HTTPCodes.OK).send();
     } else {
       response.status(HTTPCodes.NotFound).send();
@@ -49,7 +56,11 @@ export class AdminScopesRoute {
 
   @Put("/:scope")
   @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["admin:scopes", "admin:scopes:update"], { checkAllScopes: false }))
+  @UseBefore(
+    new ScopeMiddleware().use(["admin:access", "admin:scopes:manage", "admin:scopes:update"], {
+      checkAllScopes: false,
+    })
+  )
   public putAdminScopes() {
     throw new MethodNotAllowed("MethodNotAllowed");
   }

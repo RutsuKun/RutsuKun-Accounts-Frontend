@@ -57,6 +57,8 @@ export class OAuth2DeviceCodeComponent implements OnInit, OnDestroy {
 
         return;
       }
+
+      this.formShow = true;
     });
   }
 
@@ -64,9 +66,6 @@ export class OAuth2DeviceCodeComponent implements OnInit, OnDestroy {
     console.log("device code init");
   }
 
-  setLoadingForm() {
-    this.formLoading = true;
-  }
 
   enterUserCode() {
     this.formLoading = true;
