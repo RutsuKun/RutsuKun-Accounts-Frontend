@@ -16,7 +16,7 @@ export class AuthService {
   userData$ = this.oidcSecurityService.userData$;
   isAuthenticated$ = this.oidcSecurityService.isAuthenticated$;
 
-  error$: Subject<string> = new Subject();
+    error$: Subject<string> = new Subject();
 
   constructor(
     public oidcSecurityService: OidcSecurityService,
@@ -31,13 +31,13 @@ export class AuthService {
 
   public authorize() {
 
-    this.oidcSecurityService.authorize("default", {
-      customParams: {
-        acr_values: "urn:rutsukun:bronze",
-        service: "admin-portal",
-      },
-    });
-    return;
+    // this.oidcSecurityService.authorize("default", {
+    //   customParams: {
+    //     acr_values: "urn:rutsukun:bronze",
+    //     service: "admin-portal",
+    //   },
+    // });
+    // return;
     try {
       this.oidcSecurityService
       .authorizeWithPopUp(
@@ -69,15 +69,13 @@ export class AuthService {
           if(!authorized) {
             this.oidcSecurityService.logoffLocal();
             this.error$.next('Admin portal access denied by authorization server');
-            setTimeout(()=>{
-              this.error$.next(null);
-            }, 2000)
             this.router.navigate(['admin', 'signin']);
             return;
           }
 
           this.router.navigate(["admin", "dashboard"]);
         } else {
+          this.error$.next('Admin portal access denied by authorization server');
           this.oidcSecurityService.logoffLocal();
         }
       }, (error)=>{

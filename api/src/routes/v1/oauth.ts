@@ -220,7 +220,7 @@ export class OAuth2Route {
           } = (await this.oauthService.authorize({
             response_type,
             redirect_uri,
-            scope,
+            scopes: scope ? scope.split(" ") : [],
             code_challenge,
             code_challenge_method,
             nonce,
@@ -297,14 +297,20 @@ export class OAuth2Route {
 
     const acl = await this.aclService.getAcl(session.getClientQuery.client_id);
 
+    console.log('acl------------------------>', acl);
+    
     scopeToAuthorize = this.oauthService.filterAllowedScopes(account, acl, scopeToAuthorize);
+
+    console.log("scopeToAuthorize---------------->", scopeToAuthorize);
+    
+
     scopeToAuthorize = scopeToAuthorize;
 
     try {
       const data = await this.oauthService.authorize({
         response_type: session.getClientQuery.response_type,
         redirect_uri: session.getClientQuery.redirect_uri,
-        scope: scopeToAuthorize.join(" "),
+        scopes: scopeToAuthorize,
         accountId: session.getCurrentSessionAccount.uuid,
         country,
         nonce: session.getClientQuery.nonce,

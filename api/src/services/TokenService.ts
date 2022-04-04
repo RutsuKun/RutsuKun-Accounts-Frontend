@@ -73,7 +73,7 @@ export class TokenService {
       {
         iss: Config.OAUTH2.issuer,
         sub: data.sub,
-        scp: data.scopes,
+        scopes: data.scopes,
         aud: Config.API.url,
         cid: data.client_id,
         code_challenge: data.code_challenge,
@@ -128,7 +128,7 @@ export class TokenService {
           picture: `${Config.CDN.url}/${data.sub}`,
           role: data.role,
           banned: data.banned,
-          scp: data.scopes,
+          scopes: data.scopes,
           country: data.country,
           locale: data.locale,
           jti: rv1 + "-" + rv2 + "-" + rv3, // id token unique id
@@ -158,7 +158,7 @@ export class TokenService {
           iss: Config.OAUTH2.issuer,
           sub: data.sub,
           aud: data.client_id,
-          scp: data.scopes,
+          scopes: data.scopes,
           jti: rv1 + "-" + rv2 + "-" + rv3, // access token unique id
           timestamp: Date.now(),
           typ: "access_token",
@@ -199,7 +199,7 @@ export class TokenService {
           iss: Config.OAUTH2.issuer,
           sub: data.sub,
           aud: data.client_id,
-          scp: data.scopes,
+          scopes: data.scopes,
           jti:rv1 + "-" + rv2 + "-" + rv3, // refresh token unique id
           timestamp: Date.now(),
           typ: "refresh_token",
@@ -344,7 +344,7 @@ export interface AccessTokenData {
   iss: string;
   sub: string;
   aud: string;
-  scp: Array<string>;
+  scopes: Array<string>;
   jti: string;
   timestamp: number;
   iat: number;
