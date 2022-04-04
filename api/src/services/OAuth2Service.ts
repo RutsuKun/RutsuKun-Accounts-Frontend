@@ -69,7 +69,7 @@ export class OAuth2Service {
     return healthy;
   }
 
-  public checkConsent(req: Request, res: Response, session: SessionService) {
+  public async checkConsent(req: Request, res: Response, session: SessionService) {
     const clientFromSession = session.getClient;
     const clientFromQuery = session.getClientQuery;
     const { ip, country, city, eu } = req.ipInfo;
@@ -90,10 +90,10 @@ export class OAuth2Service {
             tos_uri: clientFromSession.tos || null,
           },
         };
-        return res.status(200).json({
+        return {
           type: "consent",
           consent: consent,
-        });
+        };
       } else {
         //TEST!!!!
 
@@ -104,7 +104,7 @@ export class OAuth2Service {
           "Authorization in progress for " + userUsername + " (" + userId + ")"
         );
 
-        this.authorize({
+        const data = await this.authorize({
           response_type: clientFromQuery.response_type,
           redirect_uri: clientFromQuery.redirect_uri,
           scope: clientFromQuery.scope,
@@ -117,32 +117,32 @@ export class OAuth2Service {
           client: clientFromSession,
           consentGiven: true,
           session_state: req.session.id,
-        }).then((data: any) => {
-          switch (data.type) {
-            case "response":
-              this.logger.success(
-                "Authorized  " + userUsername + " (" + userId + ")"
-              );
-              this.logger.info("Response Type: " + data.type);
-              this.logger.info("Response Mode: " + data.response.mode);
-              this.logger.info(
-                "Response Parameter URI: " + data.response.parameters.uri
-              );
-              return res.status(200).json(data);
-              break;
-            case "error":
-              return res.status(400).json({
-                type: "error",
-                error: data.error,
-              });
-              break;
-          }
         });
+
+        switch (data.type) {
+          case "response":
+            this.logger.success(
+              "Authorized  " + userUsername + " (" + userId + ")"
+            );
+            this.logger.info("Response Type: " + data.type);
+            this.logger.info("Response Mode: " + data.response.mode);
+            this.logger.info(
+              "Response Parameter URI: " + data.response.parameters.uri
+            );
+            return data;
+          break;
+          case "error":
+            return {
+              type: "error",
+              error: data.error,
+            };
+            break;
+        }
       }
     } else {
-      res.status(200).json({
+      return {
         type: "logged-in",
-      });
+      };
     }
   }
 

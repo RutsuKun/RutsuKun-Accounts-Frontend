@@ -204,7 +204,7 @@ export class AccountsService {
         sub: account.uuid,
         id: account.uuid,
         username: account.username,
-        picture: "https://cdn-dev.rainingdreams.to/avatars/" + account.uuid,
+        picture: account.avatar,
         role: account.role,
         emails: account.emails,
       });

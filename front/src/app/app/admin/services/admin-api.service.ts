@@ -17,7 +17,7 @@ export class AdminApiService {
   getAccounts(): Promise<any> {
     return new Promise((resolve, reject) => {
       this.http
-        .get(`${this.apiUrl}/v1/accounts`)
+        .get(`${this.apiUrl}/v1/admin/accounts`)
         .pipe(
           catchError((err) => {
             reject(err.error);
@@ -33,7 +33,7 @@ export class AdminApiService {
   getGroups(): Promise<any> {
     return new Promise((resolve, reject) => {
       this.http
-        .get(`${this.apiUrl}/v1/groups`)
+        .get(`${this.apiUrl}/v1/admin/groups`)
         .pipe(
           catchError((err) => {
             reject(err.error);

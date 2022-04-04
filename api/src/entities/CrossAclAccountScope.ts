@@ -18,7 +18,7 @@ export class CrossAclAccountScopeEntity {
   @ManyToOne(() => AccountEntity, (account: AccountEntity) => account.accountScopes, { nullable: false })
   account: AccountEntity;
 
-  @ManyToOne(() => OAuthScope, (scope: OAuthScope) => scope.name, { nullable: false })
+  @ManyToOne(() => OAuthScope, (scope: OAuthScope) => scope.name, { cascade: true })
   scope: OAuthScope;
 
   @ManyToOne(() => OAuthClientACL, (acl: OAuthClientACL) => acl.accountsWithScopes, { nullable: false })

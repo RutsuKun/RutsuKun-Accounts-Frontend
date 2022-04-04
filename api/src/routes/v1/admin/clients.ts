@@ -30,7 +30,7 @@ export class AdminClientsRoute {
 
   @Get("/")
   @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["admin:clients"]))
+  @UseBefore(new ScopeMiddleware().use(["admin:access", "admin:clients:manage"]))
   public async getAdminClients(@Req() request: Req, @Res() response: Res) {
     const clients = await this.clientService.getAdminClients(["account", "organization"]);
 
@@ -50,7 +50,7 @@ export class AdminClientsRoute {
 
   @Post("/")
   @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["admin:clients"]))
+  @UseBefore(new ScopeMiddleware().use(["admin:access", "admin:clients:manage"]))
   public async postClients(@Req() request: Req, @Res() response: Res) {
     const data = request.body;
     try {
@@ -67,6 +67,7 @@ export class AdminClientsRoute {
 
   @Delete("/:clientId")
   @UseBefore(SessionMiddleware)
+  @UseBefore(new ScopeMiddleware().use(["admin:access", "admin:clients:manage", "admin:clients:delete"]))
   public deleteClients(@Req() request: Req, @Res() response: Res) {
     const currentAccount = this.sessionService.getCurrentSessionAccount;
 

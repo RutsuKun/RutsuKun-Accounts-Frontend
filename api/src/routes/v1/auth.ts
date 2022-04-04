@@ -36,7 +36,7 @@ export class AuthRoute {
   ) {
     if (session.getAction === "signup") {
       session.delAction();
-      session.saveSession();
+      await session.saveSession();
       return response.status(200).json({
         type: "signup",
       });
@@ -75,8 +75,8 @@ export class AuthRoute {
         if (multifactorRequired && multifactorRequired.type === "multifactor") {
           return response.status(200).json(multifactorRequired);
         }
-
-        this.oauthService.checkConsent(request, response, session);
+        const data = await this.oauthService.checkConsent(request, response, session);
+        return data;
       }
     } else {
       if (session.getError) {
@@ -265,43 +265,45 @@ export class AuthRoute {
     );
 
     if (findClient && !findClient.consent) {
-      this.oauthService
+      console.log("findClient", findClient);
+      
+      const data = await this.oauthService
         .authorize({
           accountId: session.getCurrentSessionAccount.uuid,
           client: findClient,
           consentGiven: true,
           deviceCodeData: deviceToken,
-        })
-        .then((data: any) => {
-          switch (data.type) {
-            case "authorized":
-              response.status(200).json({
-                type: data.type,
-              });
-              break;
-            case "multifactor":
-              response.status(200).json({
-                type: data.type,
-                multifactor: data.multifactor,
-              });
-              break;
-            case "error":
-              const resErrorRes = {
-                type: "error",
-                error: data.error,
-                errors: data.errors,
-                requestId: request.id,
-              };
-              response.status(400).json(resErrorRes);
-              break;
-            default:
-              response.status(400).json({
-                type: "error",
-                error: "invalid_response_type",
-              });
-              break;
-          }
         });
+      
+        console.log("data", data);
+        
+        switch (data.type) {
+          case "authorized":
+            response.status(200).json(data);
+            break;
+          case "multifactor":
+            response.status(200).json({
+              type: data.type,
+              multifactor: data.multifactor,
+            });
+            break;
+          case "error":
+            const resErrorRes = {
+              type: "error",
+              error: data.error,
+              errors: data.errors,
+              requestId: request.id,
+            };
+            response.status(400).json(resErrorRes);
+            break;
+          default:
+            response.status(400).json({
+              type: "error",
+              error: "invalid_response_type",
+            });
+            break;
+        }
+      
     }
   }
 
