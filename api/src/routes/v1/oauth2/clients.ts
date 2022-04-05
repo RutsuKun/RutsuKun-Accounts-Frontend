@@ -35,7 +35,12 @@ export class OAuth2ClientsRoute {
     @Context("session") session: SessionService
   ) {
 
-    const clients = await this.clientService.getAccountClients(session.getCurrentSessionAccount.uuid);
+    let clients = await this.clientService.getAccountClients(session.getCurrentSessionAccount.uuid);
+
+    clients = clients.map((client) => {
+      delete client.account;
+      return client;
+    });
 
     return timer(2000).pipe(map(() => clients));
 
