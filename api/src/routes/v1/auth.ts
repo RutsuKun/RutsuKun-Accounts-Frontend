@@ -141,7 +141,8 @@ export class AuthRoute {
             type: "logged-in",
           });
         } else if (session.getFlow === "oauth") {
-          this.oauthService.checkConsent(request, response, session);
+          const data = await this.oauthService.checkConsent(request, response, session);
+          return response.status(200).json(data);
         }
         break;
       case "multifactor":

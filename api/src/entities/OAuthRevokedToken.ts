@@ -20,8 +20,8 @@ export class OAuthRevokedToken {
   @Column({ type: "numeric" })
   exp: number;
   
-  @OneToOne((type) => AccountEntity, (account) => account.uuid, { cascade: true })
-  @JoinColumn({ name: "sub", referencedColumnName: "uuid" })
+  @OneToOne((type) => AccountEntity, (account) => account.id, { cascade: true })
+  @JoinColumn({ name: "sub", referencedColumnName: "id" })
   sub: string;
   
   @OneToOne((type) => ClientEntity, (client) => client.client_id, { cascade: true })

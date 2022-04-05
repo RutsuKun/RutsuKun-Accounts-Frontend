@@ -243,6 +243,23 @@ export class AccountsService {
       resolve(accounts);
     });
   }
+  public async getAccountEndpoint(uuid:string): Promise<AccountEntity> {
+    const foundAccount = await this.accountRepository.findOne({ uuid }, { relations: ["emails", "accountScopes", "accountScopes.scope"] });
+
+    return {
+      uuid: foundAccount.uuid,
+      username: foundAccount.username,
+      avatar: foundAccount.avatar,
+      role: foundAccount.role,
+      state: foundAccount.state,
+      banned: foundAccount.banned,
+      clients: foundAccount.clients,
+      providers: foundAccount.providers,
+      emails: foundAccount.emails,
+      accountScopes: foundAccount.accountScopes,
+    };
+
+  }
   public deleteAccountEndpoint(accountId): Promise<any> {
     const ctx = this;
     return new Promise(async (resolve, reject) => {

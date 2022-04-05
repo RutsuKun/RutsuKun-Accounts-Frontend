@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { AccountEntity } from "./Account";
 
@@ -17,7 +18,10 @@ export class Email {
     Object.assign(this, email);
   }
 
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id?: string;
+
+  @Column()
   @Generated("uuid")
   uuid?: string;
 
@@ -31,6 +35,6 @@ export class Email {
   primary: boolean;
 
   @ManyToOne(() => AccountEntity, (account) => account.emails)
-  @JoinColumn({ name: "account_uuid", referencedColumnName: "uuid" })
+  @JoinColumn({ name: "account_id", referencedColumnName: "id" })
   account?: AccountEntity;
 }
