@@ -4,7 +4,6 @@ import {
   Generated,
   ManyToMany,
   OneToMany,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { AccountEntity } from "./Account";
@@ -26,10 +25,10 @@ export class AccountGroup {
   @Generated("uuid")
   uuid?: string;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", unique: true })
   name: string;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", unique: true })
   display_name: string;
 
   @Column({ type: "boolean" })
@@ -42,5 +41,5 @@ export class AccountGroup {
     (type: any) => CrossAclGroupScopeEntity,
     (groupScopes: CrossAclGroupScopeEntity) => groupScopes.group
   )
-  groupScopes: CrossAclGroupScopeEntity[];
+  groupScopes?: CrossAclGroupScopeEntity[];
 }

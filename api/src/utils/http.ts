@@ -1,5 +1,5 @@
 import { Logger, Req, Res } from "@tsed/common";
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 
 import { LoggerService } from "@services/LoggerService";
 
@@ -8,7 +8,7 @@ class HTTP {
     id: Number | String,
     req: Request,
     res: Response,
-    logger: LoggerService,
+    logger: Logger,
     supressLog = false
   ) {
     if (!supressLog) {
@@ -29,7 +29,7 @@ class HTTP {
     }
   }
 
-  public static BadRequest(message: string, req: Request, res: Response, logger: Logger) {
+  public static BadRequest(message: string | object, req: Request, res: Response, logger: Logger) {
     logger.warn(`System received a bad request (${message})`, {
       body: req.body,
       parameters: req.params,
@@ -37,10 +37,19 @@ class HTTP {
       route: req.route,
     });
     try {
-      return res.status(HTTPCodes.BadRequest).json({
+      let response: any = {
         status: "error",
-        message,
-      });
+        message
+      };
+
+      const isString = typeof message === "string";
+      if (!isString) {
+        response = {
+          status: "error",
+          ...message
+        };
+      }
+      return res.status(HTTPCodes.BadRequest).json(response);
     } catch (_) {
       // shall do nothing
     }
