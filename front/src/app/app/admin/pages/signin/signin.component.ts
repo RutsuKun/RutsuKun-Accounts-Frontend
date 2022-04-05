@@ -30,13 +30,6 @@ export class AdminSignInComponent implements OnInit {
     setTimeout(() => {
       this.formShow = true;
     }, 200);
-    this.activatedRoute.data.subscribe((data) => {
-      console.log('data', data);
-      
-      if(data.error) {
-        this.formError = data.error
-      }
-    })
   }
 
   signin() {

@@ -547,7 +547,6 @@ export class AccountsService {
 
     return this.accountsSessionRepository.delete({
       uuid: session_uuid,
-      account: { uuid: account_uuid },
     });
   }
 

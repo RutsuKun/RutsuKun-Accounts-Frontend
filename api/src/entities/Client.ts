@@ -38,7 +38,7 @@ export class ClientEntity {
   description?: string;
 
   @Column({ type: "boolean", default: true })
-  third_party?: string;
+  third_party?: boolean;
 
   @Column({ type: "varchar", nullable: true })
   website?: string;
@@ -84,10 +84,8 @@ export class ClientEntity {
   organization?: OAuthClientOrganization;
 
   addAcl?(scopes: OAuthScope[]) {
-    // this.acl = {
-    //   client: this,
-    //   scopes: scopes
-    // };
+    this.acl = {
+      scopes: scopes
+    };
   }
-
 }
