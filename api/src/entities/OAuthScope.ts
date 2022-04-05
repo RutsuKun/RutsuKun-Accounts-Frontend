@@ -32,7 +32,7 @@ export class OAuthScope {
   @PrimaryColumn()
   name: string;
 
-  @ManyToMany(() => OAuthClientACL, (acl) => acl.scopes, { onUpdate: "CASCADE" })
+  @ManyToMany(() => OAuthClientACL, (acl) => acl.scopes, { onUpdate: "CASCADE", onDelete: "CASCADE" })
   acls?: CrossAclAccountScopeEntity[];
 
   @OneToMany(() => CrossAclAccountScopeEntity, (accountScope) => accountScope.account)
