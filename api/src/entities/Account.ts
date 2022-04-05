@@ -6,6 +6,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
   VersionColumn,
 } from "typeorm";
 import bcrypt from "bcryptjs";
@@ -13,9 +14,9 @@ import { ClientEntity } from "./Client";
 import { Email } from "./Email";
 import { AccountProvider } from "./AccountProvider";
 import { AccountGroup } from "./AccountGroup";
-import { OAuthClientACL } from "./OAuthClientACL";
-import { OAuthScope } from "./OAuthScope";
 import { AccountAuthnMethod } from "./AccountAuthnMethod";
+import { AccountSession } from "./AccountSession";
+import { CrossAclAccountScopeEntity } from "./CrossAclAccountScope";
 
 @Entity({
   name: "oauth_accounts",
@@ -26,7 +27,10 @@ export class AccountEntity {
     Object.assign(this, account);
   }
 
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id?: number;
+
+  @Column()
   @Generated("uuid")
   uuid?: string;
 
@@ -36,7 +40,10 @@ export class AccountEntity {
   @Column({ type: "varchar", nullable: true, default: null })
   password?: string;
 
-  @Column({ type: "varchar", default: "/assets/images/avatars/default-avatar.png" })
+  @Column({
+    type: "varchar",
+    default: "/assets/images/avatars/default-avatar.png",
+  })
   avatar?: string;
 
   @Column({ type: "varchar", default: "user" })
@@ -69,34 +76,25 @@ export class AccountEntity {
 
   @ManyToMany(() => AccountGroup, (group) => group.accounts, { cascade: true })
   @JoinTable({
-    name: 'AccountToGroup',
+    name: "oauth_accounts_groups",
     joinColumn: {
-      name: 'account_uuid',
-      referencedColumnName: 'uuid'
+      name: "account_id",
+      referencedColumnName: "id",
     },
     inverseJoinColumn: {
-      name: 'group_name',
-      referencedColumnName: 'name'
-    }
+      name: "group_id",
+      referencedColumnName: "id",
+    },
   })
   groups?: AccountGroup[];
 
-  @ManyToMany(() => OAuthClientACL, (acl) => acl.accounts, { cascade: true })
-  acl?: OAuthClientACL[];
-
-  @ManyToMany(() => OAuthScope, (scope) => scope.accounts)
-  @JoinTable({
-    name: 'AccountToScope',
-    joinColumn: {
-      name: 'account_uuid',
-      referencedColumnName: 'uuid'
-    },
-    inverseJoinColumn: {
-      name: 'scope_name',
-      referencedColumnName: 'name'
-    }
+  @OneToMany(() => AccountSession, (session) => session.account, {
+    cascade: true,
   })
-  scopes?: OAuthScope[];
+  sessions?: AccountSession[];
+
+  @OneToMany(() => CrossAclAccountScopeEntity, (scope) => scope.account)
+  accountScopes?: CrossAclAccountScopeEntity[];
 
   @OneToMany(() => AccountAuthnMethod, (authn) => authn.account, {
     cascade: true,

@@ -38,7 +38,7 @@ export class ClientEntity {
   description?: string;
 
   @Column({ type: "boolean", default: true })
-  third_party?: string;
+  third_party?: boolean;
 
   @Column({ type: "varchar", nullable: true })
   website?: string;
@@ -74,7 +74,7 @@ export class ClientEntity {
   verified?: string;
 
   @ManyToOne(() => AccountEntity, (account) => account.clients)
-  @JoinColumn({ name: "account_uuid", referencedColumnName: "uuid" })
+  @JoinColumn({ name: "account_id", referencedColumnName: "id" })
   account?: AccountEntity;
 
   @OneToOne(() => OAuthClientACL, (acl) => acl.client, { cascade: true  })
@@ -85,9 +85,7 @@ export class ClientEntity {
 
   addAcl?(scopes: OAuthScope[]) {
     this.acl = {
-      client: this,
       scopes: scopes
     };
   }
-
 }

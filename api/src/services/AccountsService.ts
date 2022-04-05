@@ -13,6 +13,8 @@ import bcrypt from "bcryptjs";
 import { AccountAuthnMethodRepository } from "@repositories/AccountAuthnMethod.repository";
 import { AuthenticationMethods } from "common/interfaces/authentication.interface";
 import { AccountAuthnMethod } from "@entities/AccountAuthnMethod";
+import { AccountSessionRepository } from "@repositories/AccountSessionRepository";
+import { AccountSession } from "@entities/AccountSession";
 
 @Injectable()
 export class AccountsService {
@@ -31,6 +33,10 @@ export class AccountsService {
   @Inject()
   @UseConnection("default")
   private accountsAuthnMethodRepository: AccountAuthnMethodRepository;
+
+  @Inject()
+  @UseConnection("default")
+  private accountsSessionRepository: AccountSessionRepository;
 
   constructor(
     private logger: LoggerService,
@@ -198,7 +204,7 @@ export class AccountsService {
         sub: account.uuid,
         id: account.uuid,
         username: account.username,
-        picture: "https://cdn-dev.rainingdreams.to/avatars/" + account.uuid,
+        picture: account.avatar,
         role: account.role,
         emails: account.emails,
       });
@@ -236,6 +242,25 @@ export class AccountsService {
       });
       resolve(accounts);
     });
+  }
+  public async getAccountEndpoint(uuid: string): Promise<AccountEntity> {
+    const foundAccount = await this.accountRepository.findOne(
+      { uuid },
+      { relations: ["emails", "accountScopes", "accountScopes.scope"] }
+    );
+
+    return {
+      uuid: foundAccount.uuid,
+      username: foundAccount.username,
+      avatar: foundAccount.avatar,
+      role: foundAccount.role,
+      state: foundAccount.state,
+      banned: foundAccount.banned,
+      clients: foundAccount.clients,
+      providers: foundAccount.providers,
+      emails: foundAccount.emails,
+      accountScopes: foundAccount.accountScopes,
+    };
   }
   public deleteAccountEndpoint(accountId): Promise<any> {
     const ctx = this;
@@ -288,6 +313,14 @@ export class AccountsService {
       }
     });
   }
+
+  public getAccountPermissionsByUUID(uuid: string) {
+    return this.accountRepository.findOne({
+      where: { uuid },
+      relations: ["accountScopes", "accountScopes.scope", "accountScopes.acl"],
+    });
+  }
+
   public getAccountByProvider(
     provider: string,
     id: string
@@ -363,18 +396,18 @@ export class AccountsService {
   public getAccountAuthnMethods(uuid: string) {
     return this.accountsAuthnMethodRepository.find({
       account: {
-        uuid
-      }
-    })
+        uuid,
+      },
+    });
   }
 
   public getAccountAuthnMethod(uuid: string, method: AuthenticationMethods) {
     return this.accountsAuthnMethodRepository.findOne({
       type: method,
       account: {
-        uuid
-      }
-    })
+        uuid,
+      },
+    });
   }
 
   public removeAccountAuthnMethod(method: AccountAuthnMethod) {
@@ -442,8 +475,6 @@ export class AccountsService {
     return this.emailRepository.save(email);
   }
 
-
-
   public deleteEmail(emailUuid: string, accountUUID: string) {
     return this.emailRepository.delete({
       uuid: emailUuid,
@@ -455,5 +486,71 @@ export class AccountsService {
 
   public saveAccount(account: AccountEntity) {
     return this.accountRepository.save(account);
+  }
+
+  public getAccountSessions(account_uuid: string): Promise<AccountSession[]> {
+    return this.accountsSessionRepository.find({
+      relations: ["account"],
+      where: {
+        account: { uuid: account_uuid },
+      },
+    });
+  }
+
+  public getBrowserSessions(session_id: string): Promise<AccountSession[]> {
+    return this.accountsSessionRepository.find({
+      relations: ["account", "account.emails"],
+      where: {
+        session_id,
+      },
+    });
+  }
+
+  public async getMeSessionsEndpoint(account_uuid: string) {
+    const sessions = await this.getAccountSessions(account_uuid);
+
+    return sessions.map((session) => {
+      return {
+        uuid: session.uuid,
+        session_id: session.session_id,
+        account_uuid: session.account.uuid,
+      };
+    });
+  }
+
+  public async getBrowserSessionsEndpoint(session_id: string) {
+    if (!session_id) return [];
+    const sessions = await this.getBrowserSessions(session_id);
+
+    return sessions.map((session) => {
+      return {
+        uuid: session.uuid,
+        session_id: session.session_id,
+        account: {
+          uuid: session.account.uuid,
+          username: session.account.username,
+          email: session.account.getPrimaryEmail(),
+          picture: session.account.avatar,
+          role: session.account.role,
+        },
+      };
+    });
+  }
+
+  public addSession(session: AccountSession) {
+    return this.accountsSessionRepository.save(session);
+  }
+
+  public deleteAccountSession(session_uuid: string, account_uuid: string) {
+    console.log(session_uuid);
+    console.log(account_uuid);
+
+    return this.accountsSessionRepository.delete({
+      uuid: session_uuid,
+    });
+  }
+
+  public deleteBrowserSession(session_id: string) {
+    return this.accountsSessionRepository.delete({ session_id });
   }
 }

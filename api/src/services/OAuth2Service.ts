@@ -24,6 +24,10 @@ import { Config } from "@config";
 import crypto from "crypto";
 import { AccountsService } from "./AccountsService";
 import { OAuthClientACL } from "@entities/OAuthClientACL";
+import { AccountEntity } from "@entities/Account";
+import { IAcl } from "common/interfaces/acl.interface";
+
+import _ from 'lodash';
 
 @Injectable()
 export class OAuth2Service {
@@ -65,8 +69,7 @@ export class OAuth2Service {
     return healthy;
   }
 
-  public checkConsent(req: Request, res: Response) {
-    const session = this.sessionService.setSession(req);
+  public async checkConsent(req: Request, res: Response, session: SessionService) {
     const clientFromSession = session.getClient;
     const clientFromQuery = session.getClientQuery;
     const { ip, country, city, eu } = req.ipInfo;
@@ -87,24 +90,24 @@ export class OAuth2Service {
             tos_uri: clientFromSession.tos || null,
           },
         };
-        return res.status(200).json({
+        return {
           type: "consent",
           consent: consent,
-        });
+        };
       } else {
         //TEST!!!!
 
-        const userId = session.getUser.id;
-        const userUsername = session.getUser.username;
+        const userId = session.getCurrentSessionAccount.uuid;
+        const userUsername = session.getCurrentSessionAccount.username;
 
         this.logger.info(
           "Authorization in progress for " + userUsername + " (" + userId + ")"
         );
 
-        this.authorize({
+        const data = await this.authorize({
           response_type: clientFromQuery.response_type,
           redirect_uri: clientFromQuery.redirect_uri,
-          scope: clientFromQuery.scope,
+          scopes: clientFromQuery.scope ? clientFromQuery.scope.split(" ") : [],
           accountId: userId,
           country,
           code_challenge: clientFromQuery.code_challenge,
@@ -114,32 +117,32 @@ export class OAuth2Service {
           client: clientFromSession,
           consentGiven: true,
           session_state: req.session.id,
-        }).then((data: any) => {
-          switch (data.type) {
-            case "response":
-              this.logger.success(
-                "Authorized  " + userUsername + " (" + userId + ")"
-              );
-              this.logger.info("Response Type: " + data.type);
-              this.logger.info("Response Mode: " + data.response.mode);
-              this.logger.info(
-                "Response Parameter URI: " + data.response.parameters.uri
-              );
-              return res.status(200).json(data);
-              break;
-            case "error":
-              return res.status(400).json({
-                type: "error",
-                error: data.error,
-              });
-              break;
-          }
         });
+
+        switch (data.type) {
+          case "response":
+            this.logger.success(
+              "Authorized  " + userUsername + " (" + userId + ")"
+            );
+            this.logger.info("Response Type: " + data.type);
+            this.logger.info("Response Mode: " + data.response.mode);
+            this.logger.info(
+              "Response Parameter URI: " + data.response.parameters.uri
+            );
+            return data;
+          break;
+          case "error":
+            return {
+              type: "error",
+              error: data.error,
+            };
+            break;
+        }
       }
     } else {
-      res.status(200).json({
+      return {
         type: "logged-in",
-      });
+      };
     }
   }
 
@@ -155,13 +158,12 @@ export class OAuth2Service {
         code_challenge_method,
         nonce,
         state,
+        scopes,
         client,
         consentGiven,
         session_state,
         deviceCodeData,
       } = data;
-
-      const scope = data.scope;
 
       if (deviceCodeData) {
         const toSaveDeviceCode: OAuthDeviceCode = {
@@ -190,7 +192,7 @@ export class OAuth2Service {
           role: account.role,
           banned: account.banned,
           client_id: client.client_id,
-          scopes: scope.split(" "),
+          scopes: scopes,
           country: country,
           nonce: nonce,
         };
@@ -198,7 +200,7 @@ export class OAuth2Service {
         const AccessTokenData: CreateAccessTokenData = {
           sub: account.uuid,
           client_id: client.client_id,
-          scopes: scope.split(" "),
+          scopes: scopes,
         };
 
         const CodeData = {
@@ -206,7 +208,7 @@ export class OAuth2Service {
           client_id: client.client_id,
           code_challenge: code_challenge,
           code_challenge_method: code_challenge_method,
-          scopes: scope.split(" "),
+          scopes: scopes,
           state,
           nonce: nonce,
         };
@@ -256,11 +258,11 @@ export class OAuth2Service {
           IDTokenData.s_hash = ctx.tokenService.createSHash(state, "RS256");
         }
 
-        if(scope.includes("offline_access") && !response_types_check.includes("code")) {
+        if(scopes.includes("offline_access") && !response_types_check.includes("code")) {
           const RefreshTokenData: CreateRefreshTokenData = {
             sub: account.uuid,
             client_id: client.client_id,
-            scopes: scope.split(" "),
+            scopes: scopes,
           };
 
           const rv1 = Math.floor(Math.random() * Math.floor(254));
@@ -275,6 +277,9 @@ export class OAuth2Service {
         if (session_state) res.session_state = session_state;
 
         const params = new URLSearchParams(res);
+
+        console.log('params', params);
+        
 
         if (response_types_check.includes("id_token")) {
           resolve({
@@ -320,16 +325,79 @@ export class OAuth2Service {
     });
   }
 
-  public filterAllowedScopes(acl: OAuthClientACL, scopes: string[]) {
-    let allowed = scopes;
+  public filterAllowedScopes(account: AccountEntity, acl: IAcl, scopes: string[]) {
+    if (!acl || !acl.allowedScopes.length) return [];
 
-    if(acl && acl.scopes.length) {
-      const unallowedScopes = allowed.filter(filteredScope => !acl.scopes.map(s=>s.name).includes(filteredScope));
-      console.log('unallowedScopes', unallowedScopes.join(", "));
-      allowed = allowed.filter(filteredScope => acl.scopes.map(s=>s.name).includes(filteredScope))
+    let aclAllowedScopes: string[] = [];
+    let accountAllowedScopes: string[] = [];
+    let groupsAllowedScopes: string[] = [];
+
+    const aclScopes = acl.allowedScopes;
+
+    const aclUnallowedScopes = !!aclScopes.length ? scopes.filter(filteredScope => !aclScopes.includes(filteredScope)) : [];
+
+    console.log("aclUnallowedScopes", aclUnallowedScopes.length ? aclUnallowedScopes.join(", ") : "none");
+
+    aclAllowedScopes = !!acl.allowedScopes.length ? scopes.filter(filteredScope => acl.allowedScopes.includes(filteredScope)) : [];
+
+    const accountHasAccess = acl.allowedAccounts.find((a) => a.uuid === account.uuid);
+    if (acl.allowedAccounts.length && accountHasAccess) {
+      
+      const accountUnallowedScopes = scopes.filter(filteredScope => !accountHasAccess.allowedScopes.includes(filteredScope));
+
+      console.log(
+        "accountUnallowedScopes",
+        accountUnallowedScopes.length ? accountUnallowedScopes.join(", ") : 'none'
+      );
+
+      accountAllowedScopes = scopes.filter((filteredScope) => accountHasAccess.allowedScopes.includes(filteredScope));
+
+      console.log("accountAllowedScopes", accountAllowedScopes.length ? accountAllowedScopes.join(", ") : "none");
     }
 
-    return allowed;
+    const groupsHasAccess = acl.allowedGroups.filter((a) => account.groups.find((accountGroup) => accountGroup.name === a.name));
+    if (acl.allowedGroups.length && groupsHasAccess.length) {
+      
+      let arrayOfScopes = groupsHasAccess.map((group) => group.allowedScopes);
+
+      console.log("arrayOfScopes", arrayOfScopes);
+      
+      if (arrayOfScopes.length) {
+
+        const hasAnyScopes = arrayOfScopes.filter((a) => a.length);
+
+        console.log("hasAnyScopes", hasAnyScopes);
+
+        if (!hasAnyScopes.length) {
+          groupsAllowedScopes = scopes;
+        } else {
+          let tempGroupsAllowedScopes = arrayOfScopes.join().split(',');
+          groupsAllowedScopes = _.union(tempGroupsAllowedScopes);
+          groupsAllowedScopes = scopes.filter(filteredScope => groupsAllowedScopes.includes(filteredScope));
+        }
+
+      }
+
+      console.log("groupsAllowedScopes", groupsAllowedScopes.length ? groupsAllowedScopes.join(", ") : "none");
+      
+    }
+    
+
+    let finalAllowedScopes;
+    if (!acl.allowedAccounts.length && !acl.allowedGroups.length) {
+      finalAllowedScopes = aclAllowedScopes;
+    } else {
+      finalAllowedScopes = [
+        ...accountAllowedScopes,
+        ...groupsAllowedScopes
+      ];
+
+      finalAllowedScopes = finalAllowedScopes.filter(filteredScope => aclAllowedScopes.includes(filteredScope));
+    }
+
+    console.log("finalAllowedScopes", finalAllowedScopes.length ? finalAllowedScopes.join(", ") : "none");
+
+    return finalAllowedScopes;
   }
 
   public getToken(data: GetTokenData) {
@@ -404,7 +472,7 @@ export class OAuth2Service {
 
             ctx.logger.success("Authorization code is fine.", null, true);
             const account = await ctx.accountRepository.findByUUID(decoded.sub);
-            const scopes = decoded.scp;
+            const scopes = decoded.scopes;
             const state = decoded.state;
 
             ctx.logger.info(
@@ -680,7 +748,7 @@ export class OAuth2Service {
 interface OAuth2AuthorizeData {
   response_type?: string;
   redirect_uri?: string;
-  scope?: string;
+  scopes?: string[];
   accountId: string;
   country?: string;
   code_challenge?: string;

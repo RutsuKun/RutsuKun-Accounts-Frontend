@@ -190,10 +190,10 @@ export class OAuth2Route {
       let paramsInUri = new URLSearchParams(params);
 
       if(session.getClientQuery.prompt === "none") {
-        if(session.getUser.logged) {
+        if(session.getCurrentSessionAccount.logged) {
 
           // refactor
-          const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getUser.id, session, acr_values as string);
+          const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getCurrentSessionAccount.uuid, session, acr_values as string);
 
           if(multifactorRequired && multifactorRequired.type === 'multifactor') {
             return response.redirect(authUrl + "?" + paramsInUri);
@@ -209,9 +209,9 @@ export class OAuth2Route {
             state,
           } = session.getClientQuery;
   
-          const accountId = session.getUser.id;
+          const accountId = session.getCurrentSessionAccount.uuid;
           const client = session.getClient;
-          const session_state = session.getIDP.session_id;
+          const session_state = session.getCurrentBrowserSession.session_id;
   
           const {
             response: {
@@ -220,7 +220,7 @@ export class OAuth2Route {
           } = (await this.oauthService.authorize({
             response_type,
             redirect_uri,
-            scope,
+            scopes: scope ? scope.split(" ") : [],
             code_challenge,
             code_challenge_method,
             nonce,
@@ -276,7 +276,7 @@ export class OAuth2Route {
 
 
 
-    if (!session.getUser.logged) {
+    if (!session.getCurrentSessionAccount.logged) {
       return response.status(200).json({
         type: "error",
         error: "You must be logged as real account",
@@ -293,16 +293,25 @@ export class OAuth2Route {
 
     let scopeToAuthorize = session.getClientQuery.scope.split(" ");
 
+    const account = await this.accountService.getByUUIDWithRelations(session.getCurrentSessionAccount.uuid, ["groups"]);
+
     const acl = await this.aclService.getAcl(session.getClientQuery.client_id);
 
-    scopeToAuthorize = this.oauthService.filterAllowedScopes(acl, scopeToAuthorize);
+    console.log('acl------------------------>', acl);
+    
+    scopeToAuthorize = this.oauthService.filterAllowedScopes(account, acl, scopeToAuthorize);
+
+    console.log("scopeToAuthorize---------------->", scopeToAuthorize);
+    
+
+    scopeToAuthorize = scopeToAuthorize;
 
     try {
       const data = await this.oauthService.authorize({
         response_type: session.getClientQuery.response_type,
         redirect_uri: session.getClientQuery.redirect_uri,
-        scope: scopeToAuthorize.join(" "),
-        accountId: session.getUser.id,
+        scopes: scopeToAuthorize,
+        accountId: session.getCurrentSessionAccount.uuid,
         country,
         nonce: session.getClientQuery.nonce,
         state: session.getClientQuery.state,
@@ -313,8 +322,8 @@ export class OAuth2Route {
 
       switch (data.type) {
         case "response":
-          const userId = session.getUser.id;
-          const userUsername = session.getUser.username;
+          const userId = session.getCurrentSessionAccount.uuid;
+          const userUsername = session.getCurrentSessionAccount.username;
           this.logger.success(
             "Authorized  " + userUsername + " (" + userId + ")"
           );
@@ -339,7 +348,7 @@ export class OAuth2Route {
   @UseBefore(CheckClientMiddleware)
   public async postDevice(@Req() request: Req, @Res() response: Res) {
     // @ts-ignore
-    const client = req.oauthClient;
+    const client = request.oauthClient;
     const { scope } = request.body;
     const flow = await this.oauthService.runDeviceCodeFlow(
       client.client_id,

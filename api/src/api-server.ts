@@ -3,9 +3,7 @@ import expressip from "express-ip";
 import poweredby from "poweredby";
 import morgan from "morgan";
 import session from "express-session";
-import MemoryStore from "memorystore";
-import FileStore from 'session-file-store';
-
+import FileStore from "session-file-store";
 
 import express from "express";
 const fileStore = FileStore(session);
@@ -14,7 +12,6 @@ import { Configuration, Inject as DInjected } from "@tsed/di";
 import { PlatformApplication } from "@tsed/common";
 
 import { cwd } from "process";
-import fs from "fs";
 import { Config } from "./config";
 import cors from "cors";
 import methodOverride from "method-override";
@@ -36,7 +33,11 @@ const apiDir = __dirname;
     "/v1": path.join(apiDir, "routes", "v1", "**", "*.ts"),
   },
   debug: false,
-  middlewares: [express.json(), express.urlencoded({ extended: true }), methodOverride()],
+  middlewares: [
+    express.json(),
+    express.urlencoded({ extended: true }),
+    methodOverride(),
+  ],
   typeorm: [
     {
       name: "default",
@@ -72,13 +73,9 @@ export class APIServer {
   }
 
   public $beforeRoutesInit(): void | Promise<any> {
-
-
-
-
     this.app.use(cors({ origin: Config.FRONTEND.url, credentials: true }));
-    this.app.getApp().set("trust proxy", 1);
-    this.app.getApp().set('etag', false); // turn off
+    this.app.getApp().set("trust proxy", Config.isProd ? 1 : 0);
+    this.app.getApp().set("etag", false); // turn off
     this.app.use(
       session({
         name: "rsid",
@@ -88,14 +85,14 @@ export class APIServer {
         //   checkPeriod: 86400000, // prune expired entries every 24h
         // }),
         store: new fileStore({
-          path: './sessions'
+          path: "./sessions",
         }),
         // proxy: true,
         cookie: {
           path: "/",
           domain: Config.API.cookieDomain,
           httpOnly: false,
-          secure: true,
+          secure: Config.isProd,
           expires: new Date(Date.now() + 86400 * 1000),
           maxAge: 86400 * 1000,
           //sameSite: 'strict'
@@ -112,6 +109,5 @@ export class APIServer {
     );
     this.app.use(expressip().getIpInfoMiddleware);
     this.app.getApp().set("json spaces", 2);
-    
   }
 }

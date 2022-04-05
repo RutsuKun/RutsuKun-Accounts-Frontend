@@ -2,10 +2,10 @@
 
 
     <ng-container *ngIf="consent">
-        <div *ngIf="session$ | async as session" class="flex flex-row justify-content-around align-items-center mb-5">
+        <div *ngIf="sessionCurrent$ | async as sessionCurrent" class="flex flex-row justify-content-around align-items-center mb-5">
             <div class="flex flex-column justify-content-center align-items-center">
-                <img class="rounded mb-2" width="50" [src]="session.picture" />
-                <span class="font-bold">{{ session.username }}</span>
+                <img class="rounded mb-2" width="50" [src]="sessionCurrent.account.picture" />
+                <span class="font-bold">{{ sessionCurrent.account.username }}</span>
             </div>
             <img width="28" height="24" src="/assets/images/connect-arrows.png" />
             <div class="flex flex-column justify-content-center align-items-center">

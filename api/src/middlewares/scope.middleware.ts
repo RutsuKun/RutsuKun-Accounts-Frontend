@@ -1,3 +1,4 @@
+import { Config } from "@config";
 import {
   Middleware,
   Next,
@@ -8,7 +9,7 @@ import {
 
 @Middleware()
 export class ScopeMiddleware {
-  use(expectedScopes, options?) {
+  use(expectedScopes: string[], options?) {
     if (!Array.isArray(expectedScopes)) {
       throw new Error(
         "Parameter expectedScopes must be an array of strings representing the scopes for the endpoint(s)"
@@ -16,6 +17,12 @@ export class ScopeMiddleware {
     }
 
     return (req: Req, res: Res, next: Next) => {
+      if (!Config.isProd) {
+        res.append(
+          "ExpectedScopes",
+          `${expectedScopes.join(" ")}`
+        );
+      }
       if (!res.user) res.status(401).json({ code: 401, error: "Unauthorized" });
 
       const error = (res) => {

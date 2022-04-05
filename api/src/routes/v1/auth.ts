@@ -1,5 +1,5 @@
 import { Controller, Inject } from "@tsed/di";
-import { Post } from "@tsed/schema";
+import { Get, Post } from "@tsed/schema";
 import { AccountsService } from "@services/AccountsService";
 import { AuthService } from "@services/AuthService";
 import { SessionService } from "@services/SessionService";
@@ -8,8 +8,7 @@ import { ClientService } from "@services/ClientService";
 import { BodyParams, Context, Req, Res, Use, UseBefore } from "@tsed/common";
 import { LoggerService } from "@services/LoggerService";
 import { HTTPCodes } from "@utils";
-import { SessionMiddleware } from "@middlewares/session.middleware";
-import { TokenService } from "@services/TokenService";
+import { SessionLoggedMiddleware, SessionMiddleware } from "@middlewares/session.middleware";
 
 @Controller("/auth")
 export class AuthRoute {
@@ -35,42 +34,49 @@ export class AuthRoute {
     @Res() response: Res,
     @Context("session") session: SessionService
   ) {
-    
     if (session.getAction === "signup") {
       session.delAction();
-      session.saveSession();
+      await session.saveSession();
       return response.status(200).json({
         type: "signup",
       });
     }
 
-    session.saveSession();
+    await session.saveSession();
 
-    if (session.getUser.logged) {
+    if (session.getCurrentSessionAccount.logged) {
       const needReauth = await session.needReAuth();
       if (needReauth) {
         return response.status(400).json({ type: "reauth" });
       }
 
       if (session.getFlow === "auth") {
+        const multifactorRequired =
+          await this.authService.checkMfaAuthnRequired(
+            session.getCurrentSessionAccount.uuid,
+            session,
+            "urn:rutsukun:gold"
+          );
 
-        const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getUser.id, session, 'urn:rutsukun:gold');
-
-        if(multifactorRequired && multifactorRequired.type === 'multifactor') {
+        if (multifactorRequired && multifactorRequired.type === "multifactor") {
           return response.status(200).json(multifactorRequired);
         }
 
         return response.status(200).json({ type: "logged-in" });
       } else if (session.getFlow === "oauth") {
-
         // refactor
-        const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getUser.id, session, session.getClientQuery.acr_values);
+        const multifactorRequired =
+          await this.authService.checkMfaAuthnRequired(
+            session.getCurrentSessionAccount.uuid,
+            session,
+            session.getClientQuery.acr_values
+          );
 
-        if(multifactorRequired && multifactorRequired.type === 'multifactor') {
+        if (multifactorRequired && multifactorRequired.type === "multifactor") {
           return response.status(200).json(multifactorRequired);
         }
-
-        this.oauthService.checkConsent(request, response);
+        const data = await this.oauthService.checkConsent(request, response, session);
+        return data;
       }
     } else {
       if (session.getError) {
@@ -82,10 +88,7 @@ export class AuthRoute {
         });
       }
 
-      if (
-        session.getAction &&
-        session.getAction.type === "signup"
-      ) {
+      if (session.getAction && session.getAction.type === "signup") {
         const email = session.getAction.email;
         session.setAction({ type: "signup-connection" });
         session.saveSession();
@@ -108,19 +111,29 @@ export class AuthRoute {
     @Res() response: Res,
     @Context("session") session: SessionService
   ) {
-
     const { email, password, captcha } = request.body;
 
-    const data = await this.authService.signin({ email, password, captcha }, session);
+    const data = await this.authService.signin(
+      { email, password, captcha },
+      session
+    );
 
     switch (data.type) {
       case "logged-in":
-
         if (session.getFlow === "auth") {
+          console.log("a", session.getCurrentSessionAccount.uuid);
 
-          const multifactorRequired = await this.authService.checkMfaAuthnRequired(session.getUser.id, session, "urn:rutsukun:gold");
+          const multifactorRequired =
+            await this.authService.checkMfaAuthnRequired(
+              session.getCurrentSessionAccount.uuid,
+              session,
+              "urn:rutsukun:gold"
+            );
 
-          if(multifactorRequired && multifactorRequired.type === 'multifactor') {
+          if (
+            multifactorRequired &&
+            multifactorRequired.type === "multifactor"
+          ) {
             return response.status(200).json(multifactorRequired);
           }
 
@@ -128,7 +141,8 @@ export class AuthRoute {
             type: "logged-in",
           });
         } else if (session.getFlow === "oauth") {
-          this.oauthService.checkConsent(request, response);
+          const data = await this.oauthService.checkConsent(request, response, session);
+          return response.status(200).json(data);
         }
         break;
       case "multifactor":
@@ -185,12 +199,19 @@ export class AuthRoute {
     const { password, captcha } = request.body;
     const { ip, country, city, eu } = request.ipInfo;
 
-    if(!session.getUser.logged) {
-      return response.status(HTTPCodes.OK).json({ type: 'auth' });
+    if (!session.getCurrentSessionAccount.logged) {
+      return response.status(HTTPCodes.OK).json({ type: "auth" });
     }
 
     const data = await this.authService.reauth(
-      { ip, country, city, email: session.getUser.email, captcha, password },
+      {
+        ip,
+        country,
+        city,
+        email: session.getCurrentSessionAccount.email,
+        captcha,
+        password,
+      },
       session
     );
     switch (data.type) {
@@ -200,7 +221,7 @@ export class AuthRoute {
             type: "logged-in",
           });
         } else if (session.getFlow === "oauth") {
-          this.oauthService.checkConsent(request, response);
+          this.oauthService.checkConsent(request, response, session);
         }
         break;
       case "error":
@@ -221,6 +242,7 @@ export class AuthRoute {
   }
 
   @Post("/device")
+  @UseBefore(SessionLoggedMiddleware)
   @Use(SessionMiddleware)
   public async postDevice(
     @Req() request: Req,
@@ -244,47 +266,50 @@ export class AuthRoute {
     );
 
     if (findClient && !findClient.consent) {
-      this.oauthService
+      console.log("findClient", findClient);
+      
+      const data = await this.oauthService
         .authorize({
-          accountId: session.getUser.id,
+          accountId: session.getCurrentSessionAccount.uuid,
           client: findClient,
           consentGiven: true,
           deviceCodeData: deviceToken,
-        })
-        .then((data: any) => {
-          switch (data.type) {
-            case "authorized":
-              response.status(200).json({
-                type: data.type,
-              });
-              break;
-            case "multifactor":
-              response.status(200).json({
-                type: data.type,
-                multifactor: data.multifactor,
-              });
-              break;
-            case "error":
-              const resErrorRes = {
-                type: "error",
-                error: data.error,
-                errors: data.errors,
-                requestId: request.id,
-              };
-              response.status(400).json(resErrorRes);
-              break;
-            default:
-              response.status(400).json({
-                type: "error",
-                error: "invalid_response_type",
-              });
-              break;
-          }
         });
+      
+        console.log("data", data);
+        
+        switch (data.type) {
+          case "authorized":
+            response.status(200).json(data);
+            break;
+          case "multifactor":
+            response.status(200).json({
+              type: data.type,
+              multifactor: data.multifactor,
+            });
+            break;
+          case "error":
+            const resErrorRes = {
+              type: "error",
+              error: data.error,
+              errors: data.errors,
+              requestId: request.id,
+            };
+            response.status(400).json(resErrorRes);
+            break;
+          default:
+            response.status(400).json({
+              type: "error",
+              error: "invalid_response_type",
+            });
+            break;
+        }
+      
     }
   }
 
   @Post("/multifactor")
+  @UseBefore(SessionLoggedMiddleware)
   @UseBefore(SessionMiddleware)
   public async postMultifactor(
     @Req() request: Req,
@@ -293,18 +318,16 @@ export class AuthRoute {
     @BodyParams("code") code: string,
     @BodyParams("token") token: string
   ) {
-
     const data = await this.authService.multifactor(code, token, session);
 
     switch (data.type) {
       case "logged-in":
-
         if (session.getFlow === "auth") {
           return response.status(200).json({
             type: "logged-in",
           });
         } else if (session.getFlow === "oauth") {
-          this.oauthService.checkConsent(request, response);
+          this.oauthService.checkConsent(request, response, session);
         }
         break;
       case "error":
@@ -322,5 +345,36 @@ export class AuthRoute {
         });
         break;
     }
+  }
+
+  @Get("/sessions")
+  @UseBefore(SessionMiddleware)
+  public async getSwitchSession(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
+    const sessions = await this.accountsService.getBrowserSessionsEndpoint(
+      session.getSession.id
+    );
+    return response.status(HTTPCodes.OK).json(sessions.map((s) => {
+      return {
+        ...s,
+        current: s.uuid === session.getCurrentSessionUuid
+      };
+    }));
+  }
+
+  @Post("/sessions")
+  @UseBefore(SessionMiddleware)
+  public async postSwitchSession(
+    @Req() request: Req,
+    @Res() response: Res,
+    @Context("session") session: SessionService
+  ) {
+    const uuid = request.body.uuid;
+    const changed = session.changeSession(uuid);
+    await session.saveSession();
+    response.status(200).json({ success: changed });
   }
 }

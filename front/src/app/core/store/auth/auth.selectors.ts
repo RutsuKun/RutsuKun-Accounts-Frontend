@@ -1,12 +1,15 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState } from '../';
-import { AuthState } from './auth.state';
+import { AuthState, IBrowserSession } from './auth.state';
 
 export const selectAuthState = createFeatureSelector<AppState, AuthState>('auth');
 
 export const selectIsAuthenticated = createSelector(selectAuthState, (state: AuthState) => state.isAuthenticated);
 
-export const selectSession = createSelector( selectAuthState, (state: AuthState) => state.session);
+export const selectSession = createSelector(selectAuthState, (state: AuthState) => state.session);
+export const selectSessions = createSelector( selectAuthState, (state: AuthState) => state.sessions);
+export const selectSessionsCurrent = createSelector( selectSessions, (sessions: IBrowserSession[]) => sessions && sessions.find((s)=> !!s.current));
+export const selectSessionsOther = createSelector( selectSessions, (sessions: IBrowserSession[]) => sessions && sessions.filter((s)=> !s.current));
 
 export const selectAuthSigninError = createSelector( selectAuthState, (state: AuthState) => state.signin.error);
 export const selectAuthSigninErrors = createSelector(selectAuthState, (state: AuthState) => state.signin.errors);

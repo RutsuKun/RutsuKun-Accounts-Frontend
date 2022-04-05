@@ -5,6 +5,7 @@ import * as a from "./auth.actions";
 export const initialState: AuthState = {
   isAuthenticated: false,
   session: null,
+  sessions: [],
   type: "auth",
   authorizeConsent: {
     client: null,
@@ -46,10 +47,10 @@ const reducer = createReducer(
 
   on(a.authSessionEndRequest, (state: AuthState) => ({
     ...state,
-    signin:{
+    signin: {
       ...state.signin,
       showForm: false,
-    }
+    },
   })),
 
   on(a.authSessionEndSuccess, (state: AuthState, { data }) => ({
@@ -57,13 +58,18 @@ const reducer = createReducer(
     session: null,
   })),
 
+  on(a.authSessionsFetchSuccess, (state: AuthState, { data }) => ({
+    ...state,
+    sessions: data,
+  })),
+
   on(a.authCheckRequest, (state: AuthState) => ({
     ...state,
     signin: {
       ...state.signin,
       showForm: false,
-      loadingForm: true
-    }
+      loadingForm: true,
+    },
   })),
 
   on(a.authCheckSuccess, (state: AuthState, { data }) => {
@@ -107,7 +113,7 @@ const reducer = createReducer(
     signin: {
       ...state.signin,
       showForm: true,
-      loadingForm: false
+      loadingForm: false,
     },
     type: data.type,
   })),
@@ -128,8 +134,8 @@ const reducer = createReducer(
       ...state.signin,
       loading: false,
       error: null,
-      errors: []
-    }
+      errors: [],
+    },
   })),
 
   on(a.authSigninFail, (state: AuthState, { error, errors }) => ({
@@ -139,8 +145,8 @@ const reducer = createReducer(
       ...state.signin,
       loading: false,
       error,
-      errors
-    }
+      errors,
+    },
   })),
 
   on(a.authSignupRequest, (state: AuthState) => ({
@@ -148,17 +154,17 @@ const reducer = createReducer(
     signup: {
       loading: true,
       message: null,
-      error: null
-    }
+      error: null,
+    },
   })),
 
   on(a.authSignupSuccess, (state: AuthState, { data }) => ({
     ...state,
     signup: {
       loading: false,
-      message: 'Account created',
-      error: null
-    }
+      message: "Account created",
+      error: null,
+    },
   })),
 
   on(a.authSignupFail, (state: AuthState, { data }) => ({
@@ -166,8 +172,8 @@ const reducer = createReducer(
     signup: {
       loading: false,
       message: null,
-      error: data.error
-    }
+      error: data.error,
+    },
   })),
 
   on(a.authAppInfoRequest, (state: AuthState) => ({

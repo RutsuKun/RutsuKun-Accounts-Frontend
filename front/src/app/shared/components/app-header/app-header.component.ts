@@ -27,7 +27,7 @@ export class AppHeaderComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.authFacade.fetchSession();
+        this.authFacade.fetchSessions();
     }
 
     logout() {

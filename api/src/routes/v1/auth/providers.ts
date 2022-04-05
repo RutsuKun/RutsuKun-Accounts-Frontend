@@ -102,11 +102,11 @@ export class AuthProvidersRoute {
       (await this.accountsService.getAccountByPrimaryEmail(email));
 
     const loggedAccount = await this.accountsService.getByUUIDWithRelations(
-      session.getUser.logged ? session.getUser.id : null,
+      session.getCurrentSessionAccount.logged ? session.getCurrentSessionAccount.uuid : null,
       ["providers"]
     );
 
-    if (findedAccount && !session.getUser.logged) {
+    if (findedAccount && !session.getCurrentSessionAccount.logged) {
       if (
         !findedAccount.providers ||
         !findedAccount.providers.find(
@@ -129,7 +129,7 @@ export class AuthProvidersRoute {
 
         const auth_time = Math.floor(Date.now() / 1000);
 
-        if (session.session && session.getUser && session.getUser.logged) {
+        if (session.session && session.getCurrentSessionAccount && session.getCurrentSessionAccount.logged) {
           session.delAction();
           session.saveSession();
 
@@ -138,41 +138,42 @@ export class AuthProvidersRoute {
           });
 
         } else {
-          console.log("savedAccount", savedAccount);
+          const newSession = await this.accountsService.addSession({
+            session_id: session.getSession.id,
+            session_issued: new Date(),
+            session_expires: session.getSession.cookie.expires,
+            account: savedAccount,
+            amr: [providerId],
+            idp: providerId,
+          });
 
-          session
-            .setUser({
-              logged: true,
-              id: savedAccount.uuid,
-              username: savedAccount.username,
+          await session.addBrowserSession({
+            uuid: newSession.uuid,
+            session_id: newSession.session_id,
+            session_issued: newSession.session_issued,
+            session_expires: newSession.session_expires,
+            amr: newSession.amr,
+            idp: newSession.idp,
+            account: {
+              uuid: savedAccount.uuid,
               email: savedAccount.getPrimaryEmail(),
+              username: savedAccount.username,
               picture: savedAccount.avatar,
               role: savedAccount.role,
-            })
-            .setIDP({
-              session_id: session.getSession.id,
-              session_state: session.getSession.id,
-              session_issued: new Date(),
-              session_expires: session.getSession.cookie.expires,
-              sub: savedAccount.uuid,
-              idp: providerId, // identity provider
-              username: savedAccount.username,
-              amr: [providerId],
-              auth_time: auth_time,
-              reauth_time: auth_time,
-              used_authn_methods: [],
-            })
-            .saveSession();
+            },
+          })
+          .setIDP({
+            auth_time: auth_time,
+            reauth_time: auth_time,
+            used_authn_methods: []
+          })
+          .setCurrentSessionUuid(newSession.uuid)
+          .delAction()
+          .saveSession();
 
-            session.delAction();
-            await session.saveSession();
-
-            console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaa>>>>>>>>>>>Aaaaaaaaaa');
-            
-
-            return response.status(200).json({
-              type: "logged-in"
-            });
+          return response.status(200).json({
+            type: "logged-in"
+          });
 
         }
       } else {
@@ -188,9 +189,7 @@ export class AuthProvidersRoute {
 
         }
 
-
-
-        if (session.session && session.getUser && session.getUser.logged) {
+        if (session.session && session.getCurrentSessionAccount && session.getCurrentSessionAccount.logged) {
 
           return response.status(200).json({
             type: "logged-in"
@@ -203,32 +202,45 @@ export class AuthProvidersRoute {
 
           const auth_time = Math.floor(Date.now() / 1000);
 
-          session
-            .setUser({
-              logged: true,
-              id: findedAccount.uuid,
-              username: findedAccount.username,
-              email: findedAccount.getPrimaryEmail(),
-              picture: findedAccount.avatar,
-              role: findedAccount.role,
-            })
-            .setIDP({
+          const accountSessionExists = session.checkAccountSessionExists(findedAccount.uuid);
+          if (!accountSessionExists) {
+            const newSession = await this.accountsService.addSession({
               session_id: session.getSession.id,
-              session_state: session.getSession.id,
               session_issued: new Date(),
               session_expires: session.getSession.cookie.expires,
-              sub: findedAccount.uuid,
+              account: findedAccount,
               idp: providerId, // identity provider
-              username: findedAccount.username,
               amr: [providerId],
-              auth_time: auth_time,
-              reauth_time: auth_time,
-              used_authn_methods: [],
-            })
-            .saveSession();
+            });
+
+            session.addBrowserSession({
+              uuid: newSession.uuid,
+              session_id: newSession.session_id,
+              session_issued: newSession.session_issued,
+              session_expires: newSession.session_expires,
+              amr: newSession.amr,
+              idp: newSession.idp,
+              account: {
+                uuid: findedAccount.uuid,
+                email: findedAccount.getPrimaryEmail(),
+                username: findedAccount.username,
+                picture: findedAccount.avatar,
+                role: findedAccount.role,
+              },
+            });
+            session.setCurrentSessionUuid(newSession.uuid);
+          } else {
+            session.setCurrentSessionUuid(accountSessionExists.uuid);
+          }
+
+          session.setIDP({
+            auth_time: auth_time,
+            reauth_time: auth_time,
+            used_authn_methods: []
+          });
 
           session.delAction();
-          session.saveSession();
+          await session.saveSession();
 
           return response.status(200).json({
             type: "logged-in"
@@ -237,7 +249,7 @@ export class AuthProvidersRoute {
         }
       }
     } else {
-      if (session.session && session.getUser && session.getUser.logged) {
+      if (session.session && session.getCurrentSessionAccount && session.getCurrentSessionAccount.logged) {
         this.accountsService.addProvider({
           provider: providerId,
           id: providerIdentity.id,
@@ -268,34 +280,43 @@ export class AuthProvidersRoute {
 
           const auth_time = Math.floor(Date.now() / 1000);
 
-          session
-            .setUser({
-              logged: true,
-              id: account.uuid,
-              username: account.username,
+          const newSession = await this.accountsService.addSession({
+            session_id: session.getSession.id,
+            session_issued: new Date(),
+            session_expires: session.getSession.cookie.expires,
+            account: account,
+            amr: [providerId],
+            idp: providerId,
+          });
+
+          await session.addBrowserSession({
+            uuid: newSession.uuid,
+            session_id: newSession.session_id,
+            session_issued: newSession.session_issued,
+            session_expires: newSession.session_expires,
+            amr: newSession.amr,
+            idp: newSession.idp,
+            account: {
+              uuid: account.uuid,
               email: account.getPrimaryEmail(),
+              username: account.username,
               picture: account.avatar,
               role: account.role,
-            })
-            .setIDP({
-              session_id: session.getSession.id,
-              session_state: session.getSession.id,
-              session_issued: new Date(),
-              session_expires: session.getSession.cookie.expires,
-              sub: account.uuid,
-              idp: providerId, // identity provider
-              username: account.username,
-              amr: [providerId],
-              auth_time: auth_time,
-              reauth_time: auth_time,
-              used_authn_methods: [],
-            })
-            .saveSession();
+            },
+          })
+          .setIDP({
+            auth_time: auth_time,
+            reauth_time: auth_time,
+            used_authn_methods: []
+          })
+          .setCurrentSessionUuid(newSession.uuid)
+          .delAction()
+          .saveSession();
 
           this.logger.success(account.username + " logged successful in system", null, true);
 
           session.delAction();
-          session.saveSession();
+          await session.saveSession();
 
           return response.status(200).json({
             type: "logged-in"
@@ -433,12 +454,12 @@ export class AuthProvidersRoute {
     const findedAccount = findedAccountByProvider || findedAccountByEmail;
 
     const loggedAccount = await this.accountsService.getByUUIDWithRelations(
-      session.getUser.logged ? session.getUser.id : null,
+      session.getCurrentSessionAccount.logged ? session.getCurrentSessionAccount.uuid : null,
       ["providers"]
     );
 
     // IF PROVIDER DOESN'T HAS EMAIL
-    if(!findedAccount && !session.getUser.logged && !providerIdentity.email) {
+    if(!findedAccount && !session.getCurrentSessionAccount.logged && !providerIdentity.email) {
         session.setAction({
           type: "complete-connect-provider",
           metadata: {
@@ -467,7 +488,7 @@ export class AuthProvidersRoute {
       if (findedAccountByEmail && !findedAccountByProvider) {
 
         // IF LOGGED USER ATTACH PROVIDER TO ACCOUNT
-        if(session.getUser.logged) {
+        if(session.getCurrentSessionAccount.logged) {
           this.accountsService.addProvider({
             provider: providerId,
             id: providerIdentity.id,
@@ -498,79 +519,87 @@ export class AuthProvidersRoute {
         delete savedAccount.password;
 
 
-        await session
-          .setUser({
-            logged: true,
-            id: savedAccount.uuid,
-            username: savedAccount.username,
+        const newSession = await this.accountsService.addSession({
+          session_id: session.getSession.id,
+          session_issued: new Date(),
+          session_expires: session.getSession.cookie.expires,
+          account: savedAccount,
+          idp: providerId, // identity provider
+          amr: [providerId],
+        });
+
+        session.addBrowserSession({
+          uuid: newSession.uuid,
+          session_id: newSession.session_id,
+          session_issued: newSession.session_issued,
+          session_expires: newSession.session_expires,
+          amr: newSession.amr,
+          idp: newSession.idp,
+          account: {
+            uuid: savedAccount.uuid,
             email: savedAccount.getPrimaryEmail(),
+            username: savedAccount.username,
             picture: savedAccount.avatar,
             role: savedAccount.role,
-          })
-          .setIDP({
-            session_id: session.getSession.id,
-            session_state: session.getSession.id,
-            session_issued: new Date(),
-            session_expires: session.getSession.cookie.expires,
-            sub: savedAccount.uuid,
-            idp: providerId, // identity provider
-            username: savedAccount.username,
-            amr: [providerId],
-            auth_time: Math.floor(Date.now() / 1000),
-            reauth_time: Math.floor(Date.now() / 1000),
-            used_authn_methods: [],
-          })
-          .saveSession();
+          },
+        });
+        session.setCurrentSessionUuid(newSession.uuid);
 
-          if (redirectTo) {
-            session.delAction();
-            await session.saveSession();
-            return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
-          } else {
-            return response.redirect(`${Config.FRONTEND.url}/account/general`);
-          }
+        session.delAction();
+        await session.saveSession();
+
+        if (redirectTo) {
+          session.delAction();
+          await session.saveSession();
+          return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
+        } else {
+          return response.redirect(`${Config.FRONTEND.url}/account/general`);
+        }
         
       } 
       
       // FINDED ACCOUNT BY PROVIDER
       if (findedAccountByProvider) {
 
-        // if (!findedAccount.isPrimaryEmailVerified()) {
-        //   this.logger.error("Account email doesn't verified", null, true);
-        //   session.delAction();
-        //   session.saveSession();
-        //   return response.redirect(
-        //     `${Config.FRONTEND.url}/signin?${new URLSearchParams({
-        //       error: "invalid_login",
-        //       error_description: "ACCOUNT_EMAIL_NOT_VERIFIED",
-        //     })}`
-        //   );
-        // }
+          const accountSessionExists = session.checkAccountSessionExists(findedAccountByProvider.uuid);
+          if (!accountSessionExists) {
+            const newSession = await this.accountsService.addSession({
+              session_id: session.getSession.id,
+              session_issued: new Date(),
+              session_expires: session.getSession.cookie.expires,
+              account: findedAccountByProvider,
+              idp: providerId, // identity provider
+              amr: [providerId],
+            });
 
+            session.addBrowserSession({
+              uuid: newSession.uuid,
+              session_id: newSession.session_id,
+              session_issued: newSession.session_issued,
+              session_expires: newSession.session_expires,
+              amr: newSession.amr,
+              idp: newSession.idp,
+              account: {
+                uuid: findedAccountByProvider.uuid,
+                email: findedAccountByProvider.getPrimaryEmail(),
+                username: findedAccountByProvider.username,
+                picture: findedAccountByProvider.avatar,
+                role: findedAccountByProvider.role,
+              },
+            });
+            session.setCurrentSessionUuid(newSession.uuid);
+          } else {
+            session.setCurrentSessionUuid(findedAccountByProvider.uuid);
+          }
 
-        await session
-          .setUser({
-            logged: true,
-            id: findedAccountByProvider.uuid,
-            username: findedAccountByProvider.username,
-            email: findedAccountByProvider.getPrimaryEmail(),
-            picture: findedAccountByProvider.avatar,
-            role: findedAccountByProvider.role,
-          })
-          .setIDP({
-            session_id: session.getSession.id,
-            session_state: session.getSession.id,
-            session_issued: new Date(),
-            session_expires: session.getSession.cookie.expires,
-            sub: findedAccountByProvider.uuid,
-            idp: providerId, // identity provider
-            username: findedAccountByProvider.username,
-            amr: [providerId],
+          session.setIDP({
             auth_time: Math.floor(Date.now() / 1000),
             reauth_time: Math.floor(Date.now() / 1000),
             used_authn_methods: [],
-          })
-          .saveSession();
+          });
+
+          session.delAction();
+          await session.saveSession();
 
           if (redirectTo) {
             session.delAction();
@@ -579,12 +608,11 @@ export class AuthProvidersRoute {
           } else {
             return response.redirect(`${Config.FRONTEND.url}/account/general`);
           }
-        
       }
     } else {
       
       // IF LOGGED USER ATTACH PROVIDER TO ACCOUNT
-      if(session.getUser.logged) {
+      if(session.getCurrentSessionAccount.logged) {
         this.accountsService.addProvider({
           provider: providerId,
           id: providerIdentity.id,
@@ -611,30 +639,41 @@ export class AuthProvidersRoute {
             email_verified: providerIdentity.email_verified,
           });
 
-          const auth_time = Math.floor(Date.now() / 1000);
+          const newSession = await this.accountsService.addSession({
+            session_id: session.getSession.id,
+            session_issued: new Date(),
+            session_expires: session.getSession.cookie.expires,
+            account: newAccount,
+            idp: providerId, // identity provider
+            amr: [providerId],
+          });
 
-          await session
-            .setUser({
-              logged: true,
-              id: newAccount.uuid,
-              username: newAccount.username,
+          session.addBrowserSession({
+            uuid: newSession.uuid,
+            session_id: newSession.session_id,
+            session_issued: newSession.session_issued,
+            session_expires: newSession.session_expires,
+            amr: newSession.amr,
+            idp: newSession.idp,
+            account: {
+              uuid: newAccount.uuid,
               email: newAccount.getPrimaryEmail(),
+              username: newAccount.username,
               picture: newAccount.avatar,
               role: newAccount.role,
-            })
-            .setIDP({
-              session_id: session.getSession.id,
-              session_state: session.getSession.id,
-              session_issued: new Date(),
-              session_expires: session.getSession.cookie.expires,
-              sub: newAccount.uuid,
-              idp: providerId, // identity provider
-              username: newAccount.username,
-              amr: [providerId],
-              auth_time: auth_time,
-              reauth_time: auth_time,
-              used_authn_methods: [],
-          }).delAction().saveSession();
+            },
+          });
+          session.setCurrentSessionUuid(newSession.uuid);
+
+
+          session.setIDP({
+            auth_time: Math.floor(Date.now() / 1000),
+            reauth_time: Math.floor(Date.now() / 1000),
+            used_authn_methods: [],
+          });
+
+          session.delAction();
+          await session.saveSession();
 
           if (redirectTo) {
             return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
@@ -674,7 +713,7 @@ export class AuthProvidersRoute {
 
     try {
       const account = await this.accountsService.getByUUIDWithRelations(
-        session.getUser.id,
+        session.getCurrentSessionAccount.uuid,
         ["providers"]
       );
       const findProvider = account.providers.find(

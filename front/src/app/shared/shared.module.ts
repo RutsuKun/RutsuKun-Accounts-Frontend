@@ -34,9 +34,10 @@ import { HttpClientModule } from "@angular/common/http";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { OtpFormComponent } from './components/otp-form/otp-form.component';
+import { HeaderAccountComponent } from './components/header-account/header-account.component';
 
 @NgModule({
-  declarations: [AuthFooterComponent, OtpFormComponent],
+  declarations: [AuthFooterComponent, OtpFormComponent, HeaderAccountComponent],
   imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, TranslateModule],
   exports: [
     CommonModule,
@@ -67,6 +68,7 @@ import { OtpFormComponent } from './components/otp-form/otp-form.component';
     ClipboardModule,
     AuthFooterComponent,
     OtpFormComponent,
+    HeaderAccountComponent,
   ],
 })
 export class SharedModule {}

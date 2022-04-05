@@ -27,9 +27,9 @@ export class MeAuthnRoute {
     @Context("session") session: SessionService,
     @Context("logger") logger: Logger
   ) {
-    if (session && session.getUser) {
+    if (session && session.getCurrentSessionAccount) {
       const methods = await this.accountsService.getAccountAuthnMethods(
-        session.getUser.id
+        session.getCurrentSessionAccount.uuid
       );
       response.status(200).json({
         methods: methods.map((method)=>{
@@ -54,9 +54,9 @@ export class MeAuthnRoute {
 
     if(Config.AUTHN.supported_authn_methods.includes(method)) {
       logger.info(`Authn Method '${method}' supported`)
-      if (session && session.getUser) {
+      if (session && session.getCurrentSessionAccount) {
         const found = await this.accountsService.getAccountAuthnMethod(
-          session.getUser.id,
+          session.getCurrentSessionAccount.uuid,
           method
         );
         delete found.data;
@@ -84,9 +84,9 @@ export class MeAuthnRoute {
 
     if(Config.AUTHN.supported_authn_methods.includes(method)) {
       logger.info(`Authn Method '${method}' supported`)
-      if (session && session.getUser) {
+      if (session && session.getCurrentSessionAccount) {
         const found = await this.accountsService.getAccountAuthnMethod(
-          session.getUser.id,
+          session.getCurrentSessionAccount.uuid,
           method
         );
 
@@ -96,7 +96,7 @@ export class MeAuthnRoute {
           const otpauth_url = speakeasy.otpauthURL({
             secret: found.data["secret"],
             encoding: 'base32',
-            label: `${session.getUser.username} - RutsuKun Accounts`,
+            label: `${session.getCurrentSessionAccount.username} - RutsuKun Accounts`,
             issuer: Config.OAUTH2.issuer,
           });
           const qrcode = await generateDataURLQRCode(otpauth_url)
@@ -109,7 +109,7 @@ export class MeAuthnRoute {
           switch (method.toUpperCase() as AuthenticationMethods) {
             case "OTP":
                const { base32, ascii } = speakeasy.generateSecret({
-                name: `${session.getUser.username} - RutsuKun Accounts`,
+                name: `${session.getCurrentSessionAccount.username} - RutsuKun Accounts`,
                 issuer: Config.OAUTH2.issuer,
                 length: 40
               });
@@ -120,11 +120,11 @@ export class MeAuthnRoute {
               const otpauth_url = speakeasy.otpauthURL({
                 secret: base32,
                 encoding: 'base32',
-                label: `${session.getUser.username} - RutsuKun Accounts`,
+                label: `${session.getCurrentSessionAccount.username} - RutsuKun Accounts`,
                 issuer: Config.OAUTH2.issuer,
               });
       
-              const account = await this.accountsService.getAccountByUUID(session.getUser.id);
+              const account = await this.accountsService.getAccountByUUID(session.getCurrentSessionAccount.uuid);
 
               const authnMethod = new AccountAuthnMethod({
                 type: 'OTP',
@@ -177,9 +177,9 @@ export class MeAuthnRoute {
 
     if(Config.AUTHN.supported_authn_methods.includes(method)) {
       logger.info(`Authn Method '${method}' supported`)
-      if (session && session.getUser) {
+      if (session && session.getCurrentSessionAccount) {
         const found = await this.accountsService.getAccountAuthnMethod(
-          session.getUser.id,
+          session.getCurrentSessionAccount.uuid,
           method
         );
 
@@ -241,9 +241,9 @@ export class MeAuthnRoute {
 
     if(Config.AUTHN.supported_authn_methods.includes(method)) {
       logger.info(`Authn Method '${method}' supported`)
-      if (session && session.getUser) {
+      if (session && session.getCurrentSessionAccount) {
         const found = await this.accountsService.getAccountAuthnMethod(
-          session.getUser.id,
+          session.getCurrentSessionAccount.uuid,
           method
         );
 

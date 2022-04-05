@@ -1,8 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-} from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 
 import { ReCaptchaV3Service } from "ng-recaptcha";
@@ -15,7 +11,6 @@ import {
 
 import { Subject } from "rxjs";
 import { AuthFacade } from "@core/store/auth/auth.facade";
-
 
 @Component({
   templateUrl: "./signin.component.html",
@@ -55,26 +50,26 @@ export class SignInComponent implements OnInit, OnDestroy {
   subscribeQuery() {
     this.route.queryParamMap.subscribe((query) => {
       if (!!query.get("client_id")) {
-         this.flow = "oauth";
-         this.authFacade.fetchAppInfo(query.get("client_id"));
-       } else {
-         this.flow = "auth";
-       }
- 
-       if (query.get("error")) {
-         this.clientError = {
-           error: query.get("error"),
-           error_description: query.get("error_description"),
-         };
-         return;
-       }
-       console.log("client from url query", query);
- 
-       this.clientFromQuery = query.keys;
-   
- 
-       this.checkAuthorization();
-     });
+        this.flow = "oauth";
+        this.authFacade.fetchAppInfo(query.get("client_id"));
+      } else {
+        this.flow = "auth";
+      }
+
+      if (query.get("error")) {
+        this.clientError = {
+          error: query.get("error"),
+          error_description: query.get("error_description"),
+        };
+        return;
+      }
+      console.log("client from url query", query);
+
+      this.clientFromQuery = query.keys;
+
+      this.checkAuthorization();
+
+    });
   }
 
   checkAuthorization() {
@@ -88,4 +83,3 @@ export class SignInComponent implements OnInit, OnDestroy {
     this.uns$.complete();
   }
 }
-

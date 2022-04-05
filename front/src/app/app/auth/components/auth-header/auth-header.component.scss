@@ -1,66 +1,14 @@
 .header {
-    height: 100px;
-    width: 100%;
-    max-width: 1228px;
-    padding: 0 64px;
-    margin: 0 auto;
-    flex: none;
-    z-index: 1;
-    -webkit-font-smoothing: antialiased;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    flex-direction: row;
-    .user-box {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        
-        .user-box-content {
-            font-family: 'Inter';
-            font-size: 16px;
-            font-weight: 200;
-            cursor: pointer;
-            color: white;
-            background: #282828;
-            border-radius: 6.4px;
-            padding: 8px;
-        }
-
-        &:hover {
-            .user-box-menu {
-                visibility: visible !important;
-                opacity: 1;
-            }
-
-            .pi-angle-down {
-                transform: rotate(180deg);
-            }
-        }
-        .avatar {
-            border-radius: 50px;
-            width: 28px;
-            height: 28px;
-        }
-        
-        .pi-angle-down {
-            transition: transform 0.10s linear;
-        }
-
-        .user-box-menu {
-            position: absolute;
-            top: 80px;
-            right: 0;
-            min-width: 340px;
-            height: auto;
-            background: #282828;
-            transition: visibility 0.10s linear, opacity 0.10s linear;
-            visibility: hidden;
-            opacity: 0;
-            button {
-                color: white;
-                box-shadow: none;
-            }
-        }
-    }
+  height: 100px;
+  width: 100%;
+  max-width: 1228px;
+  padding: 0 64px;
+  margin: 0 auto;
+  flex: none;
+  z-index: 1;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-direction: row;
 }

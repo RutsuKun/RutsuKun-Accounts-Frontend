@@ -33,6 +33,10 @@ export class Validate {
     return arg1 === arg2;
   }
 
+  public static isBoolean(data: any) {
+    return typeof data === "boolean";
+  }
+
   public static isValidUri(...values: (string | undefined)[]): boolean {
     let isValid = true;
     const regex =

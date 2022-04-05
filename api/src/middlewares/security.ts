@@ -41,7 +41,7 @@ export class AccessTokenMiddleware {
             logged: true,
             sub: decoded.sub,
             audience: decoded.aud,
-            scope: decoded.scp
+            scope: decoded.scopes
           };
           return next();
         } catch (err) {
@@ -63,7 +63,7 @@ export class AccessTokenMiddleware {
             logged: true,
             sub: decoded.sub,
             audience: decoded.aud,
-            scope: decoded.scp
+            scope: decoded.scopes
           };
           return next();
         } catch (err) {
@@ -225,7 +225,7 @@ export function AccessTokenCheck(tokenService: TokenService, req: Request, res: 
           logged: true,
           sub: decoded.sub,
           audience: decoded.aud,
-          scope: decoded.scp
+          scope: decoded.scopess
         };
         return next();
       } catch (err) {
@@ -247,7 +247,7 @@ export function AccessTokenCheck(tokenService: TokenService, req: Request, res: 
           logged: true,
           sub: decoded.sub,
           audience: decoded.aud,
-          scope: decoded.scp
+          scope: decoded.scopes
         };
         return next();
       } catch (err) {

@@ -1,31 +1,19 @@
-import { NextFunction, Request, Response } from "express";
-import { Controller, Inject } from "@tsed/di";
+import { Controller } from "@tsed/di";
 import { Delete, Get, Post } from "@tsed/schema";
 import { AccountsService } from "@services/AccountsService";
 import { Context, Req, Res, UseBefore } from "@tsed/common";
-import { AccessTokenMiddleware } from "@middlewares/security";
-import { ScopeMiddleware } from "@middlewares/scope.middleware";
-import { SessionLoggedMiddleware, SessionMiddleware } from "@middlewares/session.middleware";
+import {
+  SessionLoggedMiddleware,
+  SessionMiddleware,
+} from "@middlewares/session.middleware";
 import { SessionService } from "@services/SessionService";
 import { HTTPCodes, Validate } from "@utils";
-import { map, timer } from "rxjs";
 
-@Controller("/accounts")
-export class AccountsRoute {
-
+@Controller("/me")
+export class MeRoute {
   constructor(private accountsService: AccountsService) {}
 
   @Get("/")
-  @UseBefore(AccessTokenMiddleware)
-  @UseBefore(new ScopeMiddleware().use(["accounts:read"]))
-  public async getIndex(
-    @Res() res: Response
-  ) {
-    const accounts = await this.accountsService.listAccountsEndpoint();
-    return res.status(200).json(accounts);
-  }
-
-  @Get("/me")
   @UseBefore(SessionLoggedMiddleware)
   @UseBefore(SessionMiddleware)
   public async getMe(
@@ -33,7 +21,7 @@ export class AccountsRoute {
     @Context("session") session: SessionService
   ) {
     const currentAccount = await this.accountsService.getByUUIDWithRelations(
-      session.getUser.id,
+      session.getCurrentSessionAccount.uuid,
       ["emails", "providers", "groups", "authn_methods"]
     );
     delete currentAccount.password;
@@ -41,19 +29,19 @@ export class AccountsRoute {
 
     const res = {
       ...currentAccount,
-      authn_methods: currentAccount.authn_methods.map((method)=>{
+      authn_methods: currentAccount.authn_methods.map((method) => {
         return {
           type: method.type,
-          enabled: method.enabled
-        }
-      })
+          enabled: method.enabled,
+        };
+      }),
     };
 
-    return timer(400).pipe(map(() => res));
+    response.status(200).json(res);
 
   }
 
-  @Post("/me/emails")
+  @Post("/emails")
   @UseBefore(SessionMiddleware)
   public async postMeEmails(
     @Req() request: Req,
@@ -61,7 +49,7 @@ export class AccountsRoute {
     @Context("session") session: SessionService
   ) {
     const currentAccount = await this.accountsService.getAccountByUUID(
-      session.getUser.id
+      session.getCurrentSessionAccount.uuid
     );
 
     const email: string = request.body.email;
@@ -90,7 +78,7 @@ export class AccountsRoute {
     response.status(HTTPCodes.Created).json(addedEmail);
   }
 
-  @Delete("/me/emails/:uuid")
+  @Delete("/emails/:uuid")
   @UseBefore(SessionMiddleware)
   public async deleteMeEmails(
     @Req() request: Req,
@@ -98,7 +86,7 @@ export class AccountsRoute {
     @Context("session") session: SessionService
   ) {
     const currentAccount = await this.accountsService.getAccountByUUID(
-      session.getUser.id
+      session.getCurrentSessionAccount.uuid
     );
 
     const emailUuid: string = request.params.uuid;

@@ -28,14 +28,14 @@ export class AuthSessionRoute {
     @Res() response: Res,
     @Context('session') session: SessionService
   ) {
-    if (session && session.getUser && session.getUser.logged) {
+    if (session && session.getCurrentSessionAccount && session.getCurrentSessionAccount.logged) {
       //   if (req.session.user.impersonate) {
       //     return res.status(200).json(req.session.user.impersonate);
       //   }
       const acr_values = session.getFlow === 'auth' ? 'urn:rutsukun:gold' : session.getClientQuery.acr_values;
-      if(!!await this.authService.checkMfaAuthnRequired(session.getUser.id, session, acr_values)) return response.status(200).json({ logged: false });
+      if(!!await this.authService.checkMfaAuthnRequired(session.getCurrentSessionAccount.uuid, session, acr_values)) return response.status(200).json({ logged: false });
 
-      response.status(200).json(session.getUser);
+      response.status(200).json(session.getCurrentSessionAccount);
     } else {
       response.status(200).json({ logged: false });
     }
@@ -59,12 +59,10 @@ export class AuthSessionRoute {
       });
     }
 
-    if (session.getUser && session.getUser.id) {
-      await session
-        .setUser({ logged: false })
-        .delPassport()
-        .delAction()
-        .saveSession();
+    if (session.getCurrentSessionAccount && session.getCurrentSessionAccount.uuid) 
+    {
+      const newSession = await session.deleteCurrentBrowserSession();
+      await newSession.delPassport().delAction().saveSession();
     }
 
     return response.redirect(post_logout_redirect_uri as string);
@@ -77,22 +75,14 @@ export class AuthSessionRoute {
     @Res() response: Res,
     @Context('session') session: SessionService
   ) {
-    if (session.getUser && session.getUser.id) {
-      /**if(req.session.user.impersonate){
-				delete req.session.user.impersonate;
-				return res.status(200).json({
-					type: "impersonate", 
-					action: "logged-out"
-				})
-			}**/
+    if (session.getCurrentSessionAccount && session.getCurrentSessionAccount.uuid) {
 
-      const newSession = session.setUser({ logged: false }).delPassport().delAction().delIDP();
-      console.log('newSession', newSession);
-
+      const newSession = await session.deleteCurrentBrowserSession();
+      newSession.delPassport().delAction();
       await newSession.saveSession();
       
 
-      response.status(200).json(newSession.getUser);
+      response.status(200).json(newSession.getCurrentSessionAccount);
     } else {
       response.status(200).json({ logged: false });
     }

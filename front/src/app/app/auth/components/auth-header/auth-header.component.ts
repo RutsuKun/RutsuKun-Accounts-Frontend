@@ -3,10 +3,13 @@ import {
     OnDestroy,
     OnInit,
 } from "@angular/core";
+import { AuthService } from "@core/services/auth.service";
 import { AuthFacade } from "@core/store/auth/auth.facade";
+import { IBrowserSession } from "@core/store/auth/auth.state";
 import { environment } from "@env/environment";
 
 import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 
 @Component({
@@ -16,20 +19,14 @@ import { Subject } from "rxjs";
 })
 export class AuthHeaderComponent implements OnInit, OnDestroy {
     private uns$ = new Subject();
-    public session$ = this.authFacade.session$;
-
-    isDevelop = environment.envName === "DEV";
 
     constructor(
-        private authFacade: AuthFacade
+        private authFacade: AuthFacade,
+        private authService: AuthService
     ) {}
 
     ngOnInit(): void {
-        this.authFacade.fetchSession();
-    }
-    
-    logout() {
-        this.authFacade.endSession();
+        this.authFacade.fetchSessions();
     }
 
     ngOnDestroy(): void {

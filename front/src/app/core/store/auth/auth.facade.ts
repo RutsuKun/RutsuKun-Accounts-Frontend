@@ -6,11 +6,14 @@ import * as s from './auth.selectors';
 import { MessageService } from 'primeng/api';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class AuthFacade {
   isAuthenticated$ = this.store.pipe(select(s.selectIsAuthenticated));
   session$ = this.store.pipe(select(s.selectSession));
+  sessions$ = this.store.pipe(select(s.selectSessions));
+  sessionCurrent$ = this.store.pipe(select(s.selectSessionsCurrent));
+  sessionsOther$ = this.store.pipe(select(s.selectSessionsOther));
 
   signinShowForm$ = this.store.pipe(select(s.selectAuthSigninShowForm));
   signinError$ = this.store.pipe(select(s.selectAuthSigninError));
@@ -24,27 +27,31 @@ export class AuthFacade {
   mfa$ = this.store.pipe(select(s.selectAuthMultifactor));
 
   appInfoData$ = this.store.pipe(select(s.selectAuthAppInfoData));
-  appInfoOrganization$ = this.store.pipe(select(s.selectAuthAppInfoOrganization));
+  appInfoOrganization$ = this.store.pipe(
+    select(s.selectAuthAppInfoOrganization)
+  );
   appInfoLoading$ = this.store.pipe(select(s.selectAuthAppInfoLoading));
   appInfoLoaded$ = this.store.pipe(select(s.selectAuthAppInfoLoaded));
   appInfoError$ = this.store.pipe(select(s.selectAuthAppInfoError));
 
-  constructor(
-    private store: Store<AppState>
-  ) {}
-
-  fetchSession() {
-    this.store.dispatch(a.authSessionFetchRequest());
-  }
+  constructor(private store: Store<AppState>) {}
 
   endSession() {
     this.store.dispatch(a.authSessionEndRequest());
   }
 
-  check(flow: 'auth' | 'oauth') {
+  fetchSessions() {
+    this.store.dispatch(a.authSessionsFetchRequest());
+  }
+
+  changeSession(uuid: string) {
+    this.store.dispatch(a.authSessionsChangeRequest({ uuid }));
+  }
+
+  check(flow: "auth" | "oauth") {
     this.store.dispatch(a.authCheckRequest({ flow }));
   }
-  
+
   signin(data: any) {
     this.store.dispatch(a.authSigninRequest({ data }));
   }
@@ -56,13 +63,12 @@ export class AuthFacade {
     repassword: string;
     captcha: string;
   }) {
-    this.store.dispatch(a.authSignupRequest({ data }))
+    this.store.dispatch(a.authSignupRequest({ data }));
   }
 
   multifactorOTP(code: string) {
     this.store.dispatch(a.authMultifactorRequest({ code }));
   }
-
 
   reauth(data: any) {
     this.store.dispatch(a.authReAuthRequest({ data }));
@@ -75,7 +81,6 @@ export class AuthFacade {
   logout() {
     // this.store.dispatch(a.authLogout());
   }
-
 
   fetchAppInfo(client_id: string) {
     this.store.dispatch(a.authAppInfoRequest({ client_id }));

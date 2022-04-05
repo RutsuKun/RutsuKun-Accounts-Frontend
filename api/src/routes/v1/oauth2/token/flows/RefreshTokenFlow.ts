@@ -53,22 +53,22 @@ const oAuth2RefreshToken = (
     const access_token = await token.createAccessToken({
       sub: clientFromReq.client_id,
       client_id: clientFromReq.client_id,
-      scopes: data.scp
+      scopes: data.scopes
     });
 
     res.access_token = access_token;
     res.type = "Bearer";
     res.expires_in = Config.Token.AccessTokenExp;
-    res.scope = data.scp.join(" ");
+    res.scope = data.scopes.join(" ");
 
     logger.success("Access Token generated: " + access_token);
 
 
-    if(data.scp.includes("offline_access")) {
+    if(data.scopes.includes("offline_access")) {
       const RefreshTokenData: CreateRefreshTokenData = {
         sub: data.sub,
         client_id: clientFromReq.client_id,
-        scopes: data.scp,
+        scopes: data.scopes,
       };
 
 

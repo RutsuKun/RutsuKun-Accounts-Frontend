@@ -82,8 +82,6 @@ export class AuthService {
 
       const account = await ctx.accountsService.getAccountByPrimaryEmail(email);
 
-      console.log("account", account);
-
       if (!account) {
         ctx.logger.error("Account doesn't exists", null, true);
         error = "ACCOUNT_NOT_EXIST";
@@ -136,39 +134,46 @@ export class AuthService {
 
       const auth_time = Math.floor(Date.now() / 1000);
 
-      session.setUser({
-        logged: true,
-        id: account.uuid,
-        username: account.username,
-        email: account.getPrimaryEmail(),
-        picture: account.avatar,
-        role: account.role,
-      });
+      const accountSessionExists = session.checkAccountSessionExists(account.uuid);
+      this.logger.info(JSON.stringify(accountSessionExists));
+      if (!accountSessionExists) {
+        const newSession = await this.accountsService.addSession({
+          session_id: session.getSession.id,
+          session_issued: new Date(),
+          session_expires: session.getSession.cookie.expires,
+          account: account,
+          amr: ["pwd"],
+          idp: "local",
+        });
+
+        session.addBrowserSession({
+          uuid: newSession.uuid,
+          session_id: newSession.session_id,
+          session_issued: newSession.session_issued,
+          session_expires: newSession.session_expires,
+          amr: newSession.amr,
+          idp: newSession.idp,
+          account: {
+            uuid: account.uuid,
+            email: account.getPrimaryEmail(),
+            username: account.username,
+            picture: account.avatar,
+            role: account.role
+          }
+        });
+        session.setCurrentSessionUuid(newSession.uuid);
+      } else {
+        session.setCurrentSessionUuid(accountSessionExists.uuid);
+      }
+
 
       session.setIDP({
-        session_id: session.getSession.id,
-        session_state: session.getSession.id,
-        session_issued: new Date(),
-        session_expires: session.getSession.cookie.expires,
-        sub: account.uuid,
-        idp: "local", // identity provider
-        username: account.username,
-        amr: ["pwd"],
         auth_time: auth_time,
         reauth_time: auth_time,
         used_authn_methods: []
       });
 
-      // if (session.getAction && session.getAction.type === "connection") {
-      //     await account.providers.push({
-      //         provider: session.getAction.provider,
-      //         uid: session.getAction.id,
-      //     });
-      //     await account.save();
-      //     session.delAction();
-      // }
-
-      session.saveSession();
+      await session.saveSession();
 
       resolve({
         type: "logged-in",
@@ -227,27 +232,29 @@ export class AuthService {
         true
       );
 
-      const auth_time = Math.floor(Date.now() / 1000);
+      // todo: refactor
+        
+      // const auth_time = Math.floor(Date.now() / 1000);
 
-      session.setUser({
-        logged: true,
-        id: account.uuid,
-        username: account.username,
-        email: account.getPrimaryEmail(),
-        picture: Config.CDN.url + "/avatars/" + account.uuid,
-        role: account.role,
-      });
+      // session.setUser({
+      //   logged: true,
+      //   id: account.uuid,
+      //   username: account.username,
+      //   email: account.getPrimaryEmail(),
+      //   picture: Config.CDN.url + "/avatars/" + account.uuid,
+      //   role: account.role,
+      // });
 
-      session.setIDP({
-        ...session.getIDP,
-        reauth_time: auth_time,
-      });
+      // session.setIDP({
+      //   ...session.getIDP,
+      //   reauth_time: auth_time,
+      // });
 
-      session.saveSession();
+      // session.saveSession();
 
-      resolve({
-        type: "logged-in"
-      })
+      // resolve({
+      //   type: "logged-in"
+      // })
 
     });
   }

@@ -14,7 +14,7 @@
     </ng-container>
 
     <ng-container *ngIf="(showForm$ | async) && !clientError">
-        <ng-container *ngIf="type === 'auth'">
+        <ng-container *ngIf="type !== 'reauth'">
             <h2 class="title">
                 {{ 'pages.signin.title' | translate }}
             </h2>
@@ -39,7 +39,7 @@
             </p>
         </ng-container>
 
-        <div *ngIf="type === 'auth'" class="form" [formGroup]="authForm">
+        <div *ngIf="type !== 'reauth'" class="form" [formGroup]="authForm">
 
             <ng-container *ngIf="error$ | async">
                 <span class="error block mb-2">

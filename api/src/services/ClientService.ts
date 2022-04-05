@@ -54,7 +54,7 @@ export class ClientService {
           uuid: accountUUID,
         },
       },
-      relations: ["acl", "acl.groups", "acl.accounts"]
+      relations: ["acl", "account"]
     });
   }
 
@@ -232,37 +232,38 @@ export class ClientService {
       }
 
       const clientById = await this.clientRepository.findByClientID(clientId);
+
       if (!clientById) {
         const accountToSave = await this.accountsService.getAccountByUUID(
           accountUUID
         );
 
+        const defaultScopes = await this.scopeService.getDefaultScopes();
         
-            const clientToSave = new ClientEntity({
-              client_id: clientId,
-              secret: clientSecret,
-              name: name,
-              description: description,
-              grant_types: grant_types,
-              redirect_uris: redirect_uris,
-              response_types: response_types,
-              privacy_policy: privacy_policy,
-              tos: tos,
-              website: website,
-              consent: consent,
-              state: "ENABLED",
-              type: type,
-              verified,
-              account: accountToSave
-            });
+        const clientToSave = new ClientEntity({
+          client_id: clientId,
+          secret: clientSecret,
+          name: name,
+          description: description,
+          grant_types: grant_types,
+          redirect_uris: redirect_uris,
+          response_types: response_types,
+          privacy_policy: privacy_policy,
+          tos: tos,
+          website: website,
+          consent: consent,
+          state: "ENABLED",
+          type: type,
+          verified,
+          third_party,
+          account: accountToSave
+        });
     
-            const defaultScopes = await this.scopeService.getDefaultScopes()
-
-            clientToSave.addAcl(defaultScopes);
+        clientToSave.addAcl(defaultScopes);
     
-            const savedClient = await this.clientRepository.save(clientToSave);
+        const savedClient = await this.clientRepository.save(clientToSave);
     
-            resolve(savedClient);
+        resolve(savedClient);
             
       } else {
         ctx.logger.error(

@@ -18,6 +18,9 @@ import {
     }
   
     @PrimaryGeneratedColumn()
+    id?: number;
+
+    @Column()
     @Generated("uuid")
     uuid?: string;
   
@@ -31,7 +34,7 @@ import {
     enabled: boolean;
   
     @ManyToOne(() => AccountEntity, (account) => account.authn_methods, { onDelete: "CASCADE" })
-    @JoinColumn({ name: "account_uuid", referencedColumnName: "uuid" })
+    @JoinColumn({ name: "account_id", referencedColumnName: "id" })
     account?: AccountEntity;
   
   }
