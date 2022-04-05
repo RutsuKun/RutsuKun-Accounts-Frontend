@@ -243,8 +243,11 @@ export class AccountsService {
       resolve(accounts);
     });
   }
-  public async getAccountEndpoint(uuid:string): Promise<AccountEntity> {
-    const foundAccount = await this.accountRepository.findOne({ uuid }, { relations: ["emails", "accountScopes", "accountScopes.scope"] });
+  public async getAccountEndpoint(uuid: string): Promise<AccountEntity> {
+    const foundAccount = await this.accountRepository.findOne(
+      { uuid },
+      { relations: ["emails", "accountScopes", "accountScopes.scope"] }
+    );
 
     return {
       uuid: foundAccount.uuid,
@@ -258,7 +261,6 @@ export class AccountsService {
       emails: foundAccount.emails,
       accountScopes: foundAccount.accountScopes,
     };
-
   }
   public deleteAccountEndpoint(accountId): Promise<any> {
     const ctx = this;
@@ -311,6 +313,14 @@ export class AccountsService {
       }
     });
   }
+
+  public getAccountPermissionsByUUID(uuid: string) {
+    return this.accountRepository.findOne({
+      where: { uuid },
+      relations: ["accountScopes", "accountScopes.scope", "accountScopes.acl"],
+    });
+  }
+
   public getAccountByProvider(
     provider: string,
     id: string
@@ -521,7 +531,7 @@ export class AccountsService {
           username: session.account.username,
           email: session.account.getPrimaryEmail(),
           picture: session.account.avatar,
-          role: session.account.role
+          role: session.account.role,
         },
       };
     });
@@ -534,8 +544,7 @@ export class AccountsService {
   public deleteAccountSession(session_uuid: string, account_uuid: string) {
     console.log(session_uuid);
     console.log(account_uuid);
-    
-    
+
     return this.accountsSessionRepository.delete({
       uuid: session_uuid,
       account: { uuid: account_uuid },
