@@ -1,5 +1,5 @@
 import { IUsedAuthnMethod } from "@services/SessionService";
-import { Column, Entity, Generated, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, Generated, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { AccountEntity } from "./Account";
 
 @Entity({
@@ -11,7 +11,10 @@ export class AccountSession {
     Object.assign(this, session);
   }
 
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id?: number;
+
+  @Column()
   @Generated("uuid")
   uuid?: string;
 
@@ -31,6 +34,6 @@ export class AccountSession {
   amr: string[];
 
   @ManyToOne(() => AccountEntity, (account) => account.sessions)
-  @JoinColumn({ name: "account_uuid", referencedColumnName: "uuid" })
+  @JoinColumn({ name: "account_id", referencedColumnName: "id" })
   account: AccountEntity;
 }

@@ -6,5 +6,5 @@ export const environment = {
   oauth: "https://rutsukun-accounts-api.henicz.eu/v1/oauth2",
   front: "https://rutsukun-accounts.henicz.eu",
 
-  admin_portal_scopes: "openid account accounts:read groups:manage admin:clients admin:scopes",
+  admin_portal_scopes: "openid account admin:access",
 };

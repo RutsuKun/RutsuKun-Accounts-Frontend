@@ -1,15 +1,16 @@
 import {
   Column,
   Entity,
+  Generated,
   ManyToMany,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { AccountEntity } from "./Account";
 import { CrossAclGroupScopeEntity } from "./CrossAclGroupScope";
 
 @Entity({
-  name: "oauth_accounts_groups",
+  name: "oauth_groups",
   engine: "InnoDB",
 })
 export class AccountGroup {
@@ -17,19 +18,28 @@ export class AccountGroup {
     Object.assign(this, group);
   }
 
-  @Column({ type: "varchar" })
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id?: number;
+
+  @Column()
+  @Generated("uuid")
+  uuid?: string;
+
+  @Column({ type: "varchar", unique: true })
   name: string;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", unique: true })
   display_name: string;
 
   @Column({ type: "boolean" })
   enabled: boolean;
 
-  @ManyToMany(() => AccountEntity, (account)=> account.groups)
+  @ManyToMany(() => AccountEntity, (account) => account.groups)
   accounts?: AccountEntity[];
 
-  @OneToMany((type: any) => CrossAclGroupScopeEntity, (groupScopes: CrossAclGroupScopeEntity) => groupScopes.group)
-  groupScopes: CrossAclGroupScopeEntity[];
+  @OneToMany(
+    (type: any) => CrossAclGroupScopeEntity,
+    (groupScopes: CrossAclGroupScopeEntity) => groupScopes.group
+  )
+  groupScopes?: CrossAclGroupScopeEntity[];
 }

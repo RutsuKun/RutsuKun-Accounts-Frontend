@@ -46,8 +46,8 @@ export class OAuthClientACL {
       referencedColumnName: "uuid",
     },
     inverseJoinColumn: {
-      name: "scope_name",
-      referencedColumnName: "name",
+      name: "scope_id",
+      referencedColumnName: "id",
     },
   })
   scopes?: OAuthScope[];

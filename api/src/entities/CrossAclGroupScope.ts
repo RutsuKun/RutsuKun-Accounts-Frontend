@@ -18,7 +18,7 @@ export class CrossAclGroupScopeEntity {
   @ManyToOne(() => AccountGroup, (group: AccountGroup) => group.groupScopes)
   group: AccountGroup;
 
-  @ManyToOne(() => OAuthScope, (scope: OAuthScope) => scope.name, { cascade: true })
+  @ManyToOne(() => OAuthScope, (scope: OAuthScope) => scope.id, { cascade: true })
   scope: OAuthScope;
 
   @ManyToOne(() => OAuthClientACL, (acl: OAuthClientACL) => acl.groupsWithScopes)

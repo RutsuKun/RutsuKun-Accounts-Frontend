@@ -1,3 +1,4 @@
+import { Config } from "@config";
 import {
   Middleware,
   Next,
@@ -16,6 +17,12 @@ export class ScopeMiddleware {
     }
 
     return (req: Req, res: Res, next: Next) => {
+      if (!Config.isProd) {
+        res.append(
+          "ExpectedScopes",
+          `${expectedScopes.join(" ")}`
+        );
+      }
       if (!res.user) res.status(401).json({ code: 401, error: "Unauthorized" });
 
       const error = (res) => {

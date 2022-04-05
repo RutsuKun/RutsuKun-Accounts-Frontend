@@ -6,6 +6,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
   VersionColumn,
 } from "typeorm";
 import bcrypt from "bcryptjs";
@@ -26,7 +27,10 @@ export class AccountEntity {
     Object.assign(this, account);
   }
 
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id?: number;
+
+  @Column()
   @Generated("uuid")
   uuid?: string;
 
@@ -72,19 +76,21 @@ export class AccountEntity {
 
   @ManyToMany(() => AccountGroup, (group) => group.accounts, { cascade: true })
   @JoinTable({
-    name: "AccountToGroup",
+    name: "oauth_accounts_groups",
     joinColumn: {
-      name: "account_uuid",
-      referencedColumnName: "uuid",
+      name: "account_id",
+      referencedColumnName: "id",
     },
     inverseJoinColumn: {
-      name: "group_name",
-      referencedColumnName: "name",
+      name: "group_id",
+      referencedColumnName: "id",
     },
   })
   groups?: AccountGroup[];
 
-  @OneToMany(() => AccountSession, (session) => session.account, { cascade: true })
+  @OneToMany(() => AccountSession, (session) => session.account, {
+    cascade: true,
+  })
   sessions?: AccountSession[];
 
   @OneToMany(() => CrossAclAccountScopeEntity, (scope) => scope.account)

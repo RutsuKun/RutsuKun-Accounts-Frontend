@@ -5,6 +5,7 @@ import {
     ManyToMany,
     OneToMany,
     PrimaryColumn,
+    PrimaryGeneratedColumn,
   } from "typeorm";
 import { CrossAclAccountScopeEntity } from "./CrossAclAccountScope";
 import { CrossAclGroupScopeEntity } from "./CrossAclGroupScope";
@@ -19,6 +20,9 @@ export class OAuthScope {
     Object.assign(this, scope);
   }
 
+  @PrimaryGeneratedColumn()
+  id?: number;
+
   @Generated("uuid")
   @Column()
   uuid?: string;
@@ -29,7 +33,7 @@ export class OAuthScope {
   @Column({ type: "boolean", default: false })
   system: boolean;
     
-  @PrimaryColumn()
+  @Column()
   name: string;
 
   @ManyToMany(() => OAuthClientACL, (acl) => acl.scopes, { onUpdate: "CASCADE", onDelete: "CASCADE" })

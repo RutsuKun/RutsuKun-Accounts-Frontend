@@ -36,7 +36,7 @@ export class AccountProvider {
   @Column({ type: "varchar" })
   picture?: string;
 
-  @ManyToOne(() => AccountEntity, (account) => account.emails, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "account_uuid", referencedColumnName: "uuid" })
+  @ManyToOne(() => AccountEntity, (account) => account.providers, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "account_id", referencedColumnName: "id" })
   account?: AccountEntity;
 }
