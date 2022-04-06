@@ -5,7 +5,7 @@
         <img *ngIf="!isAdmin && isDev" class="cursor-pointer" src="./../../../assets/images/logo/logo-light-dev.svg" height="40px" routerLink="/account/general" />
         <img *ngIf="!isAdmin && isProd" class="cursor-pointer" src="./../../../assets/images/logo/logo-light-prod.svg" height="40px" routerLink="/account/general" />
 
-        <app-header-account></app-header-account>
+        <app-header-account [isAdmin]="isAdmin"></app-header-account>
 
     </div>
 </header>

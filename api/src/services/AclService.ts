@@ -101,7 +101,7 @@ export class AclService {
         groups.push({
           name: groupWithScope.group.name,
           enabled: groupWithScope.group.enabled,
-          allowedScopes: [groupWithScope.scope.name],
+          allowedScopes: groupWithScope.scope ? [groupWithScope.scope.name] : [],
         });
       } else {
         const index = groups.findIndex((a) => a.name === foundGroup.name);

@@ -98,7 +98,7 @@ const oAuth2AuthorizationCodeFlow = (
 
       logger.success("Authorization code is fine.", null, true);
       const findAccount = await account.getByUUIDWithRelations(decoded.sub, ["emails",]);
-      let scopes: string[] = decoded.scp;
+      let scopes: string[] = decoded.scopes;
 
       const state = decoded.state;
 

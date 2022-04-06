@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
 import { AuthService } from '@core/services/auth.service';
 import { AuthFacade } from '@core/store/auth/auth.facade';
 import { environment } from '@env/environment';
+import { OidcSecurityService } from 'angular-auth-oidc-client';
 
 @Component({
   selector: "app-header-account",
@@ -15,16 +16,33 @@ export class HeaderAccountComponent implements OnInit {
   sessionsOther$ = this.authFacade.sessionsOther$;
 
   isDevelop = environment.envName === "DEV";
+  @Input() isAdmin = false;
+
+  adminAccount$ = this.oidcSecurityService.userData$;
 
   constructor(
     private authFacade: AuthFacade,
-    private authService: AuthService
+    private authService: AuthService,
+    private oidcSecurityService: OidcSecurityService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.oidcSecurityService.userData$.subscribe((b) => {
+   console.log('bbbbbbbbb', b);
+   
+ })
+  }
 
   logout() {
     this.authFacade.endSession();
+  }
+
+  logoutLocal() {
+    this.oidcSecurityService.logoffLocal();
+  }
+
+  logoutSession() {
+    this.oidcSecurityService.logoff();
   }
 
   changeSession(uuid: string) {

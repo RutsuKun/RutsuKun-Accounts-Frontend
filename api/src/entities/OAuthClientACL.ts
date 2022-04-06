@@ -56,11 +56,11 @@ export class OAuthClientACL {
     () => CrossAclAccountScopeEntity,
     (accountScope: CrossAclAccountScopeEntity) => accountScope.acl
   )
-  accountsWithScopes: CrossAclAccountScopeEntity[];
+  accountsWithScopes?: CrossAclAccountScopeEntity[];
 
   @OneToMany(
     () => CrossAclGroupScopeEntity,
     (groupScope: CrossAclGroupScopeEntity) => groupScope.acl
   )
-  groupsWithScopes: CrossAclGroupScopeEntity[];
+  groupsWithScopes?: CrossAclGroupScopeEntity[];
 }

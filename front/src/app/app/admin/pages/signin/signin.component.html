@@ -34,9 +34,9 @@
 
                 <div class="form" [formGroup]="authForm">
 
-                    <ng-container *ngIf="formError">
+                    <ng-container *ngIf="formError | async as error">
                         <span class="error block mb-2">
-                            {{ formError | async | translate }}
+                            {{ error | translate }}
                         </span>
                     </ng-container>
 
