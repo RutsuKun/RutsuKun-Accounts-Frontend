@@ -14,11 +14,12 @@ import { AccountsService } from "./AccountsService";
 import { EmailRepository } from "@repositories/EmailRepository";
 import { TokenService } from "./TokenService";
 import * as speakeasy from "speakeasy";
+import { AccountEntity } from "@entities/Account";
 
 @Injectable()
 export class AuthService {
   private logger: LoggerService;
-  private providers: IProvider<any>[] = [];
+  private providers: IProvider[] = [];
 
   @Inject()
   @UseConnection("default")
@@ -334,323 +335,43 @@ export class AuthService {
 
     }
 
-  //   public checkEmailExist(email: string) {
-  //     const ctx = this;
-  //     return new Promise<void>(async (resolve, reject) => {
-  //       if (Validate.isEmpty(email) || Validate.isUndefined(email)) {
-  //         ctx.logger.error("Account email missing", null, true);
-  //         return reject("ACCOUNT_EMAIL_MISSING");
-  //       }
+  async authWithProvider(providerId: string, account: AccountEntity, session: SessionService) {
+      const accountSessionExists = session.checkAccountSessionExists(account.uuid);
+      if (accountSessionExists) {
+        session.setCurrentSessionUuid(accountSessionExists.uuid);
+        session.delAction();
+        await session.saveSession();
+        return true;
+      }
 
-  //       if (!Validate.isEmail(email)) {
-  //         ctx.logger.error("Invalid email", null, true);
-  //         return reject("ACCOUNT_EMAIL_INVALID");
-  //       }
+      const newSession = await this.accountsService.addSession({
+        session_id: session.getSession.id,
+        session_issued: new Date(),
+        session_expires: session.getSession.cookie.expires,
+        account: account,
+        idp: providerId, // identity provider
+        amr: [providerId],
+      });
 
-  //       const account = await ctx.account.getAccountByEmail(email);
-
-  //       if (!account) {
-  //         ctx.logger.success("Email " + email + " is free", null, true);
-  //         return resolve();
-  //       } else {
-  //         ctx.logger.error("Email " + email + " is taken", null, true);
-  //         return reject("ACCOUNT_EMAIL_CANNOT_BE_USED");
-  //       }
-  //     });
-  //   }
-
-  //   public checkUsernameExist(username: string) {
-  //     const ctx = this;
-  //     return new Promise<void>(async (resolve, reject) => {
-  //       if (Validate.isEmpty(username) || Validate.isUndefined(username)) {
-  //         ctx.logger.error("Account username missing", null, true);
-  //         return reject("ACCOUNT_USERNAME_MISSING");
-  //       }
-
-  //       const account = await ctx.account.getAccountByUsername(username);
-
-  //       if (!account) {
-  //         ctx.logger.success("Username " + username + " is free", null, true);
-  //         return resolve();
-  //       } else {
-  //         ctx.logger.error("Username " + username + " is taken", null, true);
-  //         return reject("ACCOUNT_USERNAME_CANNOT_BE_USED");
-  //       }
-  //     });
-  //   }
-
-  //   async impersonate(email: string, req: Request) {
-  //     const ctx = this;
-  //     return new Promise<void>(async (resolve, reject) => {
-  //       const account = await ctx.account.getAccountByEmail(email);
-  //       if (!req.session.user || !req.session.user.logged) {
-  //         return reject("You must be logged in");
-  //       }
-  //       if (
-  //         account &&
-  //         account.role !== "admin" &&
-  //         req.session.user.role === "admin"
-  //       ) {
-  //         req.session.user.impersonate = {
-  //           logged: true,
-  //           impersonate: true,
-  //           id: account._id,
-  //           username: account.username,
-  //           email: account.email,
-  //           picture: "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //           role: account.role,
-  //         };
-  //         req.session.save(() => {
-  //           resolve();
-  //         });
-  //       } else {
-  //         ctx.logger.error(
-  //           "Account " +
-  //           req.session.user.username +
-  //           " (" +
-  //           req.session.user.id +
-  //           ") tried impersonate account " +
-  //           account.email +
-  //           " (" +
-  //           account._id +
-  //           ")",
-  //           null,
-  //           true,
-  //           req.session.user.id
-  //         );
-  //         reject("Account don't found or you haven't permission to impersonate.");
-  //       }
-  //     });
-  //   }
-
-  //   async authWithProvider(provider: string, req: Request, res: Response) {
-  //     const ctx = this;
-  //     const account = await ctx.account.getAccountByProvider(
-  //       provider,
-  //       req.user["id"]
-  //     );
-
-  //     if (account && !account.verified_email) {
-  //       req.session.error = "ACCOUNT_EMAIL_NOT_VERIFIED";
-  //       delete req.session.passport;
-  //       req.session.save(() => {
-  //         res.redirect(req.session.redirectTo);
-  //       });
-  //       return;
-  //     }
-  //     if (account && account.enabled2fa) {
-  //       ctx.logger.info("Account have 2fa", null, true);
-  //       req.session.action = {
-  //         type: "multifactor",
-  //         multifactor: {
-  //           type: "2fa",
-  //           accountId: account._id,
-  //           provider: provider,
-  //         },
-  //       };
-  //       delete req.session.passport;
-  //       req.session.save(() => {
-  //         res.redirect(req.session.redirectTo);
-  //       });
-  //       return;
-  //     }
-  //     switch (provider) {
-  //       case "discord":
-  //         if (account) {
-  //           ctx.logger.success(
-  //             account.username + " logged successful in OAuth",
-  //             null,
-  //             true
-  //           );
-
-  //           req.session.user = {
-  //             logged: true,
-  //             provider: "discord",
-  //             id: account._id,
-  //             username: account.username,
-  //             email: account.email,
-  //             picture: "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //           };
-
-  //           if (req.session.action && req.session.action.type === "connection") {
-  //             await account.providers.push({
-  //               provider: req.session.action.provider,
-  //               uid: req.session.action.id,
-  //             });
-  //             await account.save();
-  //             delete req.session.action;
-  //           }
-
-  //           delete req.session.passport;
-  //           req.session.save(() => {
-  //             res.redirect(
-  //               "https://auth-dev.rainingdreams.to/callback#logged=true"
-  //             );
-  //           });
-  //         } else {
-  //           const accountByEmail = await this.account.getAccountByEmail(
-  //             req.user["email"]
-  //           );
-  //           if (accountByEmail) {
-  //             req.session.action = {
-  //               type: "connection",
-  //               provider: "discord",
-  //               id: req.user["id"],
-  //               email: req.user["email"],
-  //             };
-  //           } else {
-  //             ctx.logger.error(req.user["email"] + " isn't registered");
-  //             req.session.action = {
-  //               type: "signup",
-  //               provider: "discord",
-  //               id: req.user["id"],
-  //               email: req.user["email"],
-  //             };
-  //           }
-  //           delete req.session.passport;
-  //           req.session.save(() => {
-  //             res.redirect(
-  //               "https://auth-dev.rainingdreams.to/callback#check=true"
-  //             );
-  //           });
-  //         }
-  //         break;
-  //       case "google":
-  //         if (account) {
-  //           const loginFields = [
-  //             { name: "ID", value: account._id },
-  //             { name: "Username", value: account.username },
-  //             { name: "Provider", value: "Google" },
-  //           ];
-  //           const embed = ctx.discord.createEmbed(
-  //             null,
-  //             "A new login in the system.",
-  //             "00931f",
-  //             loginFields,
-  //             "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //             "RutsuKun Accounts Notifier"
-  //           );
-  //           ctx.discord.sendMessageToChannel("737721370921664652", embed);
-
-  //           ctx.logger.success(
-  //             account.username + " logged successful in OAuth",
-  //             null,
-  //             true
-  //           );
-
-  //           req.session.user = {
-  //             logged: true,
-  //             provider: "google",
-  //             id: account._id,
-  //             username: account.username,
-  //             email: account.email,
-  //             picture: "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //           };
-
-  //           if (req.session.action && req.session.action.type === "connection") {
-  //             await account.providers.push({
-  //               provider: req.session.action.provider,
-  //               uid: req.session.action.id,
-  //             });
-  //             await account.save();
-  //             delete req.session.action;
-  //           }
-
-  //           delete req.session.passport;
-  //           req.session.save(() => {
-  //             res.redirect(
-  //               "https://auth-dev.rainingdreams.to/callback#logged=true"
-  //             );
-  //           });
-  //         } else {
-  //           const accountByEmail = await this.account.getAccountByEmail(
-  //             req.user["email"]
-  //           );
-  //           if (accountByEmail) {
-  //             req.session.action = {
-  //               type: "connection",
-  //               provider: "google",
-  //               id: req.user["id"],
-  //               email: req.user["email"],
-  //             };
-  //           } else {
-  //             ctx.logger.error(req.user["email"] + " isn't registered");
-  //             req.session.action = {
-  //               type: "signup",
-  //               provider: "google",
-  //               id: req.user["id"],
-  //               email: req.user["email"],
-  //             };
-  //           }
-  //           delete req.session.passport;
-  //           req.session.save(() => {
-  //             res.redirect(
-  //               "https://auth-dev.rainingdreams.to/callback#check=true"
-  //             );
-  //           });
-  //         }
-  //         break;
-  //       case "steam":
-  //         if (account) {
-  //           const loginFields = [
-  //             { name: "ID", value: account._id },
-  //             { name: "Username", value: account.username },
-  //             { name: "Provider", value: "Steam" },
-  //           ];
-  //           const embed = ctx.discord.createEmbed(
-  //             null,
-  //             "A new login in the system.",
-  //             "00931f",
-  //             loginFields,
-  //             "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //             "RutsuKun Accounts Notifier"
-  //           );
-  //           ctx.discord.sendMessageToChannel("737721370921664652", embed);
-
-  //           ctx.logger.success(
-  //             account.username + " logged successful in OAuth",
-  //             null,
-  //             true
-  //           );
-
-  //           req.session.user = {
-  //             logged: true,
-  //             provider: "steam",
-  //             id: account._id,
-  //             username: account.username,
-  //             email: account.email,
-  //             picture: "https://cdn-dev.rainingdreams.to/avatars/" + account._id,
-  //           };
-
-  //           if (req.session.action && req.session.action.type === "connection") {
-  //             await account.providers.push({
-  //               provider: req.session.action.provider,
-  //               uid: req.session.action.provider.id,
-  //             });
-  //             await account.save();
-  //             delete req.session.action;
-  //           }
-
-  //           delete req.session.passport;
-  //           req.session.save(() => {
-  //             res.redirect(
-  //               "https://auth-dev.rainingdreams.to/callback#logged=true"
-  //             );
-  //           });
-  //         } else {
-  //           req.session.action = {
-  //             type: "signup",
-  //           };
-  //           delete req.session.passport;
-  //           req.session.save(() => {
-  //             res.redirect(
-  //               "https://auth-dev.rainingdreams.to/callback#check=true"
-  //             );
-  //           });
-  //         }
-  //         break;
-  //     }
-  //   }
+      session.addBrowserSession({
+        uuid: newSession.uuid,
+        session_id: newSession.session_id,
+        session_issued: newSession.session_issued,
+        session_expires: newSession.session_expires,
+        amr: newSession.amr,
+        idp: newSession.idp,
+        account: {
+          uuid: account.uuid,
+          email: account.getPrimaryEmail(),
+          username: account.username,
+          picture: account.avatar,
+          role: account.role,
+        },
+      });
+      session.setCurrentSessionUuid(newSession.uuid);
+      session.delAction();
+      await session.saveSession();
+    }
 }
 
 export interface SigninData {
