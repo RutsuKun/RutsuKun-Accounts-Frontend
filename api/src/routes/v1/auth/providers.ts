@@ -541,7 +541,14 @@ export class AuthProvidersRoute {
           session.delAction();
           await session.saveSession();
 
-          return response.redirect(`${Config.FRONTEND.url}/account/general`);
+          let redirectUrl = `${Config.FRONTEND.url}/account/general`;
+
+          if (session.getFlow === "oauth")
+            redirectUrl = `${Config.FRONTEND.url}/signin?${new URLSearchParams(
+              session.getClientQuery as any
+            )}`;
+
+          return response.redirect(redirectUrl);
         }
 
         // IF NOT LOGGED ATTACH PROVIDER TO FINDED ACCOUNT BY EMAIL
@@ -569,7 +576,14 @@ export class AuthProvidersRoute {
         if (redirectTo) {
           return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
         } else {
-          return response.redirect(`${Config.FRONTEND.url}/account/general`);
+          let redirectUrl = `${Config.FRONTEND.url}/account/general`;
+
+          if (session.getFlow === "oauth")
+            redirectUrl = `${Config.FRONTEND.url}/signin?${new URLSearchParams(
+              session.getClientQuery as any
+            )}`;
+
+          return response.redirect(redirectUrl);
         }
       }
 
@@ -590,7 +604,14 @@ export class AuthProvidersRoute {
         if (redirectTo) {
           return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
         } else {
-          return response.redirect(`${Config.FRONTEND.url}/account/general`);
+          let redirectUrl = `${Config.FRONTEND.url}/account/general`;
+
+          if (session.getFlow === "oauth")
+            redirectUrl = `${Config.FRONTEND.url}/signin?${new URLSearchParams(
+              session.getClientQuery as any
+            )}`;
+
+          return response.redirect(redirectUrl);
         }
       }
     } else {
@@ -611,7 +632,14 @@ export class AuthProvidersRoute {
           session
         );
 
-        return response.redirect(`${Config.FRONTEND.url}/account/general`);
+        let redirectUrl = `${Config.FRONTEND.url}/account/general`;
+
+        if (session.getFlow === "oauth")
+          redirectUrl += `${Config.FRONTEND.url}/signin?${new URLSearchParams(
+            session.getClientQuery as any
+          )}`;
+
+        return response.redirect(redirectUrl);
       }
 
       // IF NOT LOGGED TRY SIGNUP ACCOUNT WITH ATTACHED PROVIDER
@@ -641,7 +669,14 @@ export class AuthProvidersRoute {
         if (redirectTo) {
           return response.redirect(`${Config.FRONTEND.url}${redirectTo}`);
         } else {
-          return response.redirect(`${Config.FRONTEND.url}/account/general`);
+          let redirectUrl = `${Config.FRONTEND.url}/account/general`;
+
+          if (session.getFlow === "oauth")
+            redirectUrl += `${Config.FRONTEND.url}/signin?${new URLSearchParams(
+              session.getClientQuery as any
+            )}`;
+
+          return response.redirect(redirectUrl);
         }
       } catch (error) {
         session.delAction();
@@ -684,11 +719,10 @@ export class AuthProvidersRoute {
         (provider) => provider.provider === providerId
       );
       if (account && findProvider) {
-        this.accountsService.removeProvider(findProvider);
-        return response.redirect(`${Config.FRONTEND.url}/account/general`);
-      } else {
-        return response.redirect(`${Config.FRONTEND.url}/account/general`);
+        await this.accountsService.removeProvider(findProvider);
       }
+
+      return response.redirect(`${Config.FRONTEND.url}/account/general`);
     } catch (err) {
       console.log("err", err);
     }

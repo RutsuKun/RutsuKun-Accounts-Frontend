@@ -64,12 +64,13 @@ export class LocalStorage {
         clientId: "admin-portal",
         scope: environment.admin_portal_scopes,
         responseType: "code",
-        silentRenew: true,
+        silentRenew: false,
         silentRenewUrl: `${window.location.origin}/silent-renew.html`,
         logLevel: LogLevel.Debug,
         storage: new LocalStorage(),
         unauthorizedRoute: "/admin/signin?error=Admin portal access denied by authorization server",
-        startCheckSession: false
+        startCheckSession: false,
+        useRefreshToken: true
       },
     }),
     StoreModule.forRoot(reducers, {

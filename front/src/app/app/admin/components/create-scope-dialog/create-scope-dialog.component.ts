@@ -11,7 +11,8 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
 export class AdminCreateScopeDialogComponent implements OnInit {
   form: FormGroup = this.fb.group({
     name: this.fb.control(null, Validators.required),
-    default: this.fb.control(false)
+    default: this.fb.control(false),
+    system: this.fb.control(false)
   });
   constructor(private fb: FormBuilder, public formService: FormService, private api: AdminApiService, private ref: DynamicDialogRef) { }
 

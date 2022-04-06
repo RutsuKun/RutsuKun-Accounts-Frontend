@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { AuthFacade } from '@core/store/auth/auth.facade';
 import { environment } from '@env/environment';
@@ -23,7 +24,8 @@ export class HeaderAccountComponent implements OnInit {
   constructor(
     private authFacade: AuthFacade,
     private authService: AuthService,
-    private oidcSecurityService: OidcSecurityService
+    private oidcSecurityService: OidcSecurityService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -39,6 +41,7 @@ export class HeaderAccountComponent implements OnInit {
 
   logoutLocal() {
     this.oidcSecurityService.logoffLocal();
+    this.router.navigate(["/admin/signin"]);
   }
 
   logoutSession() {

@@ -297,11 +297,8 @@ export class OAuth2Route {
 
     const acl = await this.aclService.getAcl(session.getClientQuery.client_id);
 
-    console.log('acl------------------------>', acl);
     
     scopeToAuthorize = this.oauthService.filterAllowedScopes(account, acl, scopeToAuthorize);
-
-    console.log("scopeToAuthorize---------------->", scopeToAuthorize);
     
 
     scopeToAuthorize = scopeToAuthorize;

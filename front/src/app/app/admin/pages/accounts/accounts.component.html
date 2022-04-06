@@ -7,20 +7,11 @@
             </div>
             <button pButton class="p-button-sm bg-white text-black-alpha-90 font-bold uppercase" label="Create" disabled></button>
         </div>
-        <div class="card__content">
-            <p-table #dt2 [value]="accounts" dataKey="id" [rows]="10" [showCurrentPageReport]="true"
+        <div class="card__content p-2">
+            <p-table styleClass="card-table" #dt2 [value]="accounts" dataKey="id" [rows]="10" [showCurrentPageReport]="true"
                 [rowsPerPageOptions]="[5,10,15, 20, 50]" [paginator]="true"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} accounts"
                 [globalFilterFields]="['username', 'emails.email','role','state']" responsiveLayout="scroll">
-                <ng-template pTemplate="caption">
-                    <div class="p-d-flex">
-                        <span class="p-input-icon-left p-ml-auto">
-                            <i class="pi pi-search"></i>
-                            <input pInputText type="text" (input)="dt2.filterGlobal($event.target['value'], 'contains')"
-                                placeholder="Search keyword" />
-                        </span>
-                    </div>
-                </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
                         <th>Picture</th>

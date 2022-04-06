@@ -23,11 +23,12 @@ import { OAuthDeviceCode } from "@entities/OAuthDeviceCode";
 import { Config } from "@config";
 import crypto from "crypto";
 import { AccountsService } from "./AccountsService";
-import { OAuthClientACL } from "@entities/OAuthClientACL";
 import { AccountEntity } from "@entities/Account";
 import { IAcl } from "common/interfaces/acl.interface";
+import { AclService } from "./AclService";
 
 import _ from 'lodash';
+
 
 @Injectable()
 export class OAuth2Service {
@@ -48,7 +49,8 @@ export class OAuth2Service {
     private sessionService: SessionService,
     private tokenService: TokenService,
     private clientService: ClientService,
-    private accountsService: AccountsService
+    private accountsService: AccountsService,
+    private aclService: AclService
   ) {
     this.logger = this.loggerService.child({
       label: {
@@ -104,10 +106,21 @@ export class OAuth2Service {
           "Authorization in progress for " + userUsername + " (" + userId + ")"
         );
 
+
+        let scopeToAuthorize = session.getClientQuery.scope.split(" ");
+
+        const account = await this.accountsService.getByUUIDWithRelations(session.getCurrentSessionAccount.uuid, ["groups"]);
+
+        const acl = await this.aclService.getAcl(session.getClientQuery.client_id);
+
+        
+        scopeToAuthorize = this.filterAllowedScopes(account, acl, scopeToAuthorize);
+
+
         const data = await this.authorize({
           response_type: clientFromQuery.response_type,
           redirect_uri: clientFromQuery.redirect_uri,
-          scopes: clientFromQuery.scope ? clientFromQuery.scope.split(" ") : [],
+          scopes: scopeToAuthorize,
           accountId: userId,
           country,
           code_challenge: clientFromQuery.code_challenge,

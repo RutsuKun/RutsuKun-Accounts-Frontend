@@ -9,7 +9,7 @@
             <button pButton class="p-button-sm bg-white text-black-alpha-90 font-bold uppercase" label="Create" disabled></button>
         </div>
         <div class="card__content">
-            <p-table [value]="groups" dataKey="name" responsiveLayout="scroll">
+            <p-table styleClass="card-table" [value]="groups" dataKey="name" responsiveLayout="scroll">
                 <ng-template pTemplate="header">
                     <tr>
                         <th style="width: 3rem"></th>

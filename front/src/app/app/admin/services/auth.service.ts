@@ -31,13 +31,6 @@ export class AuthService {
 
   public authorize() {
 
-    // this.oidcSecurityService.authorize("default", {
-    //   customParams: {
-    //     acr_values: "urn:rutsukun:bronze",
-    //     service: "admin-portal",
-    //   },
-    // });
-    // return;
     try {
       this.oidcSecurityService
       .authorizeWithPopUp(
@@ -46,6 +39,9 @@ export class AuthService {
             display: "popup",
             service: "admin-portal"
           },
+          urlHandler: (url: string) => {
+            console.log('url handler', url);
+          }
         },
         {
           width: 700,
