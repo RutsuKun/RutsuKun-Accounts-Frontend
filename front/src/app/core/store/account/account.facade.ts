@@ -4,7 +4,7 @@ import { AppState } from '..';
 import * as a from './account.actions';
 import * as s from './account.selectors';
 import { MessageService } from 'primeng/api';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { IOAuth2Client } from '@core/interfaces/IOAuth2Client';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
@@ -82,8 +82,12 @@ export class AccountFacade {
     this.store.dispatch(a.accountClientsCreateRequest({ data }));
   }
 
-  fetchClient(client_id: string) {
-    this.store.dispatch(a.accountClientFetchRequest({ client_id }));
+  fetchClient(client_id: string): Observable<IOAuth2Client> {
+    return this.http.get<IOAuth2Client>(`${environment.api}/v1/oauth2/clients/${client_id}`, { withCredentials: true });
+  }
+
+  updateClient(client_id: string, client: IOAuth2Client): Observable<IOAuth2Client> {
+    return this.http.put<IOAuth2Client>(`${environment.api}/v1/oauth2/clients/${client_id}`, client,  { withCredentials: true });
   }
 
   mfaInitFlow(flow: "otp") {

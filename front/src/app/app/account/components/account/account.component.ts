@@ -1,11 +1,11 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { IAccount } from '@core/interfaces/IAccount';
-import { AccountFacade } from '@core/store/account/account.facade';
-import { AuthFacade } from '@core/store/auth/auth.facade';
-import { ISession } from '@core/store/auth/auth.state';
-import { MenuItem } from 'primeng/api';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { IAccount } from "@core/interfaces/IAccount";
+import { AccountFacade } from "@core/store/account/account.facade";
+import { AuthFacade } from "@core/store/auth/auth.facade";
+import { ISession } from "@core/store/auth/auth.state";
+import { MenuItem } from "primeng/api";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
   selector: "app-account-page",
@@ -16,37 +16,26 @@ export class AccountComponent implements OnInit, OnDestroy {
   uns$ = new Subject();
   account: ISession = null;
 
-  menu: MenuItem[] = [
+  navigation: MenuItem[] = [
     {
-      label: "General",
-      items: [
-        {
-          label: "Account",
-          icon: "pi pi-cog",
-          routerLink: "/account/general",
-        },
-        {
-          label: "Sessions",
-          icon: "pi pi-lock",
-          routerLink: "/account/sessions",
-        },
-      ],
+      label: "Account",
+      icon: "pi pi-cog",
+      routerLink: "/account/general",
     },
     {
-      label: "OAuth2",
-      items: [
-        {
-          label: "Apps",
-          icon: "pi pi-table",
-          routerLink: "/account/apps",
-        },
-      ],
+      label: "Sessions",
+      icon: "pi pi-lock",
+      routerLink: "/account/sessions",
+    },
+
+    {
+      label: "Apps",
+      icon: "pi pi-table",
+      routerLink: "/account/apps",
     },
   ];
 
-  constructor(
-    private authFacade: AuthFacade
-  ) {}
+  constructor(private authFacade: AuthFacade) {}
 
   ngOnInit(): void {
     this.subscribeCurrentSession();

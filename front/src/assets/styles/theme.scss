@@ -1485,8 +1485,8 @@ p-radiobutton.ng-dirty.ng-invalid > .p-radiobutton > .p-radiobutton-box {
   color: #71717A;
 }
 .p-selectbutton .p-button.p-highlight {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
   color: #ffffff;
 }
 .p-selectbutton .p-button.p-highlight .p-button-icon-left,
@@ -1494,8 +1494,8 @@ p-radiobutton.ng-dirty.ng-invalid > .p-radiobutton > .p-radiobutton-box {
   color: #ffffff;
 }
 .p-selectbutton .p-button.p-highlight:hover {
-  background: var(--primary-color-hover);
-  border-color: var(--primary-color-hover);
+  background: var(--primary-color-hover) !important;
+  border-color: var(--primary-color-hover) !important;
   color: #ffffff;
 }
 .p-selectbutton .p-button.p-highlight:hover .p-button-icon-left,
