@@ -1,5 +1,5 @@
-<header class="header flex flex-row fixed top-0 z-5">
-    <div class="header-wrapper w-11 lg:w-10">
+<header class="header flex flex-row" [class.isAdmin]="isAdmin">
+    <div class="header-wrapper">
         <img *ngIf="isAdmin && isDev" class="cursor-pointer" src="./../../../assets/images/logo/admin/logo-light-admin-dev.svg" height="40px" routerLink="/admin" />
         <img *ngIf="isAdmin && isProd" class="cursor-pointer" src="./../../../assets/images/logo/admin/logo-light-admin-prod.svg" height="40px" routerLink="/admin" />
         <img *ngIf="!isAdmin && isDev" class="cursor-pointer" src="./../../../assets/images/logo/logo-light-dev.svg" height="40px" routerLink="/account/general" />

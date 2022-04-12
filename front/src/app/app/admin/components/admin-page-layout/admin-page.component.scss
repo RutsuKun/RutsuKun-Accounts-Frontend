@@ -42,38 +42,3 @@
         }
     }
 }
-
-.page-nav {
-    min-width: 200px;
-    .nav-link {
-        padding: 0.7rem 1rem;
-        border-left: 4px solid transparent;
-        margin-bottom: 5px;
-        cursor: pointer;
-        border-radius: 8px;
-        color: white;
-        &.active {
-            border-left: 4px solid var(--primary-color);
-            font-weight: 800 !important;
-        }
-        &:hover {
-            background: rgba(0, 0, 0, 0.1);
-        }
-    }
-    .nav-sub-link {
-        padding: 0.4rem 1rem;
-        border-left: 4px solid transparent;
-        margin-bottom: 5px;
-        cursor: pointer;
-        margin-left: 3rem;
-        border-radius: 8px;
-        color: white;
-        &.active {
-            border-left: 4px solid #6f6aef;
-            font-weight: 800 !important;
-        }
-        &:hover {
-            background: rgba(0, 0, 0, 0.1);
-        }
-    }
-}

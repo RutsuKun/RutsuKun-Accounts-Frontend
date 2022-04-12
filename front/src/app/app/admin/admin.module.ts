@@ -66,7 +66,6 @@ import { DialogService } from "primeng/dynamicdialog";
     AdminSettingsComponent,
     AdminCreateScopeDialogComponent,
     AdminCreateAppDialogComponent,
-
   ],
 })
 export class AdminModule implements OnDestroy {

@@ -1,5 +1,9 @@
-<app-header [isAdmin]="true"></app-header>
-
-<main class="admin-layout w-12 lg:w-10">
-    <router-outlet></router-outlet>
-</main>
+<div class="flex flex-row">
+  <app-admin-sidebar></app-admin-sidebar>
+  <div class="flex flex-column flex-1">
+    <app-header [isAdmin]="true"></app-header>
+    <main class="admin-layout">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

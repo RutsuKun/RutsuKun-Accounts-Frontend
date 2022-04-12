@@ -1,6 +1,10 @@
 .admin-layout {
-    max-width: 1500px;
-    min-height: calc(100vh - 160px - 64px);
-    margin: 0 auto;
-    padding-top: 95px;
+  min-height: calc(100vh - 160px - 64px);
+  padding: 10px;
+}
+
+app-header {
+    position: sticky;
+    top: 0;
+    z-index: 999;
 }

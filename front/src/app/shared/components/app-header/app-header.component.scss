@@ -2,9 +2,10 @@
     height: 85px;
     width: 100%;
     background-color: #111111;
+    flex: 1;
     .header-wrapper {
-        max-width: 1500px;
-        margin: 0 auto;
+        width: 100% !important;
+        padding: 0 20px;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
         flex: none;
