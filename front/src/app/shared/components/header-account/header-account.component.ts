@@ -28,12 +28,7 @@ export class HeaderAccountComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
-    this.oidcSecurityService.userData$.subscribe((b) => {
-   console.log('bbbbbbbbb', b);
-   
- })
-  }
+  ngOnInit(): void {}
 
   logout() {
     this.authFacade.endSession();

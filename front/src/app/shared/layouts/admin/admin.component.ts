@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { OidcSecurityService } from "angular-auth-oidc-client";
 import { MenuItem } from "primeng/api";
 
 @Component({
@@ -7,6 +8,7 @@ import { MenuItem } from "primeng/api";
   styleUrls: ["admin.component.scss"],
 })
 export class AdminLayoutComponent {
+  userData$ = this.oidcService.userData$;
 
-  constructor() {}
+  constructor(private oidcService: OidcSecurityService) {}
 }
