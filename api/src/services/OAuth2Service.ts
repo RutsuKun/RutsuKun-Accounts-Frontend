@@ -28,6 +28,7 @@ import { IAcl } from "common/interfaces/acl.interface";
 import { AclService } from "./AclService";
 
 import _ from 'lodash';
+import { OAuthAuthorizationRepository } from "@repositories/OAuthAuthorizationRepository";
 
 
 @Injectable()
@@ -44,6 +45,10 @@ export class OAuth2Service {
   @UseConnection("default")
   private oauthDeviceCode: OAuthDeviceCodeRepository;
 
+  @Inject()
+  @UseConnection("default")
+  private oauthAuthorizationRepository: OAuthAuthorizationRepository;
+
   constructor(
     private loggerService: LoggerService,
     private sessionService: SessionService,
@@ -58,17 +63,6 @@ export class OAuth2Service {
         name: "Auth Manager",
       },
     });
-  }
-
-  public healthy() {
-    const ctx = this;
-    ctx.logger.info(`Requested ${this.name} Component Healthy Check`);
-    const healthy = {
-      name: this.name,
-      slug: "oauth2",
-      healthy: ctx.running,
-    };
-    return healthy;
   }
 
   public async checkConsent(req: Request, res: Response, session: SessionService) {
@@ -755,6 +749,10 @@ export class OAuth2Service {
       user_code,
     });
     return findDeviceToken;
+  }
+
+  async getAuthorizations() {
+    return this.oauthAuthorizationRepository.findAll()
   }
 }
 
