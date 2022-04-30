@@ -90,7 +90,7 @@ export class SessionService {
     const error = req.session.error;
 
     const flow = req.body.flow || req.session.flow || "auth";
-    const prompt = req.body.prompt || req.session.clientFromQuery.prompt || null;
+    const prompt = req.body.prompt || req.session.clientFromQuery ? req.session.clientFromQuery.prompt : null;
 
     const browserSessions = await this.accountsService.getBrowserSessionsEndpoint(session_id);
     this.setBrowserSessions(browserSessions);
@@ -101,7 +101,7 @@ export class SessionService {
     if (idp) this.setIDP(idp);
     if (sso) this.setSSO(sso);
     if (action) this.setAction(action);
-    this.setPrompt(prompt);
+    if (prompt) this.setPrompt(prompt);
     this.setFlow(flow);
     if (error) this.setError(error);
 
