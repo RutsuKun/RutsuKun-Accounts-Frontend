@@ -64,7 +64,7 @@ export const authSessionsChangeFail = createAction(
 
 export const authCheckRequest = createAction(
   "[Auth] Check - Request",
-  props<{ flow: "auth" | "oauth" }>()
+  props<{ flow: "auth" | "oauth", prompt: "login" | "consent" | "signup" | "none" | "select_account" }>()
 );
 export const authCheckSuccess = createAction(
   "[Auth] Check - Success",
@@ -148,6 +148,21 @@ export const authAuthorizeSuccess = createAction(
 export const authAuthorizeFail = createAction(
   "[Auth] Authorize - Fail",
   props<{ error: any }>()
+);
+
+// auth signin
+
+export const authChooseAccountRequest = createAction(
+  "[Auth] Choose Account - Request",
+  props<{ account_uuid: any }>()
+);
+export const authChooseAccountSuccess = createAction(
+  "[Auth] Choose Account - Success",
+  props<{ data: any }>()
+);
+export const authChooseAccountFail = createAction(
+  "[Auth] Choose Account - Fail",
+  props<{ error: string }>()
 );
 
 // fetch app info

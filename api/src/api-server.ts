@@ -47,7 +47,7 @@ const apiDir = __dirname;
       username: Config.Database.user,
       password: Config.Database.pass,
       database: Config.Database.database,
-      logging: !Config.isLocal,
+      logging: Config.isLocal,
       synchronize: Config.isLocal || Config.isDevelop,
       driver: require("mysql2"),
       entities: [`${apiDir}/entities/*{.ts,.js}`],

@@ -90,6 +90,7 @@ export class SessionService {
     const error = req.session.error;
 
     const flow = req.body.flow || req.session.flow || "auth";
+    const prompt = req.body.prompt || req.session.clientFromQuery.prompt;
 
     const browserSessions = await this.accountsService.getBrowserSessionsEndpoint(session_id);
     this.setBrowserSessions(browserSessions);
@@ -100,6 +101,7 @@ export class SessionService {
     if (idp) this.setIDP(idp);
     if (sso) this.setSSO(sso);
     if (action) this.setAction(action);
+    this.setPrompt(prompt);
     this.setFlow(flow);
     if (error) this.setError(error);
 
@@ -362,6 +364,23 @@ export class SessionService {
     return this;
   }
 
+  // PROMPT
+
+  get getPrompt() {
+    return this.clientQuery.prompt;
+  }
+
+  setPrompt(prompt) {
+    this.clientQuery.prompt = prompt;
+    return this;
+  }
+
+  delPrompt() {
+    this.loggerService.info("function delPrompt");
+    this.clientQuery.prompt = null;
+    return this;
+  }
+
   // OAUTH //
 
   get getOAuth() {
@@ -449,7 +468,7 @@ export interface SessionClientQuery {
   scope: string;
   state: string;
   nonce: string;
-  prompt: "login" | "signup" | "consent" | "none";
+  prompt: "login" | "signup" | "consent" | "select_account" | "none";
   code_challenge: string;
   code_challenge_method: string;
 }

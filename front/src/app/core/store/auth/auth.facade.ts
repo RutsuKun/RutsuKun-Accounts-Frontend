@@ -48,8 +48,8 @@ export class AuthFacade {
     this.store.dispatch(a.authSessionsChangeRequest({ uuid }));
   }
 
-  check(flow: "auth" | "oauth") {
-    this.store.dispatch(a.authCheckRequest({ flow }));
+  check(flow: "auth" | "oauth", prompt?: "login" | "consent" | "signup" | "none" | "select_account") {
+    this.store.dispatch(a.authCheckRequest({ flow, prompt }));
   }
 
   signin(data: any) {
@@ -76,6 +76,10 @@ export class AuthFacade {
 
   authorize({ consentGiven, scope }) {
     this.store.dispatch(a.authAuthorizeRequest({ consentGiven, scope }));
+  }
+
+  chooseAccount(account_uuid: string) {
+    this.store.dispatch(a.authChooseAccountRequest({ account_uuid }));
   }
 
   logout() {

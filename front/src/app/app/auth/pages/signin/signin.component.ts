@@ -67,14 +67,14 @@ export class SignInComponent implements OnInit, OnDestroy {
 
       this.clientFromQuery = query.keys;
 
-      this.checkAuthorization();
+      this.checkAuthorization(query.get("prompt"));
 
     });
   }
 
-  checkAuthorization() {
+  checkAuthorization(prompt) {
     this.recaptchaV3Service.execute("check").subscribe(() => {
-      this.authFacade.check(this.flow);
+      this.authFacade.check(this.flow, prompt);
     });
   }
 

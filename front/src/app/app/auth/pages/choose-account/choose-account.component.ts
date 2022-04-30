@@ -1,13 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { AuthFacade } from '@core/store/auth/auth.facade';
+import { Subject } from 'rxjs';
+import { pairwise, takeUntil } from 'rxjs/operators';
 
 @Component({
   templateUrl: './choose-account.component.html',
   styleUrls: ['./choose-account.component.scss']
 })
-export class ChooseAccountComponent implements OnInit {
+export class ChooseAccountComponent implements OnInit, OnDestroy {
+  uns$ = new Subject();
+
   flow: "auth" | "oauth" = null;
 
   appInfoData$ = this.authFacade.appInfoData$;
@@ -23,6 +27,12 @@ export class ChooseAccountComponent implements OnInit {
 
   ngOnInit(): void {
     this.subscribeQuery();
+    this.subscribeSessions();
+  }
+
+  ngOnDestroy(): void {
+    this.uns$.next();
+    this.uns$.complete();
   }
 
   subscribeQuery() {
@@ -37,8 +47,18 @@ export class ChooseAccountComponent implements OnInit {
     });
   }
 
+  subscribeSessions() {
+    this.sessions$.pipe(takeUntil(this.uns$), pairwise()).subscribe(([prev, curr])=>{
+      if(!prev.length && !curr.length) this.authService.redirectToSignIn();
+    })
+  }
+
+  chooseAccount(account_uuid: string) {
+    this.authFacade.chooseAccount(account_uuid);
+  }
+
   goToSignIn() {
-    this.authService.redirectToSignIn();
+    this.authService.redirectToSignInNextAccount();
   }
 
 }

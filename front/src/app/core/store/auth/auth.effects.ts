@@ -180,12 +180,28 @@ export class AuthEffects {
     { dispatch: true }
   );
 
+  authChooseAccountRequest = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(a.authChooseAccountRequest),
+        switchMap(({ account_uuid }) =>
+          this.http.post(`${environment.auth}/choose-account`, { account_uuid }, { withCredentials: true }).pipe(
+            map((res: any) => a.authChooseAccountSuccess({ data: res })),
+            catchError((res: HttpErrorResponse) =>
+              of(a.authChooseAccountFail({ error: res.error.error }))
+            )
+          )
+        )
+      ),
+    { dispatch: true }
+  );
+
   authCheckRequest = createEffect(
     () =>
       this.actions$.pipe(
         ofType(a.authCheckRequest),
-        switchMap(({ flow }) =>
-          this.http.post(`${environment.auth}`, { flow }, { withCredentials: true }).pipe(
+        switchMap(({ flow, prompt }) =>
+          this.http.post(`${environment.auth}`, { flow, prompt }, { withCredentials: true }).pipe(
             map((res: any) => a.authCheckSuccess({ data: res })),
             catchError((error: HttpErrorResponse) =>
               of(a.authCheckFail({ data: error.error }))
@@ -217,14 +233,19 @@ export class AuthEffects {
   authSuccess = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(a.authCheckSuccess, a.authSigninSuccess, a.authSignupSuccess,  a.authReAuthSuccess, a.authMultifactorSuccess, a.authAuthorizeSuccess, a.authCompleteConnectProviderSuccess),
+        ofType(
+          a.authCheckSuccess,
+          a.authSigninSuccess,
+          a.authSignupSuccess, 
+          a.authReAuthSuccess,
+          a.authMultifactorSuccess,
+          a.authAuthorizeSuccess,
+          a.authChooseAccountSuccess,
+          a.authCompleteConnectProviderSuccess
+        ),
         tap(({ data }) => {
           this.store.dispatch(a.authSessionsFetchRequest());
           this.route.queryParamMap.subscribe((params)=>{
-            if (params.has("prompt") && params.get("prompt") === "login") {
-              return;
-            }
-
             const type = data.type;
             switch (type) {
               case "auth":

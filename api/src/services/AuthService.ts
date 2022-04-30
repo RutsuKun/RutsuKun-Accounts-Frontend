@@ -124,7 +124,6 @@ export class AuthService {
         return resolve({ type: "error", error: "ACCOUNT_BANNED" });
       }
 
-
       // IN THIS MOMENT USER IS LOGGED SUCCESSFUL
 
       ctx.logger.success(
@@ -135,7 +134,9 @@ export class AuthService {
 
       const auth_time = Math.floor(Date.now() / 1000);
 
-      const accountSessionExists = session.checkAccountSessionExists(account.uuid);
+      const accountSessionExists = session.checkAccountSessionExists(
+        account.uuid
+      );
       this.logger.info(JSON.stringify(accountSessionExists));
       if (!accountSessionExists) {
         const newSession = await this.accountsService.addSession({
@@ -159,19 +160,18 @@ export class AuthService {
             email: account.getPrimaryEmail(),
             username: account.username,
             picture: account.avatar,
-            role: account.role
-          }
+            role: account.role,
+          },
         });
         session.setCurrentSessionUuid(newSession.uuid);
       } else {
         session.setCurrentSessionUuid(accountSessionExists.uuid);
       }
 
-
       session.setIDP({
         auth_time: auth_time,
         reauth_time: auth_time,
-        used_authn_methods: []
+        used_authn_methods: [],
       });
 
       await session.saveSession();
@@ -234,7 +234,7 @@ export class AuthService {
       );
 
       // todo: refactor
-        
+
       // const auth_time = Math.floor(Date.now() / 1000);
 
       // session.setUser({
@@ -256,122 +256,198 @@ export class AuthService {
       // resolve({
       //   type: "logged-in"
       // })
-
     });
+  }
+
+  public async chooseAccount(
+    { account_uuid },
+    session: SessionService
+  ): Promise<any> {
+    const ctx = this;
+    let error = null;
+    const errors = {
+      email: null,
+      password: null,
+    };
+
+    if (
+      Validate.isNull(account_uuid) ||
+      Validate.isEmpty(account_uuid) ||
+      Validate.isUndefined(account_uuid)
+    ) {
+      throw new Error("ACCOUNT_UUID_MISSING");
+    }
+
+    const foundSession = session.checkAccountSessionExists(account_uuid);
+
+    if (!foundSession) {
+      throw new Error("ACCOUNT_SESSION_NOT_EXIST");
+    }
+
+    const account = await ctx.accountsService.getByUUIDWithRelations(
+      account_uuid,
+      ["emails"]
+    );
+
+    if (!account) {
+      throw new Error("ACCOUNT_NOT_EXIST");
+    }
+
+    if (!account.isPrimaryEmailVerified()) {
+      throw new Error("ACCOUNT_EMAIL_NOT_VERIFIED");
+    }
+
+    // IN THIS MOMENT USER IS LOGGED SUCCESSFUL
+
+    const auth_time = Math.floor(Date.now() / 1000);
+
+    session.setCurrentSessionUuid(foundSession.uuid);
+
+    session.setIDP({
+      auth_time: auth_time,
+      reauth_time: auth_time,
+      used_authn_methods: [],
+    });
+
+    await session.saveSession();
+
+    return {
+      type: "logged-in",
+    };
   }
 
   public getProviders() {
     return this.providers;
   }
 
-  public async checkMfaAuthnRequired(accountId: string, session: SessionService, acr_values: string = 'urn:rutsukun:bronze') {
-    const account = await this.accountsService.getByUUIDWithRelations(accountId, ["authn_methods"]);
-    const enabledMethod =  account.authn_methods.find(m => !!m.enabled);
+  public async checkMfaAuthnRequired(
+    accountId: string,
+    session: SessionService,
+    acr_values: string = "urn:rutsukun:bronze"
+  ) {
+    const account = await this.accountsService.getByUUIDWithRelations(
+      accountId,
+      ["authn_methods"]
+    );
+    const enabledMethod = account.authn_methods.find((m) => !!m.enabled);
 
-    if(account.authn_methods.length && enabledMethod) {
-
-      if(acr_values === 'urn:rutsukun:bronze') return null;
-      if(session.getIDP.used_authn_methods.find(m => m.method === enabledMethod.type)) return null;
+    if (account.authn_methods.length && enabledMethod) {
+      if (acr_values === "urn:rutsukun:bronze") return null;
+      if (
+        session.getIDP.used_authn_methods.find(
+          (m) => m.method === enabledMethod.type
+        )
+      )
+        return null;
 
       return {
         type: "multifactor",
         multifactor: {
           type: enabledMethod.type,
-          token: await this.tokenService.createMfaToken(account.uuid, enabledMethod.type)
-        }
-      }
-
+          token: await this.tokenService.createMfaToken(
+            account.uuid,
+            enabledMethod.type
+          ),
+        },
+      };
     } else {
       return null;
     }
   }
 
-    public async multifactor(code: string, token: string, session: SessionService): Promise<any> {
+  public async multifactor(
+    code: string,
+    token: string,
+    session: SessionService
+  ): Promise<any> {
+    const { valid, data } = this.tokenService.verifyMfaToken(token);
 
-        const { valid, data } = this.tokenService.verifyMfaToken(token);
+    if (valid && data.multifactor.type === "OTP") {
+      const accountId = data.multifactor.accountId;
 
-        if (valid && data.multifactor.type === "OTP") {
-          const accountId = data.multifactor.accountId;
+      const account = await this.accountsService.getByUUIDWithRelations(
+        accountId,
+        ["authn_methods"]
+      );
+      const method = account.authn_methods.find((m) => m.type === "OTP");
 
-          const account = await this.accountsService.getByUUIDWithRelations(accountId, ["authn_methods"]);
-          const method = account.authn_methods.find(m => m.type === "OTP");
-
-          if(accountId !== account.uuid) {
-            return { type: "error", error: "TOKEN_ACCOUNT_INVALID" };
-          }
-
-          const verified = speakeasy.totp.verify({
-            secret: method.data.secret,
-            encoding: "base32",
-            token: code,
-          });
-          
-          if (verified) {
-
-            session.setIDP({
-              ...session.getIDP,
-              used_authn_methods: [
-                ...session.getIDP.used_authn_methods,
-                {
-                  method: 'OTP',
-                  first_used_date: new Date(),
-                  last_used_date: new Date()
-                }
-              ]
-            });
-
-            await session.saveSession()
-
-
-            return { type: "logged-in" };
-
-          } else {
-
-            return { type: "error", error: "INVALID_CODE" };
-          }
-        } else {
-          return { type: "error", error: "INVALID_MULTIFACTOR_TYPE" };
-        }
-
-    }
-
-  async authWithProvider(providerId: string, account: AccountEntity, session: SessionService) {
-      const accountSessionExists = session.checkAccountSessionExists(account.uuid);
-      if (accountSessionExists) {
-        session.setCurrentSessionUuid(accountSessionExists.uuid);
-        session.delAction();
-        await session.saveSession();
-        return true;
+      if (accountId !== account.uuid) {
+        return { type: "error", error: "TOKEN_ACCOUNT_INVALID" };
       }
 
-      const newSession = await this.accountsService.addSession({
-        session_id: session.getSession.id,
-        session_issued: new Date(),
-        session_expires: session.getSession.cookie.expires,
-        account: account,
-        idp: providerId, // identity provider
-        amr: [providerId],
+      const verified = speakeasy.totp.verify({
+        secret: method.data.secret,
+        encoding: "base32",
+        token: code,
       });
 
-      session.addBrowserSession({
-        uuid: newSession.uuid,
-        session_id: newSession.session_id,
-        session_issued: newSession.session_issued,
-        session_expires: newSession.session_expires,
-        amr: newSession.amr,
-        idp: newSession.idp,
-        account: {
-          uuid: account.uuid,
-          email: account.getPrimaryEmail(),
-          username: account.username,
-          picture: account.avatar,
-          role: account.role,
-        },
-      });
-      session.setCurrentSessionUuid(newSession.uuid);
+      if (verified) {
+        session.setIDP({
+          ...session.getIDP,
+          used_authn_methods: [
+            ...session.getIDP.used_authn_methods,
+            {
+              method: "OTP",
+              first_used_date: new Date(),
+              last_used_date: new Date(),
+            },
+          ],
+        });
+
+        await session.saveSession();
+
+        return { type: "logged-in" };
+      } else {
+        return { type: "error", error: "INVALID_CODE" };
+      }
+    } else {
+      return { type: "error", error: "INVALID_MULTIFACTOR_TYPE" };
+    }
+  }
+
+  async authWithProvider(
+    providerId: string,
+    account: AccountEntity,
+    session: SessionService
+  ) {
+    const accountSessionExists = session.checkAccountSessionExists(
+      account.uuid
+    );
+    if (accountSessionExists) {
+      session.setCurrentSessionUuid(accountSessionExists.uuid);
       session.delAction();
       await session.saveSession();
+      return true;
     }
+
+    const newSession = await this.accountsService.addSession({
+      session_id: session.getSession.id,
+      session_issued: new Date(),
+      session_expires: session.getSession.cookie.expires,
+      account: account,
+      idp: providerId, // identity provider
+      amr: [providerId],
+    });
+
+    session.addBrowserSession({
+      uuid: newSession.uuid,
+      session_id: newSession.session_id,
+      session_issued: newSession.session_issued,
+      session_expires: newSession.session_expires,
+      amr: newSession.amr,
+      idp: newSession.idp,
+      account: {
+        uuid: account.uuid,
+        email: account.getPrimaryEmail(),
+        username: account.username,
+        picture: account.avatar,
+        role: account.role,
+      },
+    });
+    session.setCurrentSessionUuid(newSession.uuid);
+    session.delAction();
+    await session.saveSession();
+  }
 }
 
 export interface SigninData {

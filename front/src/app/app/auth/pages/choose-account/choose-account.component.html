@@ -42,8 +42,8 @@
 
         <div class="flex flex-column mt-4" *ngIf="sessions$ | async as sessions">
             <ng-container *ngFor="let session of sessions">
-                <div class="account-item flex flex-row align-items-center p-2 rounded-sm cursor-pointer" >
-                    <div class="w-1 h-1 rounded mr-2 flex flex-row justify-content-center align-items-center">
+                <div (click)="chooseAccount(session.account.uuid)" class="account-item flex flex-row align-items-center p-2 rounded-sm cursor-pointer" >
+                    <div class="w-2rem h-2rem rounded mr-2 flex flex-row justify-content-center align-items-center">
                         <img class="w-full h-full rounded" [src]="session.account.picture" />
                     </div>
                     
@@ -55,8 +55,8 @@
                 <p-divider styleClass="my-1"></p-divider>
             </ng-container>
 
-            <div (click)="goToSignIn()" class="account-item flex flex-row align-items-center px-2 py-3 rounded-sm cursor-pointer">
-                <div class="w-1 h-1 rounded mr-2 flex flex-row justify-content-center align-items-center">
+            <div (click)="goToSignIn()" class="account-item flex flex-row align-items-center p-2 rounded-sm cursor-pointer">
+                <div class="w-2rem h-2rem rounded mr-2 flex flex-row justify-content-center align-items-center">
                     <i class="pi pi-user"></i>
                 </div>
                 <span class="font-bold text-sm line-height-1">Sign in to another account</span>

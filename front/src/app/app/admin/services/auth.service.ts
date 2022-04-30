@@ -37,7 +37,8 @@ export class AuthService {
         {
           customParams: {
             display: "popup",
-            service: "admin-portal"
+            service: "admin-portal",
+            prompt: "select_account"
           },
           urlHandler: (url: string) => {
             console.log('url handler', url);

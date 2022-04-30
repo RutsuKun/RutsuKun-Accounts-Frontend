@@ -64,6 +64,11 @@ export class AuthRoute {
 
         return response.status(200).json({ type: "logged-in" });
       } else if (session.getFlow === "oauth") {
+
+        if(session.getClientQuery.prompt === "login") {
+          return response.status(200).json({ type: "auth" });
+        }
+
         // refactor
         const multifactorRequired =
           await this.authService.checkMfaAuthnRequired(
