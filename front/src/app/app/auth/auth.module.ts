@@ -31,6 +31,7 @@ import { MultifactorComponent } from './pages/multifactor/multifactor.component'
 import { AuthMultifactorCardComponent } from "./components/multifactor-card/multifactor-card.component";
 import { CompleteSignUpComponent } from "./pages/complete-signup/complete-signup.component";
 import { CompleteSignUpCardComponent } from "./components/complete-signup-card/complete-signup-card.component";
+import { ChooseAccountComponent } from './pages/choose-account/choose-account.component';
 
 @NgModule({
   imports: [
@@ -56,7 +57,8 @@ import { CompleteSignUpCardComponent } from "./components/complete-signup-card/c
     AuthMultifactorCardComponent,
     MultifactorComponent,
     CompleteSignUpComponent,
-    CompleteSignUpCardComponent
+    CompleteSignUpCardComponent,
+    ChooseAccountComponent
   ],
 })
 export class AuthModule {}

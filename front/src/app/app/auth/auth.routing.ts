@@ -10,6 +10,7 @@ import { CallbackDebugComponent } from "./pages/callback-debug/callback-debug.co
 import { OAuth2DeviceCodeComponent } from "./pages/device-code/device-code.component";
 import { MultifactorComponent } from "./pages/multifactor/multifactor.component";
 import { CompleteSignUpComponent } from "./pages/complete-signup/complete-signup.component";
+import { ChooseAccountComponent } from "./pages/choose-account/choose-account.component";
 
 export const AuthRoutes: Routes = [
   {
@@ -25,6 +26,13 @@ export const AuthRoutes: Routes = [
     component: SignInComponent,
     data: {
       title: "signin",
+    },
+  },
+  {
+    path: "choose-account",
+    component: ChooseAccountComponent,
+    data: {
+      title: "choose-account",
     },
   },
   {
