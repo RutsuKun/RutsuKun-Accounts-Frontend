@@ -13,6 +13,11 @@ export const selectSessionsLoading = createSelector(selectAccountState, (state: 
 export const selectSessionsLoaded = createSelector(selectAccountState, (state: AccountState) => state.sessions.loaded);
 export const selectSessionsError = createSelector(selectAccountState, (state: AccountState) => state.sessions.error);
 
+export const selectProvidersData = createSelector(selectAccountState, (state: AccountState) => state.providers.data);
+export const selectProvidersLoading = createSelector(selectAccountState, (state: AccountState) => state.providers.loading);
+export const selectProvidersLoaded = createSelector(selectAccountState, (state: AccountState) => state.providers.loaded);
+export const selectProvidersError = createSelector(selectAccountState, (state: AccountState) => state.providers.error);
+
 export const selectEmailCreateLoading = createSelector(selectAccountState, (state: AccountState) => state.createEmail.loading);
 export const selectEmailCreateError = createSelector(selectAccountState, (state: AccountState) => state.createEmail.error);
 

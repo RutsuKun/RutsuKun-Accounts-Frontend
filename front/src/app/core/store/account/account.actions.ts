@@ -1,4 +1,4 @@
-import { IAccount, IAccountEmail } from "@core/interfaces/IAccount";
+import { IAccount, IAccountEmail, IAccountProvider } from "@core/interfaces/IAccount";
 import { IOAuth2Client } from "@core/interfaces/IOAuth2Client";
 import { createAction, props } from "@ngrx/store";
 import { Subject } from "rxjs";
@@ -36,6 +36,21 @@ export const accountSessionsFail = createAction(
   props<{ error: any }>()
 );
 
+// fetch providers
+
+export const accountProvidersRequest = createAction(
+  "[Account] Providers - Request"
+);
+
+export const accountProvidersSuccess = createAction(
+  "[Account] Providers - Success",
+  props<{ data: IAccountProvider[] }>()
+);
+
+export const accountProvidersFail = createAction(
+  "[Account] Providers - Fail",
+  props<{ error: any }>()
+);
 
 // create email
 

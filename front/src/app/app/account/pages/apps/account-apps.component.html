@@ -39,6 +39,7 @@
                             </div>
                         </ng-container>
                     </div>
+                    <span *ngIf="!(apps$ | async).length">None, create one.</span>
                 </ng-container>
             </section>
         </div>

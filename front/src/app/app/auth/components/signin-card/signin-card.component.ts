@@ -117,6 +117,13 @@ export class SignInCardComponent implements OnInit, OnDestroy {
     return initialEmail;
   }
 
+  onDevInfoClick() {
+    this.authForm.patchValue({
+      email: "test@test.com",
+      password: "secret123"
+    });
+  }
+
   signin() {
     this.captcha.execute("signin").subscribe((token) => {
       if(!this.formService.validate(this.authForm) || !this.checkValidEmail) return;

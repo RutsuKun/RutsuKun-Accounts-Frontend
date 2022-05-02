@@ -4,6 +4,7 @@ import { AccountAppsCreateComponent } from "./pages/apps/create-app/account-apps
 import { AccountAppsViewComponent } from "./pages/apps/view-app/view-app.component";
 import { AccountGeneralComponent } from "./pages/general/account-general.component";
 import { AccountSessionsComponent } from "./pages/sessions/account-sessions.component";
+import { AccountConnectionsComponent } from "./pages/connections/connections.component";
 
 export const AccountRoutes: Routes = [
   {
@@ -48,6 +49,13 @@ export const AccountRoutes: Routes = [
     component: AccountSessionsComponent,
     data: {
       title: "account-sessions",
+    },
+  },
+  {
+    path: "connections",
+    component: AccountConnectionsComponent,
+    data: {
+      title: "account-connections",
     },
   },
 ];

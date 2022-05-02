@@ -27,11 +27,15 @@ export class AccountComponent implements OnInit, OnDestroy {
       icon: "pi pi-lock",
       routerLink: "/account/sessions",
     },
-
     {
       label: "Apps",
       icon: "pi pi-table",
       routerLink: "/account/apps",
+    },
+    {
+      label: "Connections",
+      icon: "pi pi-link",
+      routerLink: "/account/connections",
     },
   ];
 

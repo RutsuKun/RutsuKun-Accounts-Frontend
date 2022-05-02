@@ -46,6 +46,20 @@ export class AccountEffects {
     { dispatch: true }
   );
 
+  accountProvidersRequest = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(a.accountProvidersRequest),
+        switchMap(() =>
+          this.http.get(`${environment.api}/v1/me/providers`, { withCredentials: true }).pipe(
+            map((res: any) => a.accountProvidersSuccess({ data: res})),
+            catchError((res: HttpErrorResponse) =>of(a.accountProvidersFail({ error: res.error.message })))
+          )
+        )
+      ),
+    { dispatch: true }
+  );
+
   accountEmailsCreateRequest = createEffect(
     () =>
       this.actions$.pipe(

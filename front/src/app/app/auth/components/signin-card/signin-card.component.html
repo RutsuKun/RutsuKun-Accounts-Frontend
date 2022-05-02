@@ -1,5 +1,9 @@
 <p-card styleClass="signin-card">
 
+    <div *ngIf="type !== 'sso'" (click)="onDevInfoClick()" tooltipPosition="bottom" pTooltip="Fill test dev user credentials" tooltipStyleClass="w-1" class="devInfoButton font-bold">
+        DEV
+    </div>
+
     <ng-container *ngIf="!(showForm$ | async) && !clientError">
         <div class="flex flex-row justify-content-center align-items-center" style="height: 336px;">
             <i class="pi pi-spinner spin text-7xl"></i>
@@ -14,7 +18,7 @@
     </ng-container>
 
     <ng-container *ngIf="(showForm$ | async) && !clientError">
-        <ng-container *ngIf="type !== 'reauth'">
+        <ng-container *ngIf="type !== 'reauth' && type !== 'sso'">
             <h2 class="title">
                 {{ 'pages.signin.title' | translate }}
             </h2>
@@ -37,9 +41,13 @@
             <p class="subtitle">
                 If your organization has SSO enabled, enter the e-mail address that you use in the organization.
             </p>
+
+            <span class="text-red block mb-2 mt-2">
+                Not available yet.
+            </span>
         </ng-container>
 
-        <div *ngIf="type !== 'reauth'" class="form" [formGroup]="authForm">
+        <div *ngIf="type !== 'reauth' && type !== 'sso'" class="form" [formGroup]="authForm">
 
             <ng-container *ngIf="error$ | async">
                 <span class="error block mb-2">
@@ -145,7 +153,7 @@
 
             <div class="flex flex-row mt-4">
                 <!-- reauth button -->
-                <button class="auth-button signin-button flex-1 ml-2" pButton pRipple (click)="ssoClick()" [disabled]="loading$ | async">
+                <button class="auth-button signin-button flex-1 ml-2" pButton pRipple (click)="ssoClick()" [disabled]="true">
                     <div class="flex flex-row justify-content-center align-items-center w-full">
                         <span *ngIf="loading$ | async" class="p-button-icon p-button-icon-left p-button-loading-icon pi pi-spinner pi-spin" aria-hidden="true"></span>
                         <i *ngIf="!(loading$ | async)" class="pi pi-lock mr-2"></i>

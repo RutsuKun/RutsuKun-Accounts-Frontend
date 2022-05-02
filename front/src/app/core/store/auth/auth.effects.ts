@@ -257,6 +257,8 @@ export class AuthEffects {
                   } else if(params.has('sso')) {
                     const decodedUrl = atob(params.get('sso'));
                     return window.location.href = `${environment.api}${decodedUrl}`;
+                  } else {
+                    this.router.navigate(['account']);
                   }
                 })
               break;

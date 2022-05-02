@@ -44,6 +44,10 @@ export class AuthRoute {
 
     await session.saveSession();
 
+    if(session.getClientQuery.prompt === "login") {
+      return response.status(200).json({ type: "auth" });
+    }
+
     if (session.getCurrentSessionAccount.logged) {
       const needReauth = await session.needReAuth();
       if (needReauth) {
@@ -64,10 +68,6 @@ export class AuthRoute {
 
         return response.status(200).json({ type: "logged-in" });
       } else if (session.getFlow === "oauth") {
-
-        if(session.getClientQuery.prompt === "login") {
-          return response.status(200).json({ type: "auth" });
-        }
 
         // refactor
         const multifactorRequired =

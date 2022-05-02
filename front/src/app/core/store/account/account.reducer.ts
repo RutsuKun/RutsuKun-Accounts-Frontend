@@ -15,6 +15,12 @@ export const initialState: AccountState = {
     loaded: false,
     error: null,
   },
+  providers: {
+    data: [],
+    loading: false,
+    loaded: false,
+    error: null,
+  },
   mfa: {
     data: {
       type: null,
@@ -107,6 +113,36 @@ const reducer = createReducer(
     ...state,
     sessions: {
       data: [],
+      loading: false,
+      loaded: false,
+      error: error,
+    },
+  })),
+
+  on(a.accountProvidersRequest, (state: AccountState) => ({
+    ...state,
+    providers: {
+      ...state.providers,
+      loading: true,
+      loaded: false,
+      error: null,
+    },
+  })),
+
+  on(a.accountProvidersSuccess, (state: AccountState, { data }) => ({
+    ...state,
+    providers: {
+      data: data,
+      loading: false,
+      loaded: true,
+      error: null,
+    },
+  })),
+
+  on(a.accountProvidersFail, (state: AccountState, { error }) => ({
+    ...state,
+    providers: {
+      data: null,
       loading: false,
       loaded: false,
       error: error,

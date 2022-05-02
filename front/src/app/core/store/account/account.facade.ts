@@ -25,6 +25,12 @@ export class AccountFacade {
   sessionsLoaded$ = this.store.pipe(select(s.selectSessionsLoaded));
   sessionsError$ = this.store.pipe(select(s.selectSessionsError));
 
+  // providers
+  providersData$ = this.store.pipe(select(s.selectProvidersData));
+  providersLoading$ = this.store.pipe(select(s.selectProvidersLoading));
+  providersLoaded$ = this.store.pipe(select(s.selectProvidersLoaded));
+  providersError$ = this.store.pipe(select(s.selectProvidersError));
+
   emailCreateLoading$ = this.store.pipe(select(s.selectEmailCreateLoading));
   emailCreateError$ = this.store.pipe(select(s.selectEmailCreateError));
 
@@ -60,6 +66,10 @@ export class AccountFacade {
 
   fetchSessions() {
     this.store.dispatch(a.accountSessionsRequest());
+  }
+
+  fetchProviders() {
+    this.store.dispatch(a.accountProvidersRequest());
   }
 
   deleteSession(uuid: string) {

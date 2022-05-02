@@ -14,6 +14,7 @@ import { AccountAppsViewComponent } from './pages/apps/view-app/view-app.compone
 
 import { AddSecondaryEmailDialogComponent } from './components/add-secondary-email-dialog/add-secondary-email-dialog.component';
 import { SetupMfaDialogComponent } from './components/setup-mfa-dialog/setup-mfa-dialog.component';
+import { AccountConnectionsComponent } from './pages/connections/connections.component';
 
 
 @NgModule({
@@ -25,6 +26,7 @@ import { SetupMfaDialogComponent } from './components/setup-mfa-dialog/setup-mfa
     AccountAppsCreateComponent,
     AccountAppsViewComponent,
     AccountSessionsComponent,
+    AccountConnectionsComponent,
     AddSecondaryEmailDialogComponent,
     SetupMfaDialogComponent
   ],
