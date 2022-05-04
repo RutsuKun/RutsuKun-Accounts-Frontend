@@ -4,13 +4,7 @@
 
 ## RutsuKun Accounts is an OAuth2.0 + OpenID Connect authorization and authentication server.
 
-Supported Grant Types: Authorization Code (also with PKCE)
-
-OAuth2 Configuration: `http://localhost:20000/.well-known/ooauth-authorization-server`<br />
-OpenID Connect Configuration: `http://localhost:20000/.well-known/openid-configuration` <br />
-Documentation: **soon**
-
->RutsuKun Accounts is not OpenID Certified at the moment. 
+Backend: <https://github.com/RutsuKun/RutsuKun-Accounts-Backend/>
 
 ## License
 
