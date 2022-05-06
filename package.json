@@ -10,6 +10,7 @@
         "build:dev": "npm run build -- -c dev",
         "build:prod": "ng build -c production",
         "build:vercel-prod": "npm run build -- -c vercel-prod",
+        "build:vercel-dev": "npm run build -- -c vercel-dev",
         "test": "ng test",
         "lint": "ng lint",
         "e2e": "ng e2e"
