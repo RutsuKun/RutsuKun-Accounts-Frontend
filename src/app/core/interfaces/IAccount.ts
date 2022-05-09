@@ -32,6 +32,15 @@ export interface IAccountProvider {
   picture: string;
 }
 
+export interface IAccountAuthorization {
+  id: number;
+  uuid: string;
+  client_logo: string;
+  client_id: string;
+  client_name: string;
+  scopes: string[];
+}
+
 export interface IAccountGroup {
   name: string;
   display_name: string;

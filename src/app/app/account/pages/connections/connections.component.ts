@@ -14,12 +14,17 @@ export class AccountConnectionsComponent implements OnInit {
   providers = [];
   loading$ = this.accountFacade.providersLoading$;
 
+
+  authzData$ = this.accountFacade.authorizationsData$;
+  authzLoading$ = this.accountFacade.authorizationsLoading$;
+
   constructor(
     private accountFacade: AccountFacade
   ) { }
 
   ngOnInit(): void {
     this.accountFacade.fetchProviders();
+    this.accountFacade.fetchAuthorizations();
     this.subscribeProviders();
   }
 
@@ -45,7 +50,15 @@ export class AccountConnectionsComponent implements OnInit {
   }
 
   disconnectProvider(provider: string) {
-    location.href = `${environment.auth}/providers/${provider}/disconnect`;
+    this.accountFacade.disconnectProvider(provider).subscribe(() => {
+      this.accountFacade.fetchProviders();
+    });
+  }
+
+  revokeAuthorization(uuid: string) {
+    this.accountFacade.revokeAuthorization(uuid).subscribe(()=> {
+      this.accountFacade.fetchAuthorizations();
+    });
   }
 
 }

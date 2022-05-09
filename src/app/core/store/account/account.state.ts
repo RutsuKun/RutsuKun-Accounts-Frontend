@@ -1,4 +1,4 @@
-import { IAccount, IAccountProvider } from "@core/interfaces/IAccount";
+import { IAccount, IAccountAuthorization, IAccountProvider } from "@core/interfaces/IAccount";
 import { IOAuth2Client } from "@core/interfaces/IOAuth2Client";
 import { IBrowserSession } from "../auth/auth.state";
 
@@ -17,6 +17,12 @@ export interface AccountState {
   };
   providers: {
     data: IAccountProvider[];
+    loading: boolean;
+    loaded: boolean;
+    error: string;
+  };
+  authorizations: {
+    data: IAccountAuthorization[];
     loading: boolean;
     loaded: boolean;
     error: string;

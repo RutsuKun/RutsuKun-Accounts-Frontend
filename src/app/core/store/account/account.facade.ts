@@ -31,6 +31,12 @@ export class AccountFacade {
   providersLoaded$ = this.store.pipe(select(s.selectProvidersLoaded));
   providersError$ = this.store.pipe(select(s.selectProvidersError));
 
+  // providers
+  authorizationsData$ = this.store.pipe(select(s.selectAuthorizationsData));
+  authorizationsLoading$ = this.store.pipe(select(s.selectAuthorizationsLoading));
+  authorizationsLoaded$ = this.store.pipe(select(s.selectAuthorizationsLoaded));
+  authorizationsError$ = this.store.pipe(select(s.selectAuthorizationsError));
+
   emailCreateLoading$ = this.store.pipe(select(s.selectEmailCreateLoading));
   emailCreateError$ = this.store.pipe(select(s.selectEmailCreateError));
 
@@ -70,6 +76,18 @@ export class AccountFacade {
 
   fetchProviders() {
     this.store.dispatch(a.accountProvidersRequest());
+  }
+
+  disconnectProvider(provider: string) {
+    return this.http.delete<any>(`${environment.api}/v1/auth/providers/${provider}`, { withCredentials: true });
+  }
+
+  fetchAuthorizations() {
+    this.store.dispatch(a.accountAuthorizationsRequest());
+  }
+
+  revokeAuthorization(uuid: string) {
+    return this.http.delete<any>(`${environment.api}/v1/me/authorizations/${uuid}`, { withCredentials: true });
   }
 
   deleteSession(uuid: string) {

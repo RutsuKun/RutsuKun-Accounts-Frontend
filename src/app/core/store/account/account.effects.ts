@@ -60,6 +60,20 @@ export class AccountEffects {
     { dispatch: true }
   );
 
+  accountAuthorizationsRequest = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(a.accountAuthorizationsRequest),
+        switchMap(() =>
+          this.http.get(`${environment.api}/v1/me/authorizations`, { withCredentials: true }).pipe(
+            map((res: any) => a.accountAuthorizationsSuccess({ data: res})),
+            catchError((res: HttpErrorResponse) =>of(a.accountAuthorizationsFail({ error: res.error.message })))
+          )
+        )
+      ),
+    { dispatch: true }
+  );
+
   accountEmailsCreateRequest = createEffect(
     () =>
       this.actions$.pipe(

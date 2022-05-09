@@ -1,144 +1,201 @@
 <app-account-page>
-    <div class="rk_accounts__split-card mb-5">
-        <div class="split-card__content--left">
-            <h2 class="title flex flex-row align-items-center my-0">
-                <i class="pi pi-link text-2xl mr-2"></i> Connections
-            </h2>
-        </div>
-        <div class="split-card__content--right">
-            <ng-container *ngIf="loading$ | async">
-                <i class="pi pi-spinner pi-spin text-2xl mb-5"></i>
-            </ng-container>
-
-            <ng-container *ngIf="!(loading$ | async)">
-                <div class="flex flex-column align-items-start">
-
-                    <div class="flex flex-column align-items-start mb-5 w-full" *ngIf="providers.length">
-                        <h2 class="mt-0">Connected</h2>
-
-                        <div class="discord-bg provider-linked-box w-full" *ngIf="getProviderByName('discord')">
-                            <div class="flex flex-row align-items-center">
-                                <div class="flex justify-content-center align-items-center w-3rem h-full">
+    <div class="flex flex-column lg:flex-row" style="gap: 1rem;">
+        <div class="rk_accounts__card flex-1">
+            <div class="card__header">
+                <h2 class="title flex flex-row align-items-center my-0">
+                    <i class="pi pi-link text-2xl mr-2"></i> Connections
+                </h2>
+            </div>
+            <div class="card__content w-auto">
+                <ng-container *ngIf="loading$ | async">
+                    <i class="pi pi-spinner pi-spin text-2xl mb-5"></i>
+                </ng-container>
+    
+                <ng-container *ngIf="!(loading$ | async)">
+                    <div class="flex flex-column align-items-start">
+    
+                        <div class="flex flex-column align-items-start mb-5 w-full" *ngIf="providers.length">
+                            <h2 class="mt-0">Connected</h2>
+    
+                            <div class="social-card mb-2" *ngIf="getProviderByName('discord')">
+                                <div class="social-card__icon cursor-pointer" style="--social-logo: var(--discord-color); --social-logo-hover: var(--discord-color-hover);">
                                     <i class="pi pi-discord text-xl"></i>
-                                </div>
 
-                                <div class="flex flex-row align-items-center">
-                                    <img [src]="getProviderByName('discord').picture" />
-                                    <div class="flex flex-column">
-                                        <span>{{ getProviderByName("discord").name }}</span>
-                                        <span>{{ getProviderByName("discord").email }}</span>
+                                    <img [src]="getProviderByName('discord').picture" class="absolute" style="bottom: 3px; right: 3px; width: 1.5rem; height: 1.5rem; border-radius: 0.3rem;" />
+                                </div>
+                                <div class="social-card__content">
+                                    <div>
+                                        <div>
+                                            {{ getProviderByName("discord").name }}
+                                        </div>
+                                        <div>
+                                            <span class="social-card__info">
+                                                {{ getProviderByName("discord").email }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="social-card__actions">
+                                    <i class="pi pi-minus-circle text-2xl cursor-pointer" (click)="disconnectProvider('discord')"></i>
+                                </div>
                             </div>
 
-                            <div class="flex justify-content-center align-items-center w-3rem h-full cursor-pointer">
-                                <i class="pi pi-minus-circle text-2xl" (click)="disconnectProvider('discord')"></i>
-                            </div>
-                        </div>
-
-                        <div class="google-bg provider-linked-box w-full mt-3" *ngIf="getProviderByName('google')">
-                            <div class="flex flex-row align-items-center">
-                                <div class="flex justify-content-center align-items-center w-3rem h-full">
+                            <div class="social-card mb-2" *ngIf="getProviderByName('google')">
+                                <div class="social-card__icon cursor-pointer" style="--social-logo: var(--google-color); --social-logo-hover: var(--google-color-hover);">
                                     <i class="pi pi-google text-xl"></i>
-                                </div>
 
-                                <div class="flex flex-row align-items-center">
-                                    <img [src]="getProviderByName('google').picture" />
-                                    <div class="flex flex-column">
-                                        <span>{{ getProviderByName("google").name }}</span>
-                                        <span>{{ getProviderByName("google").email }}</span>
+                                    <img [src]="getProviderByName('google').picture" class="absolute" style="bottom: 3px; right: 3px; width: 1.5rem; height: 1.5rem; border-radius: 0.3rem;" />
+                                </div>
+                                <div class="social-card__content">
+                                    <div>
+                                        <div>
+                                            {{ getProviderByName("google").name }}
+                                        </div>
+                                        <div>
+                                            <span class="social-card__info">
+                                                {{ getProviderByName("google").email }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="social-card__actions">
+                                    <i class="pi pi-minus-circle text-2xl cursor-pointer" (click)="disconnectProvider('google')"></i>
+                                </div>
                             </div>
 
-                            <div class="flex justify-content-center align-items-center w-3rem h-full cursor-pointer">
-                                <i class="pi pi-minus-circle text-2xl" (click)="disconnectProvider('google')"></i>
-                            </div>
-                        </div>
-
-                        <div class="twitter-bg provider-linked-box w-full mt-3" *ngIf="getProviderByName('twitter')">
-                            <div class="flex flex-row align-items-center">
-                                <div class="flex justify-content-center align-items-center w-3rem h-full">
+                            <div class="social-card mb-2" *ngIf="getProviderByName('twitter')">
+                                <div class="social-card__icon cursor-pointer" style="--social-logo: var(--twitter-color); --social-logo-hover: var(--twitter-color-hover);">
                                     <i class="pi pi-twitter text-xl"></i>
-                                </div>
 
-                                <div class="flex flex-row align-items-center">
-                                    <img [src]="getProviderByName('twitter').picture" />
-                                    <div class="flex flex-column">
-                                        <span>{{ getProviderByName("twitter").name }}</span>
-                                        <span>{{ getProviderByName("twitter").email }}</span>
+                                    <img [src]="getProviderByName('twitter').picture" class="absolute" style="bottom: 3px; right: 3px; width: 1.5rem; height: 1.5rem; border-radius: 0.3rem;" />
+                                </div>
+                                <div class="social-card__content">
+                                    <div>
+                                        <div>
+                                            {{ getProviderByName("twitter").name }}
+                                        </div>
+                                        <div>
+                                            <span class="social-card__info">
+                                                {{ getProviderByName("twitter").email }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="social-card__actions">
+                                    <i class="pi pi-minus-circle text-2xl cursor-pointer" (click)="disconnectProvider('twitter')"></i>
+                                </div>
                             </div>
-
-                            <div class="flex justify-content-center align-items-center w-3rem h-full cursor-pointer">
-                                <i class="pi pi-minus-circle text-2xl" (click)="disconnectProvider('twitter')"></i>
+    
+                        </div>
+    
+                        <div *ngIf="availableConnections()" class="flex flex-column justify-content-start mb-3">
+    
+                            <h2 class="mt-0">Available connections</h2>
+    
+    
+                            <div class="flex flex-row justify-content-start flex-wrap" style="gap: 12px;">
+                                <div *ngIf="!getProviderByName('discord')" (click)="connectProvider('discord')"
+                                    class="discord-bg provider-linked-box py-3 cursor-pointer">
+                                    <div class="flex flex-row align-items-center">
+                                        <div class="flex justify-content-center align-items-center w-3rem h-full">
+                                            <i class="pi pi-discord text-xl"></i>
+                                        </div>
+    
+                                        <div class="flex flex-row align-items-center text-2xl font-bold">
+                                            Discord
+                                        </div>
+                                    </div>
+    
+                                    <div class="flex justify-content-center align-items-center w-3rem h-full">
+                                        <i class="pi pi-plus text-xl"></i>
+                                    </div>
+                                </div>
+    
+                                <div *ngIf="!getProviderByName('google')" (click)="connectProvider('google')"
+                                    class="google-bg provider-linked-box py-3 cursor-pointer">
+                                    <div class="flex flex-row align-items-center">
+                                        <div class="flex justify-content-center align-items-center w-3rem h-full">
+                                            <i class="pi pi-google text-xl"></i>
+                                        </div>
+    
+                                        <div class="flex flex-row align-items-center text-2xl font-bold">
+                                            Google
+                                        </div>
+                                    </div>
+    
+                                    <div class="flex justify-content-center align-items-center w-3rem h-full">
+                                        <i class="pi pi-plus text-xl"></i>
+                                    </div>
+                                </div>
+    
+                                <div *ngIf="!getProviderByName('twitter')" (click)="connectProvider('twitter')"
+                                    class="twitter-bg provider-linked-box py-3 cursor-pointer">
+                                    <div class="flex flex-row align-items-center">
+                                        <div class="flex justify-content-center align-items-center w-3rem h-full">
+                                            <i class="pi pi-twitter text-xl"></i>
+                                        </div>
+    
+                                        <div class="flex flex-row align-items-center text-2xl font-bold">
+                                            Twitter
+                                        </div>
+                                    </div>
+    
+                                    <div class="flex justify-content-center align-items-center w-3rem h-full">
+                                        <i class="pi pi-plus text-xl"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+    
+    
                     </div>
-
-                    <div *ngIf="availableConnections()" class="flex flex-column justify-content-start mb-3">
-
-                        <h2 class="mt-0">Available connections</h2>
-
-
-                        <div class="flex flex-row justify-content-start flex-wrap" style="gap: 12px;">
-                            <div *ngIf="!getProviderByName('discord')" (click)="connectProvider('discord')"
-                                class="discord-bg provider-linked-box py-3 cursor-pointer">
-                                <div class="flex flex-row align-items-center">
-                                    <div class="flex justify-content-center align-items-center w-3rem h-full">
-                                        <i class="pi pi-discord text-xl"></i>
+                </ng-container>
+            </div>
+        </div>
+    
+        <div class="rk_accounts__card flex-1">
+            <div class="card__header">
+                <h2 class="title flex flex-row align-items-center my-0">
+                    <i class="pi pi-link text-2xl mr-2"></i> Applications
+                </h2>
+            </div>
+            <div class="card__content w-auto">
+                <ng-container *ngIf="authzLoading$ | async">
+                    <i class="pi pi-spinner pi-spin text-2xl mb-5"></i>
+                </ng-container>
+    
+                <ng-container *ngIf="!(authzLoading$ | async)">
+                    <div class="flex flex-column align-items-start">
+                        <ng-container *ngIf="authzData$ | async as authzData">
+                            <div class="flex flex-column align-items-start w-full" *ngIf="authzData.length">
+        
+                                <div *ngFor="let authzItem of authzData" class="social-card mb-2">
+                                    <div [routerLink]="['/', 'account', 'connections', 'applications', authzItem.client_id]" class="social-card__icon cursor-pointer" style="--social-logo: url('{{ authzItem.client_logo }}'), hsla(0, 0%, 54%, .1); --social-logo-hover: url('{{ authzItem.client_logo }}'), hsla(0, 0%, 60%, .1);"></div>
+                                    <div class="social-card__content">
+                                        <div>
+                                            <div>
+                                                {{ authzItem.client_name}}
+                                            </div>
+                                            <div>
+                                                <span class="social-card__info">
+                                                    {{ authzItem.scopes.join(" ") }}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <div class="flex flex-row align-items-center text-2xl font-bold">
-                                        Discord
+                                    <div class="social-card__actions">
+                                        <button (click)="revokeAuthorization(authzItem.uuid)" pButton label="Revoke" class="p-button-sm bg-white text-black-alpha-90 font-bold uppercase"></button>
                                     </div>
-                                </div>
-
-                                <div class="flex justify-content-center align-items-center w-3rem h-full">
-                                    <i class="pi pi-plus text-xl"></i>
                                 </div>
                             </div>
-
-                            <div *ngIf="!getProviderByName('google')" (click)="connectProvider('google')"
-                                class="google-bg provider-linked-box py-3 cursor-pointer">
-                                <div class="flex flex-row align-items-center">
-                                    <div class="flex justify-content-center align-items-center w-3rem h-full">
-                                        <i class="pi pi-google text-xl"></i>
-                                    </div>
-
-                                    <div class="flex flex-row align-items-center text-2xl font-bold">
-                                        Google
-                                    </div>
-                                </div>
-
-                                <div class="flex justify-content-center align-items-center w-3rem h-full">
-                                    <i class="pi pi-plus text-xl"></i>
-                                </div>
-                            </div>
-
-                            <div *ngIf="!getProviderByName('twitter')" (click)="connectProvider('twitter')"
-                                class="twitter-bg provider-linked-box py-3 cursor-pointer">
-                                <div class="flex flex-row align-items-center">
-                                    <div class="flex justify-content-center align-items-center w-3rem h-full">
-                                        <i class="pi pi-twitter text-xl"></i>
-                                    </div>
-
-                                    <div class="flex flex-row align-items-center text-2xl font-bold">
-                                        Twitter
-                                    </div>
-                                </div>
-
-                                <div class="flex justify-content-center align-items-center w-3rem h-full">
-                                    <i class="pi pi-plus text-xl"></i>
-                                </div>
-                            </div>
+                        </ng-container>
+                        <div *ngIf="!(authzData$ | async).length">
+                            None
                         </div>
                     </div>
-
-
-                </div>
-            </ng-container>
+                </ng-container>
+    
+            </div>
         </div>
     </div>
 </app-account-page>
