@@ -9,10 +9,8 @@
             <button pButton class="p-button-sm bg-white text-black-alpha-90 font-bold uppercase" label="Create app" (click)="openCreateAppDialog()"></button>
         </div>
         <div class="card__content p-2">
-
-            <p-table styleClass="card-table" #dt2 [value]="apps" dataKey="client_id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[5,10,15, 20, 50]" [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} apps" [globalFilterFields]="['client_id', 'name']"
-            responsiveLayout="scroll">
-            <ng-template pTemplate="header">
+            <p-table styleClass="card-table" #dt2 [value]="apps" dataKey="client_id" responsiveLayout="scroll">
+            <!-- <ng-template pTemplate="header">
                 <tr>
                     <th class="w-1rem">Picture</th>
                     <th>
@@ -26,9 +24,9 @@
                         Owner
                     </th>
                 </tr>
-            </ng-template>
+            </ng-template> -->
             <ng-template pTemplate="body" let-app>
-                <tr>
+                <tr class="bg-transparent">
                     <td class="w-1rem">
                         <p-avatar styleClass="p-mr-2" size="large" [image]="app.logo"></p-avatar>
                     </td>
@@ -43,6 +41,9 @@
                         <div class="flex flex-row align-items-center">
                             <p-avatar styleClass="mr-2" size="large" [image]="app.account.avatar"></p-avatar> <span class="font-medium">{{ app.account.username }}</span>
                         </div>
+                    </td>
+                    <td>
+                        <button [routerLink]="['/admin/apps/', app.client_id, 'settings']" pButton class="p-button-nano">Settings</button>
                     </td>
                 </tr>
             </ng-template>

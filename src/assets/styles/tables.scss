@@ -3,6 +3,15 @@
     tr>th {
       background: #8a8a8a1a;
       color: white;
+      border: none;
+    }
+
+    tr > th:first-of-type {
+      border-radius: 0.33rem 0 0 0;
+    }
+
+    tr > th:last-of-type {
+      border-radius: 0 0.33rem 0 0;
     }
   }
   .p-datatable-tbody {
@@ -10,12 +19,18 @@
           background: #6b6a6a5a;
           color: white;
       }
+
+      tr > td {
+        border-color: #8a8a8a1a;
+      }
   }
 }
 
 .card-table.p-datatable {
     .p-paginator {
         background: #8a8a8a1a;
+        border: none;
+        border-radius: 0 0 0.33rem 0.33rem;
         .p-paginator-current {
             color: white;
         }

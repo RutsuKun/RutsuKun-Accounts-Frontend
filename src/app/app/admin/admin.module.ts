@@ -34,6 +34,7 @@ import { NgApexchartsModule } from "ng-apexcharts";
 import { ChartCardComponent } from "./components/chart-card/chart-card.component";
 import { AdminApiService } from "./services/admin-api.service";
 import { DialogService } from "primeng/dynamicdialog";
+import { AdminAppsSettingsComponent } from './pages/apps/settings/settings.component';
 
 
 
@@ -54,18 +55,21 @@ import { DialogService } from "primeng/dynamicdialog";
     AdminDashboardComponent,
     CallbackComponent,
     ChartCardComponent,
+
     AdminAccountsComponent,
     AdminAppsComponent,
+    AdminAppsCreateComponent,
+    AdminAppsSettingsComponent,
     AdminOAuthComponent,
     AdminOAuthScopesComponent,
     AdminOAuthScopesViewComponent,
     AdminOAuthGroupsComponent,
     AdminAccountsCreateComponent,
-    AdminAppsCreateComponent,
     AdminAccountsSessionsComponent,
     AdminSettingsComponent,
     AdminCreateScopeDialogComponent,
     AdminCreateAppDialogComponent,
+
   ],
 })
 export class AdminModule implements OnDestroy {

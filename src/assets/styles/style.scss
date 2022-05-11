@@ -13,7 +13,7 @@
     border-color: hsla(0, 0%, 54%, 0.1);
     color: #ffffff;
   }
-  
+
   .p-selectbutton .p-button {
     background-color: hsla(0, 0%, 54%, 0.1);
     border-color: hsla(0, 0%, 54%, 0.1);
@@ -23,12 +23,19 @@
   .p-chips .p-chips-multiple-container .p-chips-input-token input {
     color: white;
   }
-  
+
 }
 
 
-.p-button:focus, .p-inputtext:enabled:focus, .p-chips .p-chips-multiple-container:not(.p-disabled).p-focus {
+.p-button:focus,
+.p-inputtext:enabled:focus,
+.p-chips .p-chips-multiple-container:not(.p-disabled).p-focus {
   box-shadow: none;
+}
+
+.p-button.p-button-nano {
+  font-size: 0.8rem;
+  padding: 0.35625rem 0.675rem;
 }
 
 :root {

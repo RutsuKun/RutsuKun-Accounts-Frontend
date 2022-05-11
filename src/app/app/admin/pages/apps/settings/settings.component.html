@@ -1,0 +1,16 @@
+<div class="rk_accounts__card">
+  <div class="card__header flex flex-row align-items-center">
+    <button
+      pButton
+      class="p-button-outlined p-button-sm rounded-full w-2rem h-2rem border-white text-white mr-3"
+      icon="pi pi-arrow-left"
+      routerLink="/admin/apps"
+    ></button>
+    <ng-container *ngIf="app">
+      <h2 class="my-0">{{ app.name }}</h2>
+    </ng-container>
+  </div>
+  <div class="card__content">
+    TODO
+  </div>
+</div>

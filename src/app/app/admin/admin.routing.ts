@@ -7,6 +7,7 @@ import { AdminAccountsCreateComponent } from "./pages/accounts/create-account/cr
 import { AdminAccountsSessionsComponent } from "./pages/accounts/sessions/sessions.component";
 import { AdminAppsComponent } from "./pages/apps/apps.component";
 import { AdminAppsCreateComponent } from "./pages/apps/create-app/create-app.component";
+import { AdminAppsSettingsComponent } from "./pages/apps/settings/settings.component";
 import { CallbackComponent } from "./pages/callback/callback.component";
 import { AdminDashboardComponent } from "./pages/dashboard/dashboard.component";
 import { AdminOAuthGroupsComponent } from "./pages/oauth/groups/groups.component";
@@ -74,6 +75,13 @@ export const AdminRoutes: Routes = [
         component: AdminAppsComponent,
         data: {
           title: "Apps",
+        },
+      },
+      {
+        path: ":client_id/settings",
+        component: AdminAppsSettingsComponent,
+        data: {
+          title: "App Settings",
         },
       },
       {

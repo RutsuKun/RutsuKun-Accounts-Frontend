@@ -62,6 +62,22 @@ export class AdminApiService {
     });
   }
 
+  getApp(client_id: string): Promise<IOAuth2Client> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<IOAuth2Client>(`${this.apiUrl}/v1/admin/clients/${client_id}`)
+        .pipe(
+          catchError((err) => {
+            resolve(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
   createApp(client: IOAuth2Client): Promise<IOAuth2Client> {
     return new Promise((resolve, reject) => {
       this.http
