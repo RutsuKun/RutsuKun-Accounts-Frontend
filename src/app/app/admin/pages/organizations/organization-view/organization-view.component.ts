@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import { MenuItem } from "primeng/api";
-import { withLatestFrom } from "rxjs/operators";
+import { take, withLatestFrom } from "rxjs/operators";
 
 @Component({
   templateUrl: "./organization-view.component.html",
@@ -15,13 +15,17 @@ export class AdminOrganizationViewComponent implements OnInit {
   constructor(private router: Router, private activateRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
+    console.log('ngOnInit');
+    
     this.generateTabs();
+    this.subscribeRouteChange();
   }
 
   generateTabs() {
+    console.log('generateTabs');
+    
     this.activateRoute.paramMap
-      .pipe(withLatestFrom(this.activateRoute.children[0].data))
-      .subscribe(([params, data]) => {
+      .subscribe((params) => {
         
         
         this.tabs = [
@@ -42,9 +46,24 @@ export class AdminOrganizationViewComponent implements OnInit {
           },
         ];
 
-        console.log('data ', data);
-        this.activeTab = this.tabs.find((tab) => tab.id === data.tab);
+        this.setCurrentTab();
 
       });
+  }
+
+  setCurrentTab() {
+    console.log('setCurrentTab');
+    this.activateRoute.children[0].data.pipe(take(1)).subscribe((data) => {
+      this.activeTab = this.tabs.find((tab) => tab.id === data.tab);
+    })
+  }
+
+  subscribeRouteChange() {
+    this.router.events.subscribe((val) => {
+      if(val instanceof NavigationEnd) {
+        console.log('routeChanged');
+        this.setCurrentTab();
+      }
+  });
   }
 }

@@ -14,11 +14,14 @@ import { AdminPageComponent } from "./components/admin-page-layout/admin-page.co
 import { AdminAccountsComponent } from "./pages/accounts/accounts.component";
 import { AdminAccountsCreateComponent } from "./pages/accounts/create-account/create-account.component";
 import { AdminAccountsSessionsComponent } from "./pages/accounts/sessions/sessions.component";
+import { AdminAccountViewComponent } from './pages/accounts/account-view/account-view.component';
+import { AdminAccountDetailsComponent } from './pages/accounts/account-view/tabs/account-details/account-details.component';
 
 // ADMIN APPS
 import { AdminAppsComponent } from "./pages/apps/apps.component";
 import { AdminAppsCreateComponent } from "./pages/apps/create-app/create-app.component";
 import { AdminCreateAppDialogComponent } from './components/create-app-dialog/create-app-dialog.component';
+import { AdminAppsSettingsComponent } from './pages/apps/settings/settings.component';
 
 // ADMIN OAUTH
 import { AdminOAuthComponent } from "./pages/oauth/oauth.component";
@@ -30,17 +33,19 @@ import { AdminOAuthGroupsComponent } from "./pages/oauth/groups/groups.component
 // ADMIN SETTINGS
 import { AdminSettingsComponent } from './pages/settings/settings.component';
 
-import { NgApexchartsModule } from "ng-apexcharts";
-import { ChartCardComponent } from "./components/chart-card/chart-card.component";
-import { AdminApiService } from "./services/admin-api.service";
-import { DialogService } from "primeng/dynamicdialog";
-import { AdminAppsSettingsComponent } from './pages/apps/settings/settings.component';
+
+// ADMIN ORGANIZATIONS
 import { AdminOrganizationsComponent } from './pages/organizations/organizations.component';
 import { AdminOrganizationViewComponent } from './pages/organizations/organization-view/organization-view.component';
 import { AdminOrganizationOverviewComponent } from './pages/organizations/organization-overview/organization-overview.component';
 import { AdminOrganizationMembersComponent } from './pages/organizations/organization-members/organization-members.component';
 import { AdminOrganizationInvitationsComponent } from './pages/organizations/organization-invitations/organization-invitations.component';
 
+// OTHER
+import { NgApexchartsModule } from "ng-apexcharts";
+import { ChartCardComponent } from "./components/chart-card/chart-card.component";
+import { AdminApiService } from "./services/admin-api.service";
+import { DialogService } from "primeng/dynamicdialog";
 
 
 @NgModule({
@@ -79,6 +84,8 @@ import { AdminOrganizationInvitationsComponent } from './pages/organizations/org
     AdminOrganizationOverviewComponent,
     AdminOrganizationMembersComponent,
     AdminOrganizationInvitationsComponent,
+    AdminAccountViewComponent,
+    AdminAccountDetailsComponent,
 
   ],
 })

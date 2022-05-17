@@ -2,6 +2,8 @@ import { Routes } from "@angular/router";
 import { AdminActivate } from "./admin.activate";
 import { AuthGuard } from "./guards/auth/auth.guard";
 import { CheckLoggedGuard } from "./guards/check-logged/check-logged.guard";
+import { AdminAccountViewComponent } from "./pages/accounts/account-view/account-view.component";
+import { AdminAccountDetailsComponent } from "./pages/accounts/account-view/tabs/account-details/account-details.component";
 import { AdminAccountsComponent } from "./pages/accounts/accounts.component";
 import { AdminAccountsCreateComponent } from "./pages/accounts/create-account/create-account.component";
 import { AdminAccountsSessionsComponent } from "./pages/accounts/sessions/sessions.component";
@@ -68,6 +70,24 @@ export const AdminRoutes: Routes = [
         data: {
           title: "Sessions",
         },
+      },
+      {
+        path: ":uuid",
+        component: AdminAccountViewComponent,
+        children: [
+          {
+            path: "",
+            redirectTo: "details",
+          },
+          {
+            path: "details",
+            component: AdminAccountDetailsComponent,
+            data: {
+              title: "Account Details",
+              tab: 'details'
+            },
+          },
+        ]
       },
     ],
   },
