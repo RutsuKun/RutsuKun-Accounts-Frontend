@@ -23,6 +23,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { MenuModule } from 'primeng/menu';
 import { ImageModule } from 'primeng/image';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { TabMenuModule } from 'primeng/tabmenu';
 
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
@@ -65,6 +66,7 @@ import { HeaderAccountComponent } from './components/header-account/header-accou
     MenuModule,
     ImageModule,
     InputNumberModule,
+    TabMenuModule,
     ClipboardModule,
     AuthFooterComponent,
     OtpFormComponent,

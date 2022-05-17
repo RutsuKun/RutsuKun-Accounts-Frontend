@@ -1,0 +1,56 @@
+<app-admin-page>
+  <div class="rk_accounts__card">
+    <div
+      class="card__header flex flex-row justify-content-between align-items-center"
+    >
+      <div>
+        <h2 class="my-0">Organizations</h2>
+        <div class="subtitle mt-2">
+          Represent the teams, business customers, and partner companies that
+          access your applications as organizations in RutsuKun Accounts.
+        </div>
+      </div>
+      <button
+        pButton
+        class="p-button-sm bg-white text-black-alpha-90 font-bold uppercase"
+        icon="pi pi-plus"
+        label="Create Organization"
+      ></button>
+    </div>
+    <div class="card__content p-2">
+      <p-table
+        styleClass="card-table"
+        #dt2
+        [value]="orgs"
+        dataKey="client_id"
+        responsiveLayout="scroll"
+      >
+        <ng-template pTemplate="body" let-org>
+          <tr class="bg-transparent">
+            <td class="w-1rem">
+              <p-avatar
+                size="large"
+                [image]="org.logo"
+              ></p-avatar>
+            </td>
+            <td class="pl-0">
+              <a [routerLink]="['/admin/organizations/', org.uuid]">{{ org.name }}</a>
+            </td>
+            <td>
+              <span class="mr-2">Domain:</span> <code>{{ org.domain }}</code>
+            </td>
+            <td style="width: 6rem">
+              <button (click)="menu.toggle($event)" pButton class="p-button-icon p-button-nano" icon="pi pi-ellipsis-v"></button>
+              <p-menu #menu appendTo="body" [popup]="true" [model]="generateOrgMenu(org)"></p-menu>
+          </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">No orgs found.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</app-admin-page>

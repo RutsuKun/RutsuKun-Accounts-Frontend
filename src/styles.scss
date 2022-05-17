@@ -10,6 +10,13 @@
 
 @import "./colors.scss";
 
+a {
+    color: var(--primary-color-link);
+    &:hover {
+        color: var(--primary-color-link-hover);
+    }
+}
+
 html,
 body {
     margin: 0;

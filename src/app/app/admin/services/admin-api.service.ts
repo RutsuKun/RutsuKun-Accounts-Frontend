@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IOAuth2Client } from '@core/interfaces/IOAuth2Client';
 import { IOAuth2Scope } from '@core/interfaces/IOAuth2Scope';
+import { IOrganization } from '@core/interfaces/IOrganization';
 import { environment } from '@env/environment';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -53,6 +54,22 @@ export class AdminApiService {
         .pipe(
           catchError((err) => {
             resolve(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getOrganizations(): Promise<IOrganization[]> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<IOrganization[]>(`${this.apiUrl}/v1/admin/organizations`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
             return throwError(err);
           })
         )

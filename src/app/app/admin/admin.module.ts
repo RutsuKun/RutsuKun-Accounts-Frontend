@@ -35,6 +35,11 @@ import { ChartCardComponent } from "./components/chart-card/chart-card.component
 import { AdminApiService } from "./services/admin-api.service";
 import { DialogService } from "primeng/dynamicdialog";
 import { AdminAppsSettingsComponent } from './pages/apps/settings/settings.component';
+import { AdminOrganizationsComponent } from './pages/organizations/organizations.component';
+import { AdminOrganizationViewComponent } from './pages/organizations/organization-view/organization-view.component';
+import { AdminOrganizationOverviewComponent } from './pages/organizations/organization-overview/organization-overview.component';
+import { AdminOrganizationMembersComponent } from './pages/organizations/organization-members/organization-members.component';
+import { AdminOrganizationInvitationsComponent } from './pages/organizations/organization-invitations/organization-invitations.component';
 
 
 
@@ -69,6 +74,11 @@ import { AdminAppsSettingsComponent } from './pages/apps/settings/settings.compo
     AdminSettingsComponent,
     AdminCreateScopeDialogComponent,
     AdminCreateAppDialogComponent,
+    AdminOrganizationsComponent,
+    AdminOrganizationViewComponent,
+    AdminOrganizationOverviewComponent,
+    AdminOrganizationMembersComponent,
+    AdminOrganizationInvitationsComponent,
 
   ],
 })

@@ -15,7 +15,7 @@
       <div class="navigation-group" *ngFor="let group of navigation">
           <div class="group-label">{{ group.label }}</div>
           <div class="group-links">
-              <div class="group-link" *ngFor="let link of group.items" [routerLink]="link.routerLink" [routerLinkActiveOptions]="{exact: true}" routerLinkActive="active">
+              <div class="group-link" *ngFor="let link of group.items" [routerLink]="link.routerLink" [routerLinkActiveOptions]="{exact: false}" routerLinkActive="active" [class.disabled]="link.disabled">
                   <i class="{{ link.icon }} text-xl mr-2"></i> {{ link.label }}
               </div>
           </div>

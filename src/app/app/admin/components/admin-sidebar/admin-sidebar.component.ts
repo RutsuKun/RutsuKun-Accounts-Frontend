@@ -23,9 +23,15 @@ export class AdminSidebarComponent implements OnInit {
           routerLink: "/admin/accounts",
         },
         {
+          label: "Organizations",
+          icon: "pi pi-building",
+          routerLink: "/admin/organizations",
+        },
+        {
           label: "Sessions",
           icon: "pi pi-database",
           routerLink: "/admin/accounts/sessions",
+          disabled: true
         },
         {
           label: "Settings",

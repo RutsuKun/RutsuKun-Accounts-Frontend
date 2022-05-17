@@ -14,6 +14,11 @@ import { AdminOAuthGroupsComponent } from "./pages/oauth/groups/groups.component
 import { AdminOAuthComponent } from "./pages/oauth/oauth.component";
 import { AdminOAuthScopesComponent } from "./pages/oauth/scopes/scopes.component";
 import { AdminOAuthScopesViewComponent } from "./pages/oauth/scopes/view/view.component";
+import { AdminOrganizationInvitationsComponent } from "./pages/organizations/organization-invitations/organization-invitations.component";
+import { AdminOrganizationMembersComponent } from "./pages/organizations/organization-members/organization-members.component";
+import { AdminOrganizationOverviewComponent } from "./pages/organizations/organization-overview/organization-overview.component";
+import { AdminOrganizationViewComponent } from "./pages/organizations/organization-view/organization-view.component";
+import { AdminOrganizationsComponent } from "./pages/organizations/organizations.component";
 import { AdminSettingsComponent } from "./pages/settings/settings.component";
 import { AdminSignInComponent } from "./pages/signin/signin.component";
 
@@ -63,6 +68,53 @@ export const AdminRoutes: Routes = [
         data: {
           title: "Sessions",
         },
+      },
+    ],
+  },
+  {
+    path: "organizations",
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: "",
+        component: AdminOrganizationsComponent,
+        data: {
+          title: "Organizations",
+        },
+      },
+      {
+        path: ":uuid",
+        component: AdminOrganizationViewComponent,
+        children: [
+          {
+            path: "",
+            redirectTo: "overview",
+          },
+          {
+            path: "overview",
+            component: AdminOrganizationOverviewComponent,
+            data: {
+              title: "Organization Overview",
+              tab: 'overview'
+            },
+          },
+          {
+            path: "members",
+            component: AdminOrganizationMembersComponent,
+            data: {
+              title: "Organization Members",
+              tab: 'members'
+            },
+          },
+          {
+            path: "invitations",
+            component: AdminOrganizationInvitationsComponent,
+            data: {
+              title: "Organization Invitations",
+              tab: 'invitations'
+            },
+          },
+        ]
       },
     ],
   },

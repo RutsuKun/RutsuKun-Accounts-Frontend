@@ -1,0 +1,25 @@
+<app-admin-page>
+  <div class="rk_accounts__card">
+    <div class="card__header flex flex-row align-items-center p-3">
+      <div class="w-4rem h-4rem mr-3">
+        <img
+          class="w-full h-full rounded-sm"
+          src="/assets/images/avatars/default-avatar.png"
+        />
+      </div>
+      <div class="flex flex-column">
+        <h2 class="my-0">RutsuKun Organization</h2>
+        <div class="subtitle mt-2">
+          <span class="mr-2 select-none">Organization ID:</span>
+          <code>test123</code>
+        </div>
+      </div>
+    </div>
+
+    <p-tabMenu styleClass="transparent" [model]="tabs" [activeItem]="activeTab"></p-tabMenu>
+
+    <div class="card__content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</app-admin-page>

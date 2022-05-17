@@ -1,0 +1,78 @@
+.p-menu {
+  border: 1px solid #e3e4e6;
+  padding: 8px;
+  min-width: 11.25rem;
+  box-shadow: 0px 33px 80px rgb(0, 0, 0, 7%), 0px 13.7866px 33.4221px rgb(0, 0, 0, 5%), 0px 7.37098px 17.869px rgb(0, 0, 0, 4%), 0px 4.13211px 10.0172px rgb(0, 0, 0, 4%), 0px 2.19453px 5.32008px rgb(0, 0, 0, 3%), 0px 0.913195px 2.21381px rgb(0, 0, 0, 2%);
+  border-radius: 8px;
+
+  .p-menu-list {
+    .p-menuitem {
+
+      .p-menuitem-link {
+        color: #65676e;
+        width: 100%;
+        height: auto;
+        display: flex;
+        padding: .5rem 8px;
+        font-size: 0.8125rem;
+        transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        align-items: center;
+        font-family: Inter, fakt-web, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        font-weight: 500;
+        line-height: 1.6;
+        border-radius: 6px;
+        letter-spacing: 0.01154em;
+
+        .p-menuitem-icon {
+          width: 0.8rem;
+          height: 0.8rem;
+          font-size: 0.8rem;
+        }
+      }
+
+      &.danger {
+        a>span {
+          color: #d03c38 !important;
+        }
+
+        .p-menuitem-link {
+          &:hover {
+            color: #aa2d31 !important;
+            background-color: #ffeeed !important;
+          }
+        }
+
+      }
+    }
+  }
+
+}
+
+
+.p-tabmenu.transparent .p-tabmenu-nav {
+  background-color: transparent;
+  border-color: rgba(138, 138, 138, 0.1) !important;
+
+  .p-tabmenuitem .p-menuitem-link {
+    border-color: rgba(138, 138, 138, 0.1);
+    color: white;
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover .p-menuitem-link {
+    background-color: transparent;
+    color: white;
+  }
+
+  .p-tabmenuitem.p-highlight .p-menuitem-link {
+    border-color: var(--primary-color-link) !important;
+    color: var(--primary-color-link);
+  }
+  
+  .p-tabmenuitem .p-menuitem-link, .p-tabmenuitem .p-menuitem-link:hover {
+    background-color: transparent;
+
+  }
+}

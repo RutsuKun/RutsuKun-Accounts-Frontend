@@ -16,50 +16,9 @@
                     <tr>
                         <th>Picture</th>
                         <th>Username</th>
-                        <th>Emails</th>
-                        <th>Role</th>
+                        <th>Groups</th>
                         <th>State</th>
-                        <th style="width: 6rem">Verified</th>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th>
-                            <p-columnFilter type="text" field="username"></p-columnFilter>
-                        </th>
-                        <th>
-                            <!-- <p-columnFilter type="text" field="emails.email" [showMenu]="false"></p-columnFilter> -->
-
-
-                        </th>
-                        <th>
-                            <p-columnFilter field="role" matchMode="equals" [showMenu]="false">
-                                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                                    <p-dropdown [ngModel]="value" [options]="roles" (onChange)="filter($event.value)"
-                                        placeholder="Any" [showClear]="true">
-                                        <ng-template let-option pTemplate="item">
-                                            <span
-                                                [class]="'customer-badge status-' + option.value">{{option.label}}</span>
-                                        </ng-template>
-                                    </p-dropdown>
-                                </ng-template>
-                            </p-columnFilter>
-                        </th>
-                        <th>
-                            <p-columnFilter field="state" matchMode="equals" [showMenu]="false">
-                                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                                    <p-dropdown [ngModel]="value" [options]="states" (onChange)="filter($event.value)"
-                                        placeholder="Any" [showClear]="true">
-                                        <ng-template let-option pTemplate="item">
-                                            <p-tag [severity]="option.value === 'ENABLED' ? 'success' : 'danger'"
-                                                [value]="option.label"></p-tag>
-                                        </ng-template>
-                                    </p-dropdown>
-                                </ng-template>
-                            </p-columnFilter>
-                        </th>
-                        <th>
-                            <p-columnFilter type="boolean" field="verified"></p-columnFilter>
-                        </th>
+                        <th style="width: 6rem"></th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-account>
@@ -68,28 +27,20 @@
                             <p-avatar styleClass="p-mr-2" size="large" [image]="account.avatar"></p-avatar>
                         </td>
                         <td>
-                            {{account.username}}
+                            <a [routerLink]="['/admin/accounts/', account.uuid]">{{account.username}}</a> <br />
+                            {{ getPrimaryEmail(account) }}
                         </td>
                         <td>
-                            <ng-container *ngFor="let email of account.emails">
-                                {{ email.email }}<br />
-                                <p-tag *ngIf="email.primary" value="Primary" class="mr-1 mt-1"></p-tag>
-                                <p-tag *ngIf="email.email_verified" value="Verified" severity="success" class="ml-2">
-                                </p-tag>
-                                <p-tag *ngIf="!email.email_verified" value="Unverified" severity="danger" class="ml-2">
-                                </p-tag>
-                            </ng-container>
-                        </td>
-                        <td>
-                            {{ account.role }}
+                            <p-tag *ngFor="let group of account.groups" [value]="group.display_name" class="mr-1 mt-1"></p-tag>
+                            {{ !account.groups.length ? "None" : null }}
                         </td>
                         <td>
                             <p-tag [severity]="account.state === 'ENABLED' ? 'success' : 'danger'"
                                 [value]="account.state"></p-tag>
                         </td>
-                        <td>
-                            <i class="pi"
-                                [ngClass]="{'true-icon pi-check-circle': true, 'false-icon pi-times-circle': false}"></i>
+                        <td style="width: 6rem">
+                            <button (click)="menu.toggle($event)" pButton class="p-button-icon p-button-nano" icon="pi pi-ellipsis-v"></button>
+                            <p-menu #menu appendTo="body" [popup]="true" [model]="generateAccountMenu(account)"></p-menu>
                         </td>
                     </tr>
                 </ng-template>

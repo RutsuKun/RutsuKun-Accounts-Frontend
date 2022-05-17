@@ -1,0 +1,21 @@
+.p-tabview.transparent {
+    .p-tabview-nav {
+        background: transparent !important;
+        border-color: rgba(138, 138, 138, 0.1) !important;
+        li .p-tabview-nav-link {
+            background: transparent !important;
+            color: white;
+            border-color: rgba(138, 138, 138, 0.1);
+            &:focus {
+                box-shadow: none;
+            }
+        }
+        li.p-highlight .p-tabview-nav-link {
+            color: var(--primary-color-link);
+            border-color: var(--primary-color-link);
+        }
+    }
+    .p-tabview-panels {
+        padding: 0;
+    }
+}
