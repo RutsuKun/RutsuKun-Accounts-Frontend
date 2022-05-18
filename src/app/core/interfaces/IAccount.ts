@@ -42,6 +42,7 @@ export interface IAccountAuthorization {
 }
 
 export interface IAccountGroup {
+  uuid: string;
   name: string;
   display_name: string;
   enabled: boolean;

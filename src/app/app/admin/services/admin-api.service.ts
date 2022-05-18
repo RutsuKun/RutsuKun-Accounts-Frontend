@@ -96,6 +96,38 @@ export class AdminApiService {
     });
   }
 
+  getGroup(uuid: string): Promise<IAccountGroup> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<IAccountGroup>(`${this.apiUrl}/v1/admin/groups/${uuid}`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getGroupMembers(uuid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<any>(`${this.apiUrl}/v1/admin/groups/${uuid}/members`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
   getApps(): Promise<IOAuth2Client[]> {
     return new Promise((resolve, reject) => {
       this.http

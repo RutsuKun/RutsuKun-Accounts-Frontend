@@ -1,0 +1,24 @@
+<app-admin-page>
+    <div class="rk_accounts__card">
+      <div class="card__header flex flex-row align-items-center p-3">
+        <div class="flex flex-column">
+          <h2 class="my-0">
+            <ng-container *ngIf="group">{{ group.display_name }} ({{ group.name }})</ng-container>
+            <p-skeleton *ngIf="!group" width="200px" height="29px"></p-skeleton>
+          </h2>
+          <div class="subtitle mt-1 mb-0">
+            <span *ngIf="group" class="mr-2 select-none">Group ID:</span>
+            <code *ngIf="group">{{ group.uuid }}</code>
+            <p-skeleton *ngIf="!group" width="280px" height="20px"></p-skeleton>
+          </div>
+        </div>
+      </div>
+  
+      <p-tabMenu styleClass="transparent" [model]="tabs" [activeItem]="activeTab"></p-tabMenu>
+  
+      <div class="card__content">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </app-admin-page>
+  

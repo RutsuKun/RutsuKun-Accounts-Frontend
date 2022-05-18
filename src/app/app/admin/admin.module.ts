@@ -18,6 +18,12 @@ import { AdminAccountViewComponent } from './pages/accounts/account-view/account
 import { AdminAccountDetailsComponent } from './pages/accounts/account-view/tabs/account-details/account-details.component';
 import { AdminAccountGroupsComponent } from './pages/accounts/account-view/tabs/account-groups/account-groups.component';
 
+// ADMIN GROUPS
+import { AdminGroupsComponent } from "./pages/groups/groups.component";
+import { AdminGroupViewComponent } from './pages/groups/group-view/group-view.component';
+import { AdminGroupOverviewComponent } from './pages/groups/group-view/tabs/group-overview/group-overview.component';
+import { AdminGroupMembersComponent } from './pages/groups/group-view/tabs/group-members/group-members.component';
+
 // ADMIN APPS
 import { AdminAppsComponent } from "./pages/apps/apps.component";
 import { AdminAppsCreateComponent } from "./pages/apps/create-app/create-app.component";
@@ -29,7 +35,7 @@ import { AdminOAuthComponent } from "./pages/oauth/oauth.component";
 import { AdminOAuthScopesComponent } from "./pages/oauth/scopes/scopes.component";
 import { AdminOAuthScopesViewComponent } from './pages/oauth/scopes/view/view.component';
 import { AdminCreateScopeDialogComponent } from './components/create-scope-dialog/create-scope-dialog.component';
-import { AdminOAuthGroupsComponent } from "./pages/oauth/groups/groups.component";
+
 
 // ADMIN SETTINGS
 import { AdminSettingsComponent } from './pages/settings/settings.component';
@@ -48,8 +54,6 @@ import { NgApexchartsModule } from "ng-apexcharts";
 import { ChartCardComponent } from "./components/chart-card/chart-card.component";
 import { AdminApiService } from "./services/admin-api.service";
 import { DialogService } from "primeng/dynamicdialog";
-
-
 
 @NgModule({
   imports: [
@@ -78,6 +82,12 @@ import { DialogService } from "primeng/dynamicdialog";
     AdminAccountsCreateComponent,
     AdminAccountsSessionsComponent,
 
+    // GROUPS
+    AdminGroupsComponent,
+    AdminGroupViewComponent,
+    AdminGroupOverviewComponent,
+    AdminGroupMembersComponent,
+
     // APPS
     AdminAppsComponent,
     AdminAppsCreateComponent,
@@ -87,7 +97,6 @@ import { DialogService } from "primeng/dynamicdialog";
     AdminOAuthComponent,
     AdminOAuthScopesComponent,
     AdminOAuthScopesViewComponent,
-    AdminOAuthGroupsComponent,
 
     AdminSettingsComponent,
     AdminCreateScopeDialogComponent,

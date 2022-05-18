@@ -13,7 +13,10 @@ import { AdminAppsCreateComponent } from "./pages/apps/create-app/create-app.com
 import { AdminAppsSettingsComponent } from "./pages/apps/settings/settings.component";
 import { CallbackComponent } from "./pages/callback/callback.component";
 import { AdminDashboardComponent } from "./pages/dashboard/dashboard.component";
-import { AdminOAuthGroupsComponent } from "./pages/oauth/groups/groups.component";
+import { AdminGroupViewComponent } from "./pages/groups/group-view/group-view.component";
+import { AdminGroupMembersComponent } from "./pages/groups/group-view/tabs/group-members/group-members.component";
+import { AdminGroupOverviewComponent } from "./pages/groups/group-view/tabs/group-overview/group-overview.component";
+import { AdminGroupsComponent } from "./pages/groups/groups.component";
 import { AdminOAuthComponent } from "./pages/oauth/oauth.component";
 import { AdminOAuthScopesComponent } from "./pages/oauth/scopes/scopes.component";
 import { AdminOAuthScopesViewComponent } from "./pages/oauth/scopes/view/view.component";
@@ -100,6 +103,53 @@ export const AdminRoutes: Routes = [
         ]
       },
     ],
+  },
+  {
+    path: "groups",
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: "",
+        component: AdminGroupsComponent,
+        data: {
+          title: "OAuth Groups",
+        },
+      },
+      {
+        path: ":uuid",
+        component: AdminGroupViewComponent,
+        children: [
+          {
+            path: "",
+            redirectTo: "overview",
+          },
+          {
+            path: "overview",
+            component: AdminGroupOverviewComponent,
+            data: {
+              title: "Group Overview",
+              tab: 'overview'
+            },
+          },
+          {
+            path: "members",
+            component: AdminGroupMembersComponent,
+            data: {
+              title: "Group Members",
+              tab: 'members'
+            },
+          },
+          {
+            path: "permissions",
+            component: AdminGroupOverviewComponent,
+            data: {
+              title: "Group Permissions",
+              tab: 'permissions'
+            },
+          },
+        ]
+      },
+    ]
   },
   {
     path: "organizations",
@@ -212,13 +262,6 @@ export const AdminRoutes: Routes = [
             },
           }
         ]
-      },
-      {
-        path: "groups",
-        component: AdminOAuthGroupsComponent,
-        data: {
-          title: "OAuth Groups",
-        },
       },
     ],
   },

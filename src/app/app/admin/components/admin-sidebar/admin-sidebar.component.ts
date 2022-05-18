@@ -17,21 +17,11 @@ export class AdminSidebarComponent implements OnInit {
           icon: "pi pi-home",
           routerLink: "/admin/dashboard",
         },
-        {
-          label: "Accounts",
-          icon: "pi pi-users",
-          routerLink: "/admin/accounts",
-        },
+
         {
           label: "Organizations",
           icon: "pi pi-building",
           routerLink: "/admin/organizations",
-        },
-        {
-          label: "Sessions",
-          icon: "pi pi-database",
-          routerLink: "/admin/accounts/sessions",
-          disabled: true
         },
         {
           label: "Settings",
@@ -39,6 +29,21 @@ export class AdminSidebarComponent implements OnInit {
           routerLink: "/admin/settings",
         },
       ],
+    },
+    {
+      label: "Account Managment",
+      items: [
+        {
+          label: "Accounts",
+          icon: "pi pi-users",
+          routerLink: "/admin/accounts",
+        },
+        {
+          label: "Groups",
+          icon: "pi pi-check-square",
+          routerLink: "/admin/groups",
+        },
+      ]
     },
     {
       label: "OAuth2",
@@ -52,11 +57,6 @@ export class AdminSidebarComponent implements OnInit {
           label: "Scopes",
           icon: "pi pi-lock",
           routerLink: "/admin/oauth/scopes",
-        },
-        {
-          label: "Groups",
-          icon: "pi pi-check-square",
-          routerLink: "/admin/oauth/groups",
         },
       ],
     },
