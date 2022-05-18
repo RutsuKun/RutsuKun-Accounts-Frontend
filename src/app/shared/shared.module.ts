@@ -24,6 +24,7 @@ import { MenuModule } from 'primeng/menu';
 import { ImageModule } from 'primeng/image';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TabMenuModule } from 'primeng/tabmenu';
+import { SkeletonModule } from 'primeng/skeleton';
 
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
@@ -67,6 +68,7 @@ import { HeaderAccountComponent } from './components/header-account/header-accou
     ImageModule,
     InputNumberModule,
     TabMenuModule,
+    SkeletonModule,
     ClipboardModule,
     AuthFooterComponent,
     OtpFormComponent,

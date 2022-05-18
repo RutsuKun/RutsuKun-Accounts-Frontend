@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { IAccountGroup } from '@core/interfaces/IAccount';
 import { IOAuth2Client } from '@core/interfaces/IOAuth2Client';
 import { IOAuth2Scope } from '@core/interfaces/IOAuth2Scope';
 import { IOrganization } from '@core/interfaces/IOrganization';
@@ -19,6 +20,54 @@ export class AdminApiService {
     return new Promise((resolve, reject) => {
       this.http
         .get(`${this.apiUrl}/v1/admin/accounts`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getAccount(uuid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get(`${this.apiUrl}/v1/admin/accounts/${uuid}`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getAccountOverview(uuid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get(`${this.apiUrl}/v1/admin/accounts/${uuid}/overview`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getAccountGroups(uuid: string): Promise<IAccountGroup[]> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<IAccountGroup[]>(`${this.apiUrl}/v1/admin/accounts/${uuid}/groups`)
         .pipe(
           catchError((err) => {
             reject(err.error);
@@ -67,6 +116,86 @@ export class AdminApiService {
     return new Promise((resolve, reject) => {
       this.http
         .get<IOrganization[]>(`${this.apiUrl}/v1/admin/organizations`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getOrganization(uuid: string): Promise<IOrganization> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<IOrganization>(`${this.apiUrl}/v1/admin/organizations/${uuid}`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getOrganizationOverview(uuid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<any>(`${this.apiUrl}/v1/admin/organizations/${uuid}/overview`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getOrganizationApps(uuid: string): Promise<IOAuth2Client[]> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<IOAuth2Client[]>(`${this.apiUrl}/v1/admin/organizations/${uuid}/apps`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getOrganizationMembers(uuid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<any>(`${this.apiUrl}/v1/admin/organizations/${uuid}/members`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getOrganizationInvitations(uuid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<any>(`${this.apiUrl}/v1/admin/organizations/${uuid}/invitations`)
         .pipe(
           catchError((err) => {
             reject(err.error);

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { AdminApiService } from '@app/admin/services/admin-api.service';
 import { MenuItem } from 'primeng/api';
 import { take } from 'rxjs/operators';
 
@@ -8,11 +9,17 @@ import { take } from 'rxjs/operators';
   styleUrls: ['./account-view.component.scss']
 })
 export class AdminAccountViewComponent implements OnInit {
+  account = null;
+
   tabs: MenuItem[] = [];
 
   activeTab = null;;
 
-  constructor(private router: Router, private activateRoute: ActivatedRoute) {}
+  constructor(
+    private api: AdminApiService,
+    private router: Router,
+    private activateRoute: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.generateTabs();
@@ -22,6 +29,7 @@ export class AdminAccountViewComponent implements OnInit {
   generateTabs() {
     this.activateRoute.paramMap
       .subscribe((params) => {
+        this.fetchAccount(params.get("uuid"));
         this.tabs = [
           {
             id: "details",
@@ -31,20 +39,19 @@ export class AdminAccountViewComponent implements OnInit {
           {
             id: "authorized-applications",
             label: "Authorized Applications",
-            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "authorized-apps"]),
+            command: () => this.router.navigate(["/admin/accounts/", params.get("uuid"), "authorized-apps"]),
             disabled: true
           },
           {
             id: "permissions",
             label: "Permissions",
-            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "permissions"]),
+            command: () => this.router.navigate(["/admin/accounts/", params.get("uuid"), "permissions"]),
             disabled: true
           },
           {
             id: "groups",
             label: "Groups",
-            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "groups"]),
-            disabled: true
+            command: () => this.router.navigate(["/admin/accounts/", params.get("uuid"), "groups"])
           },
         ];
 
@@ -64,6 +71,12 @@ export class AdminAccountViewComponent implements OnInit {
       if(val instanceof NavigationEnd) {
         this.setCurrentTab();
       }
-  });
+    });
+  }
+
+  fetchAccount(uuid: string) {
+    this.api.getAccount(uuid).then((account) => {
+      this.account = account;
+    })
   }
 }

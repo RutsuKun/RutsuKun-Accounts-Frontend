@@ -4,6 +4,7 @@ import { AuthGuard } from "./guards/auth/auth.guard";
 import { CheckLoggedGuard } from "./guards/check-logged/check-logged.guard";
 import { AdminAccountViewComponent } from "./pages/accounts/account-view/account-view.component";
 import { AdminAccountDetailsComponent } from "./pages/accounts/account-view/tabs/account-details/account-details.component";
+import { AdminAccountGroupsComponent } from "./pages/accounts/account-view/tabs/account-groups/account-groups.component";
 import { AdminAccountsComponent } from "./pages/accounts/accounts.component";
 import { AdminAccountsCreateComponent } from "./pages/accounts/create-account/create-account.component";
 import { AdminAccountsSessionsComponent } from "./pages/accounts/sessions/sessions.component";
@@ -16,6 +17,7 @@ import { AdminOAuthGroupsComponent } from "./pages/oauth/groups/groups.component
 import { AdminOAuthComponent } from "./pages/oauth/oauth.component";
 import { AdminOAuthScopesComponent } from "./pages/oauth/scopes/scopes.component";
 import { AdminOAuthScopesViewComponent } from "./pages/oauth/scopes/view/view.component";
+import { AdminOrganizationAppsComponent } from "./pages/organizations/organization-apps/organization-apps.component";
 import { AdminOrganizationInvitationsComponent } from "./pages/organizations/organization-invitations/organization-invitations.component";
 import { AdminOrganizationMembersComponent } from "./pages/organizations/organization-members/organization-members.component";
 import { AdminOrganizationOverviewComponent } from "./pages/organizations/organization-overview/organization-overview.component";
@@ -87,6 +89,14 @@ export const AdminRoutes: Routes = [
               tab: 'details'
             },
           },
+          {
+            path: "groups",
+            component: AdminAccountGroupsComponent,
+            data: {
+              title: "Account Groups",
+              tab: 'groups'
+            },
+          },
         ]
       },
     ],
@@ -116,6 +126,14 @@ export const AdminRoutes: Routes = [
             data: {
               title: "Organization Overview",
               tab: 'overview'
+            },
+          },
+          {
+            path: "apps",
+            component: AdminOrganizationAppsComponent,
+            data: {
+              title: "Organization Apps",
+              tab: 'apps'
             },
           },
           {

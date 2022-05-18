@@ -57,22 +57,39 @@ export class AdminAccountsComponent implements OnInit {
         command: () => this.router.navigate(["/admin/accounts/", account.uuid]),
       },
       {
+        label: "Authorized Apps",
+        command: () => this.router.navigate(["/admin/accounts/", account.uuid, "authorized-apps"]),
+        disabled: true
+      },
+      {
+        label: "Permissions",
+        command: () => this.router.navigate(["/admin/accounts/", account.uuid, "permissions"]),
+        disabled: true
+      },
+      {
+        label: "Groups",
+        command: () => this.router.navigate(["/admin/accounts/", account.uuid, "groups"]),
+      },
+      {
         separator: true,
       },
       {
         label: "Assign Groups",
         command: () => {},
         icon: "pi pi-check-square",
+        disabled: true
       },
       {
         label: "Assign Permissions",
         command: () => {},
         icon: "pi pi-check-square",
+        disabled: true
       },
       {
         label: "Send Verification Email",
         command: () => {},
         icon: "pi pi-envelope",
+        disabled: true
       },
       {
         separator: true,
@@ -80,10 +97,12 @@ export class AdminAccountsComponent implements OnInit {
       {
         label: "Change Email",
         command: () => {},
+        disabled: true
       },
       {
         label: "Change Password",
         command: () => {},
+        disabled: true
       },
       {
         separator: true,
@@ -92,12 +111,14 @@ export class AdminAccountsComponent implements OnInit {
         label: "Block",
         command: () => {},
         icon: "pi pi-times-circle",
+        disabled: true
       },
       {
         label: "Delete",
         icon: "pi pi-trash",
         command: () => {},
-        styleClass: "danger"
+        styleClass: "danger",
+        disabled: true
       },
     ];
   }

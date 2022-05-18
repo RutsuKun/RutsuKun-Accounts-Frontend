@@ -1,5 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
+import { AdminApiService } from "@app/admin/services/admin-api.service";
+import { IOrganization } from "@core/interfaces/IOrganization";
 import { MenuItem } from "primeng/api";
 import { take, withLatestFrom } from "rxjs/operators";
 
@@ -8,11 +10,18 @@ import { take, withLatestFrom } from "rxjs/operators";
   styleUrls: ["./organization-view.component.scss"],
 })
 export class AdminOrganizationViewComponent implements OnInit {
+
+  organization: IOrganization = null;
+
   tabs: MenuItem[] = [];
 
   activeTab = this.tabs[0];
 
-  constructor(private router: Router, private activateRoute: ActivatedRoute) {}
+  constructor(
+    private api: AdminApiService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     console.log('ngOnInit');
@@ -24,15 +33,18 @@ export class AdminOrganizationViewComponent implements OnInit {
   generateTabs() {
     console.log('generateTabs');
     
-    this.activateRoute.paramMap
-      .subscribe((params) => {
-        
-        
+    this.activatedRoute.paramMap.subscribe((params) => {
+        this.fetchOrganization(params.get("uuid"));
         this.tabs = [
           {
             id: "overview",
             label: "Overview",
             command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "overview"]),
+          },
+          {
+            id: "apps",
+            label: "Apps",
+            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "apps"]),
           },
           {
             id: "members",
@@ -53,7 +65,7 @@ export class AdminOrganizationViewComponent implements OnInit {
 
   setCurrentTab() {
     console.log('setCurrentTab');
-    this.activateRoute.children[0].data.pipe(take(1)).subscribe((data) => {
+    this.activatedRoute.children[0].data.pipe(take(1)).subscribe((data) => {
       this.activeTab = this.tabs.find((tab) => tab.id === data.tab);
     })
   }
@@ -65,5 +77,11 @@ export class AdminOrganizationViewComponent implements OnInit {
         this.setCurrentTab();
       }
   });
+  }
+
+  fetchOrganization(uuid: string) {
+    this.api.getOrganization(uuid).then((organization) => {
+      this.organization = organization;
+    })
   }
 }

@@ -14,7 +14,7 @@
                 [globalFilterFields]="['username', 'emails.email','role','state']" responsiveLayout="scroll">
                 <ng-template pTemplate="header">
                     <tr>
-                        <th>Picture</th>
+                        <th style="width: 4rem">Picture</th>
                         <th>Username</th>
                         <th>Groups</th>
                         <th>State</th>
@@ -23,7 +23,7 @@
                 </ng-template>
                 <ng-template pTemplate="body" let-account>
                     <tr>
-                        <td>
+                        <td style="width: 4rem">
                             <p-avatar styleClass="p-mr-2" size="large" [image]="account.avatar"></p-avatar>
                         </td>
                         <td>

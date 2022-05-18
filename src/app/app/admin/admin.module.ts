@@ -16,6 +16,7 @@ import { AdminAccountsCreateComponent } from "./pages/accounts/create-account/cr
 import { AdminAccountsSessionsComponent } from "./pages/accounts/sessions/sessions.component";
 import { AdminAccountViewComponent } from './pages/accounts/account-view/account-view.component';
 import { AdminAccountDetailsComponent } from './pages/accounts/account-view/tabs/account-details/account-details.component';
+import { AdminAccountGroupsComponent } from './pages/accounts/account-view/tabs/account-groups/account-groups.component';
 
 // ADMIN APPS
 import { AdminAppsComponent } from "./pages/apps/apps.component";
@@ -38,6 +39,7 @@ import { AdminSettingsComponent } from './pages/settings/settings.component';
 import { AdminOrganizationsComponent } from './pages/organizations/organizations.component';
 import { AdminOrganizationViewComponent } from './pages/organizations/organization-view/organization-view.component';
 import { AdminOrganizationOverviewComponent } from './pages/organizations/organization-overview/organization-overview.component';
+import { AdminOrganizationAppsComponent } from './pages/organizations/organization-apps/organization-apps.component';
 import { AdminOrganizationMembersComponent } from './pages/organizations/organization-members/organization-members.component';
 import { AdminOrganizationInvitationsComponent } from './pages/organizations/organization-invitations/organization-invitations.component';
 
@@ -46,6 +48,7 @@ import { NgApexchartsModule } from "ng-apexcharts";
 import { ChartCardComponent } from "./components/chart-card/chart-card.component";
 import { AdminApiService } from "./services/admin-api.service";
 import { DialogService } from "primeng/dynamicdialog";
+
 
 
 @NgModule({
@@ -66,27 +69,37 @@ import { DialogService } from "primeng/dynamicdialog";
     CallbackComponent,
     ChartCardComponent,
 
+
+    // ACCOUNTS
     AdminAccountsComponent,
+    AdminAccountViewComponent,
+    AdminAccountDetailsComponent,
+    AdminAccountGroupsComponent,
+    AdminAccountsCreateComponent,
+    AdminAccountsSessionsComponent,
+
+    // APPS
     AdminAppsComponent,
     AdminAppsCreateComponent,
     AdminAppsSettingsComponent,
+
+    // OAUTH
     AdminOAuthComponent,
     AdminOAuthScopesComponent,
     AdminOAuthScopesViewComponent,
     AdminOAuthGroupsComponent,
-    AdminAccountsCreateComponent,
-    AdminAccountsSessionsComponent,
+
     AdminSettingsComponent,
     AdminCreateScopeDialogComponent,
     AdminCreateAppDialogComponent,
+
+    // ORGANIZATIONS
     AdminOrganizationsComponent,
     AdminOrganizationViewComponent,
     AdminOrganizationOverviewComponent,
+    AdminOrganizationAppsComponent,
     AdminOrganizationMembersComponent,
     AdminOrganizationInvitationsComponent,
-    AdminAccountViewComponent,
-    AdminAccountDetailsComponent,
-
   ],
 })
 export class AdminModule implements OnDestroy {

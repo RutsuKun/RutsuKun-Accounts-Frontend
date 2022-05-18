@@ -71,3 +71,11 @@ code {
 .rounded-none {
   border-radius: 0 !important;
 }
+
+.p-skeleton {
+  background-color: #2c292a;
+}
+
+.p-skeleton:after {
+  background: linear-gradient(90deg, #2c292a, #46404340, #2c292a);
+}

@@ -3,11 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { AdminApiService } from '@app/admin/services/admin-api.service';
 
 @Component({
-  templateUrl: './organization-overview.component.html',
-  styleUrls: ['./organization-overview.component.scss']
+  templateUrl: './account-groups.component.html',
+  styleUrls: ['./account-groups.component.scss']
 })
-export class AdminOrganizationOverviewComponent implements OnInit {
-  overview = [];
+export class AdminAccountGroupsComponent implements OnInit {
+
+  groups = [];
 
   constructor(
     private api: AdminApiService,
@@ -16,13 +17,14 @@ export class AdminOrganizationOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.activatedRoute.parent.paramMap.subscribe((params) => {
-      this.fetchOverview(params.get("uuid"));
+      this.fetchGroups(params.get("uuid"));
     });
   }
 
-  fetchOverview(uuid: string) {
-    this.api.getOrganizationOverview(uuid).then((overview) => {
-      this.overview = overview;
+  fetchGroups(uuid: string) {
+    this.api.getAccountGroups(uuid).then((groups) => {
+      this.groups = groups;
     })
   }
+
 }
