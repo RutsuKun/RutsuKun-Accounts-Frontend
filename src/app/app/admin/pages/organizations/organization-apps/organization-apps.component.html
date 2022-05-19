@@ -4,31 +4,35 @@
   dataKey="client_id"
   responsiveLayout="scroll"
 >
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Client</th>
+      <th>Owner</th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
   <ng-template pTemplate="body" let-app>
-    <tr class="bg-transparent">
-      <td class="w-1rem">
-        <p-avatar
-          styleClass="p-mr-2"
-          size="large"
-          [image]="app.logo"
-        ></p-avatar>
-      </td>
+    <tr>
       <td>
-        {{ app.name }} <br />
-        <small>( {{ app.client_id }} )</small>
-      </td>
-      <td>
-        <p-tag
-          [severity]="app.verified ? 'success' : 'danger'"
-          [value]="app.verified ? 'Verified' : 'Unverified'"
-        ></p-tag>
+        <div class="flex flex-row align-items-center">
+          <p-avatar
+            styleClass="mr-2"
+            size="large"
+            [image]="app.logo"
+          ></p-avatar>
+
+          <div>
+            {{ app.name }} <br />
+            <small>( {{ app.client_id }} )</small>
+          </div>
+        </div>
       </td>
       <td>
         <div class="flex flex-row align-items-center">
           <p-avatar
             styleClass="mr-2"
             size="large"
-            [image]="app.account.avatar"
+            [image]="app.account.picture"
           ></p-avatar>
           <span class="font-medium">{{ app.account.username }}</span>
         </div>

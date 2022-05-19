@@ -37,7 +37,7 @@
               <a [routerLink]="['/admin/organizations/', org.uuid]">{{ org.name }}</a>
             </td>
             <td>
-              <span class="mr-2">Domain:</span> <code>{{ org.domain }}</code>
+              <span class="mr-2">Domain:</span> <code>{{ org.domain ? org.domain : "(none)" }}</code>
             </td>
             <td style="width: 6rem">
               <button (click)="menu.toggle($event)" pButton class="p-button-icon p-button-nano" icon="pi pi-ellipsis-v"></button>

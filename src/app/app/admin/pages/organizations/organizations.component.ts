@@ -40,6 +40,7 @@ export class AdminOrganizationsComponent implements OnInit {
       {
         label: "Invitations",
         command: () => this.router.navigate(["/admin/organizations/", org.uuid, 'invitations']),
+        disabled: true
       },
       {
         separator: true,
@@ -48,7 +49,8 @@ export class AdminOrganizationsComponent implements OnInit {
         label: "Delete Organization",
         icon: "pi pi-trash",
         command: () => {},
-        styleClass: "danger"
+        styleClass: "danger",
+        disabled: true
       },
     ];
   }

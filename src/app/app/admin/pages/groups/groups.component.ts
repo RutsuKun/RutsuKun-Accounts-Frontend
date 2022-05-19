@@ -36,7 +36,7 @@ export class AdminGroupsComponent implements OnInit {
     return [
       {
         label: "View Details",
-        command: () => this.router.navigate(["/admin/groups/", group.uuid, "details"]),
+        command: () => this.router.navigate(["/admin/groups/", group.uuid, "overview"]),
       },
       {
         label: "Members",
