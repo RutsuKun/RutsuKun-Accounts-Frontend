@@ -20,10 +20,11 @@ import { AdminGroupsComponent } from "./pages/groups/groups.component";
 import { AdminOAuthComponent } from "./pages/oauth/oauth.component";
 import { AdminOAuthScopesComponent } from "./pages/oauth/scopes/scopes.component";
 import { AdminOAuthScopesViewComponent } from "./pages/oauth/scopes/view/view.component";
-import { AdminOrganizationAppsComponent } from "./pages/organizations/organization-apps/organization-apps.component";
-import { AdminOrganizationInvitationsComponent } from "./pages/organizations/organization-invitations/organization-invitations.component";
-import { AdminOrganizationMembersComponent } from "./pages/organizations/organization-members/organization-members.component";
-import { AdminOrganizationOverviewComponent } from "./pages/organizations/organization-overview/organization-overview.component";
+import { AdminOrganizationAppsComponent } from "./pages/organizations/organization-view/tabs/organization-apps/organization-apps.component";
+import { AdminOrganizationInvitationsComponent } from "./pages/organizations/organization-view/tabs/organization-invitations/organization-invitations.component";
+import { AdminOrganizationMembersComponent } from "./pages/organizations/organization-view/tabs/organization-members/organization-members.component";
+import { AdminOrganizationPermissionsComponent } from "./pages/organizations/organization-view/tabs/organization-permissions/organization-permissions.component";
+import { AdminOrganizationOverviewComponent } from "./pages/organizations/organization-view/tabs/organization-overview/organization-overview.component";
 import { AdminOrganizationViewComponent } from "./pages/organizations/organization-view/organization-view.component";
 import { AdminOrganizationsComponent } from "./pages/organizations/organizations.component";
 import { AdminSettingsComponent } from "./pages/settings/settings.component";
@@ -192,6 +193,14 @@ export const AdminRoutes: Routes = [
             data: {
               title: "Organization Members",
               tab: 'members'
+            },
+          },
+          {
+            path: "permissions",
+            component: AdminOrganizationPermissionsComponent,
+            data: {
+              title: "Organization Permissions",
+              tab: 'permissions'
             },
           },
           {

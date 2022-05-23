@@ -44,10 +44,11 @@ import { AdminSettingsComponent } from './pages/settings/settings.component';
 // ADMIN ORGANIZATIONS
 import { AdminOrganizationsComponent } from './pages/organizations/organizations.component';
 import { AdminOrganizationViewComponent } from './pages/organizations/organization-view/organization-view.component';
-import { AdminOrganizationOverviewComponent } from './pages/organizations/organization-overview/organization-overview.component';
-import { AdminOrganizationAppsComponent } from './pages/organizations/organization-apps/organization-apps.component';
-import { AdminOrganizationMembersComponent } from './pages/organizations/organization-members/organization-members.component';
-import { AdminOrganizationInvitationsComponent } from './pages/organizations/organization-invitations/organization-invitations.component';
+import { AdminOrganizationOverviewComponent } from './pages/organizations/organization-view/tabs/organization-overview/organization-overview.component';
+import { AdminOrganizationAppsComponent } from './pages/organizations/organization-view/tabs/organization-apps/organization-apps.component';
+import { AdminOrganizationMembersComponent } from './pages/organizations/organization-view/tabs/organization-members/organization-members.component';
+import { AdminOrganizationPermissionsComponent } from './pages/organizations/organization-view/tabs/organization-permissions/organization-permissions.component';
+import { AdminOrganizationInvitationsComponent } from './pages/organizations/organization-view/tabs/organization-invitations/organization-invitations.component';
 
 // OTHER
 import { NgApexchartsModule } from "ng-apexcharts";
@@ -108,6 +109,7 @@ import { DialogService } from "primeng/dynamicdialog";
     AdminOrganizationOverviewComponent,
     AdminOrganizationAppsComponent,
     AdminOrganizationMembersComponent,
+    AdminOrganizationPermissionsComponent,
     AdminOrganizationInvitationsComponent,
   ],
 })

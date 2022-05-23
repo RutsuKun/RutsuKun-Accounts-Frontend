@@ -52,6 +52,16 @@ export class AdminOrganizationViewComponent implements OnInit {
             command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "members"])
           },
           {
+            id: "groups",
+            label: "Groups",
+            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "groups"])
+          },
+          {
+            id: "permissions",
+            label: "Permissions",
+            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "permissions"])
+          },
+          {
             id: "invitations",
             label: "Invitations",
             command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "invitations"]),
