@@ -36,9 +36,9 @@ export class AdminOrganizationMembersComponent implements OnInit {
       break;
       case "ORGANIZATION-GROUP": return "Organization Group"
       break;
-      case "ACL-ACCOUNT": return "Acl Account"
+      case "ACL-ACCOUNT": return "Account"
       break;
-      case "ACL-GROUP": return "Acl Group"
+      case "ACL-GROUP": return "Group"
       break;
     }
   }

@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminApiService } from '@app/admin/services/admin-api.service';
 import { IOrganization } from '@core/interfaces/IOrganization';
-import { MenuItem } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
+import { AdminOrganizationCreateDialogComponent } from './organization-create-dialog/organization-create-dialog.component';
 
 @Component({
   templateUrl: './organizations.component.html',
@@ -12,7 +14,9 @@ export class AdminOrganizationsComponent implements OnInit {
   orgs: IOrganization[] = [];
   constructor(
     private router: Router,
-    private api: AdminApiService
+    private api: AdminApiService,
+    private dialog: DialogService,
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
@@ -48,11 +52,34 @@ export class AdminOrganizationsComponent implements OnInit {
       {
         label: "Delete Organization",
         icon: "pi pi-trash",
-        command: () => {},
+        command: () => {
+          this.confirmationService.confirm({
+            header: "Delete organization",
+            message: "Are you sure that you want to delete organization?",
+            icon: "pi pi-info-circle",
+            accept: () => {
+              this.api.deleteOrganization(org.uuid).then(() => {
+                this.fetchOrgs();
+              })
+            }
+          });
+        },
         styleClass: "danger",
-        disabled: true
       },
     ];
+  }
+
+  openCreateOrganizationDialog() {
+    this.dialog
+      .open(AdminOrganizationCreateDialogComponent, {
+        header: "Create organization",
+        modal: true,
+        dismissableMask: true,
+        styleClass: "w-11 md:w-6 lg:w-3",
+      })
+      .onClose.subscribe(() => {
+        this.fetchOrgs();
+      });
   }
 
 }

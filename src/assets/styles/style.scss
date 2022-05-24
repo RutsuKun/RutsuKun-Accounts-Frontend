@@ -9,28 +9,11 @@
 @import "menu";
 @import "tabview";
 
-.page-account {
-  .p-inputtext {
-    background-color: hsla(0, 0%, 54%, 0.1);
-    border-color: hsla(0, 0%, 54%, 0.1);
-    color: #ffffff;
-  }
-
-  .p-selectbutton .p-button {
-    background-color: hsla(0, 0%, 54%, 0.1);
-    border-color: hsla(0, 0%, 54%, 0.1);
-    color: white;
-  }
-
-  .p-chips .p-chips-multiple-container .p-chips-input-token input {
-    color: white;
-  }
-
-}
 
 
 .p-button:focus,
 .p-inputtext:enabled:focus,
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box.p-focus,
 .p-chips .p-chips-multiple-container:not(.p-disabled).p-focus {
   box-shadow: none;
 }
@@ -45,10 +28,6 @@
   padding: 0.4rem 0.4rem;
   width: auto;
 }
-
-
-
-
 
 .p-chips .p-chips-multiple-container .p-chips-token {
   background: var(--primary-color);
@@ -68,6 +47,7 @@ code {
   background-color: rgba(138, 138, 138, 0.1);
   border: 1px solid rgba(138, 138, 138, 0.1);
   color: #ffffff;
+  width: fit-content;
 }
 
 .rounded-none {

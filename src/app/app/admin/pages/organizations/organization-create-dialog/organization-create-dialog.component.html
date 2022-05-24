@@ -1,0 +1,27 @@
+<div [formGroup]="form">
+    <div class="mb-3">
+        <label for="name" class="flex justify-content-between align-items-center text-sm text-500 font-medium mb-0 pr-2">
+            <span>Name <span class="text-red">*</span></span>
+            <small *ngIf="formService.hasError(form, 'name')" class="p-error uppercase">
+                {{ formService.hasError(form, 'name', 'required') ? 'Name required' : null }}
+            </small>
+        </label>
+        <input pInputText id="name" class="w-full mt-1" formControlName="name" />
+    </div>
+
+    <div class="mb-3">
+        <label for="description" class="flex justify-content-between align-items-center text-sm text-500 font-medium mb-0 pr-2">
+            <span>Description</span>
+        </label>
+        <textarea pInputTextarea id="description" class="w-full mt-1" formControlName="description"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label for="domain" class="flex justify-content-between align-items-center text-sm text-500 font-medium mb-0 pr-2">
+            <span>Domain</span>
+        </label>
+        <input pInputText id="domain" class="w-full mt-1" formControlName="domain" />
+    </div>
+
+    <button (click)="createOrganization()" pButton label="Create" class="w-full p-button-lg"></button>
+</div>

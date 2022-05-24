@@ -176,6 +176,38 @@ export class AdminApiService {
     });
   }
 
+  createOrganization(organization): Promise<IOAuth2Scope> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .post<any>(`${this.apiUrl}/v1/admin/organizations`, organization)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  deleteOrganization(uuid): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .delete<any>(`${this.apiUrl}/v1/admin/organizations/${uuid}`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
   getOrganization(uuid: string): Promise<IOrganization> {
     return new Promise((resolve, reject) => {
       this.http

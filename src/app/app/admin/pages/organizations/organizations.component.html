@@ -1,3 +1,4 @@
+<p-confirmDialog></p-confirmDialog>
 <app-admin-page>
   <div class="rk_accounts__card">
     <div
@@ -11,6 +12,7 @@
         </div>
       </div>
       <button
+        (click)="openCreateOrganizationDialog()"
         pButton
         class="p-button-sm bg-white text-black-alpha-90 font-bold uppercase"
         icon="pi pi-plus"
@@ -37,7 +39,9 @@
               <a [routerLink]="['/admin/organizations/', org.uuid]">{{ org.name }}</a>
             </td>
             <td>
-              <span class="mr-2">Domain:</span> <code>{{ org.domain ? org.domain : "(none)" }}</code>
+              <div class="flex flex-row align-items-center">
+                <span class="mr-2">Domain:</span> <code>{{ org.domain ? org.domain : "(none)" }}</code>
+              </div>
             </td>
             <td style="width: 6rem">
               <button (click)="menu.toggle($event)" pButton class="p-button-icon p-button-nano" icon="pi pi-ellipsis-v"></button>

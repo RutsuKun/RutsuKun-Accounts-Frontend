@@ -33,12 +33,9 @@
           <div class="flex flex-column" style="gap: 0.5rem;">
             <div class="flex flex-row flex-wrap" style="gap: 0.5rem;" *ngFor="let permission of member.account_permissions">
               <code tooltipStyleClass="w-auto">{{ permission.name }}</code>
-              <p-tag [severity]="getSourceTagColor(source)" *ngFor="let source of permission.sources">
+              <p-tag [severity]="getSourceTagColor(source)" tooltipPosition="bottom" [pTooltip]="source.organization ? source.organization.name : source.account ? source.account.username : source.group ? source.group.name : null" *ngFor="let source of permission.sources">
                 <div class="flex flex-column">
                     {{ getSourceName(source) }}
-                    <span *ngIf="source.organization">Name: {{ source.organization.name }}</span>
-                    <span *ngIf="source.account">Username: {{ source.account.username }}</span>
-                    <span *ngIf="source.group">Name: {{ source.group.name }}</span>
                 </div>
               </p-tag>
             </div>

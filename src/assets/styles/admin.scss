@@ -1,5 +1,35 @@
 body.page-admin {
-    background: #0c0c0c;
-    overflow-x: initial;
-    height: 100%;
+  background: #0c0c0c;
+  overflow-x: initial;
+  height: 100%;
+
+  .p-dialog .p-dialog-header {
+    background: #211e1f;
+    color: white;
+  }
+
+  .p-dialog .p-dialog-content {
+    background: #292727;
+    color: white;
+    padding: 2rem;
+  }
+
+  .p-dialog .p-dialog-footer {
+    background: #292727;
+    color: white;
+    position: absolute;
+    width: 100%;
+    top: 97%;
+  }
+
+  .p-inputtext {
+    background-color: hsla(0, 0%, 54%, 0.1);
+    border-color: hsla(0, 0%, 54%, 0.1);
+    color: #ffffff;
+  }
+
+  .p-checkbox:not(.p-checkbox-checked) .p-checkbox-box {
+    background-color: hsla(0, 0%, 54%, 0.1);
+    border-color: hsla(0, 0%, 54%, 0.1);
+  }
 }

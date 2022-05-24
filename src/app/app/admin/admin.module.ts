@@ -50,12 +50,14 @@ import { AdminOrganizationAppsComponent } from './pages/organizations/organizati
 import { AdminOrganizationMembersComponent } from './pages/organizations/organization-view/tabs/organization-members/organization-members.component';
 import { AdminOrganizationPermissionsComponent } from './pages/organizations/organization-view/tabs/organization-permissions/organization-permissions.component';
 import { AdminOrganizationInvitationsComponent } from './pages/organizations/organization-view/tabs/organization-invitations/organization-invitations.component';
+import { AdminOrganizationCreateDialogComponent } from './pages/organizations/organization-create-dialog/organization-create-dialog.component';
 
 // OTHER
 import { NgApexchartsModule } from "ng-apexcharts";
 import { ChartCardComponent } from "./components/chart-card/chart-card.component";
 import { AdminApiService } from "./services/admin-api.service";
 import { DialogService } from "primeng/dynamicdialog";
+
 
 
 @NgModule({
@@ -114,6 +116,7 @@ import { DialogService } from "primeng/dynamicdialog";
     AdminOrganizationMembersComponent,
     AdminOrganizationPermissionsComponent,
     AdminOrganizationInvitationsComponent,
+    AdminOrganizationCreateDialogComponent,
   ],
 })
 export class AdminModule implements OnDestroy {

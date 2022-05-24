@@ -25,6 +25,8 @@ import { ImageModule } from 'primeng/image';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TabMenuModule } from 'primeng/tabmenu';
 import { SkeletonModule } from 'primeng/skeleton';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
@@ -41,6 +43,7 @@ import { HeaderAccountComponent } from './components/header-account/header-accou
 @NgModule({
   declarations: [AuthFooterComponent, OtpFormComponent, HeaderAccountComponent],
   imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, TranslateModule],
+  providers: [ConfirmationService],
   exports: [
     CommonModule,
     FormsModule,
@@ -69,6 +72,7 @@ import { HeaderAccountComponent } from './components/header-account/header-accou
     InputNumberModule,
     TabMenuModule,
     SkeletonModule,
+    ConfirmDialogModule,
     ClipboardModule,
     AuthFooterComponent,
     OtpFormComponent,
