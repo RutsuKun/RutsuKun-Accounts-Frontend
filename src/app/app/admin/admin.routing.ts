@@ -29,6 +29,7 @@ import { AdminOrganizationViewComponent } from "./pages/organizations/organizati
 import { AdminOrganizationsComponent } from "./pages/organizations/organizations.component";
 import { AdminSettingsComponent } from "./pages/settings/settings.component";
 import { AdminSignInComponent } from "./pages/signin/signin.component";
+import { AdminAccountPermissionsComponent } from "./pages/accounts/account-view/tabs/account-permissions/account-permissions.component";
 
 export const AdminRoutes: Routes = [
   {
@@ -91,6 +92,14 @@ export const AdminRoutes: Routes = [
             data: {
               title: "Account Details",
               tab: 'details'
+            },
+          },
+          {
+            path: "permissions",
+            component: AdminAccountPermissionsComponent,
+            data: {
+              title: "Account Permissions",
+              tab: 'permissions'
             },
           },
           {

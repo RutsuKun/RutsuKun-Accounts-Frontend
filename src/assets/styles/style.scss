@@ -60,7 +60,9 @@ app-header-account {
 }
 
 code {
-  display: inline;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   padding: 2px 6px;
   border-radius: 4px;
   background-color: rgba(138, 138, 138, 0.1);

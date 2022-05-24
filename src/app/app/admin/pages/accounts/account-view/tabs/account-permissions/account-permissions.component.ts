@@ -3,11 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { AdminApiService } from '@app/admin/services/admin-api.service';
 
 @Component({
-  templateUrl: './organization-members.component.html',
-  styleUrls: ['./organization-members.component.scss']
+  templateUrl: './account-permissions.component.html',
+  styleUrls: ['./account-permissions.component.scss']
 })
-export class AdminOrganizationMembersComponent implements OnInit {
-  members = [];
+export class AdminAccountPermissionsComponent implements OnInit {
+  permissions = [];
 
   constructor(
     private api: AdminApiService,
@@ -16,18 +16,14 @@ export class AdminOrganizationMembersComponent implements OnInit {
 
   ngOnInit(): void {
     this.activatedRoute.parent.paramMap.subscribe((params) => {
-      this.fetchMembers(params.get("uuid"));
+      this.fetchPermissions(params.get("uuid"));
     });
   }
 
-  fetchMembers(uuid: string) {
-    this.api.getOrganizationMembers(uuid).then((members) => {
-      this.members = members;
+  fetchPermissions(uuid: string) {
+    this.api.getAccountPermissions(uuid).then((permissions) => {
+      this.permissions = permissions;
     })
-  }
-
-  getPermissionSourcesString(permission) {
-    return permission.sources.map(s => '• ' + s.type).join('\r\n')
   }
 
   getSourceName(source) {

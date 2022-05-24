@@ -14,8 +14,12 @@
           <ng-container *ngIf="organization">{{ organization.name }}</ng-container>
           <p-skeleton *ngIf="!organization" width="200px" height="29px"></p-skeleton>
         </h2>
-        <div class="subtitle mt-1 mb-0">
+        <div class="subtitle flex flex-row align-items-center mt-1">
+
           <span *ngIf="organization" class="mr-2 select-none">Organization ID:</span>
+          <code class="mr-2" *ngIf="organization">{{ organization.id }}</code>
+
+          <span *ngIf="organization" class="mr-2 select-none">Organization UUID:</span>
           <code *ngIf="organization">{{ organization.uuid }}</code>
           <p-skeleton *ngIf="!organization" width="280px" height="20px"></p-skeleton>
         </div>
@@ -26,6 +30,13 @@
 
     <div class="card__content">
       <router-outlet></router-outlet>
+    </div>
+
+    <div *ngIf="isDevelop" class="card__content">
+      Debug:
+      <code>
+        <pre>{{ debug | json}}</pre>
+      </code>
     </div>
   </div>
 </app-admin-page>

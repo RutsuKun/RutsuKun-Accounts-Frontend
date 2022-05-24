@@ -46,7 +46,6 @@ export class AdminAccountViewComponent implements OnInit {
             id: "permissions",
             label: "Permissions",
             command: () => this.router.navigate(["/admin/accounts/", params.get("uuid"), "permissions"]),
-            disabled: true
           },
           {
             id: "groups",

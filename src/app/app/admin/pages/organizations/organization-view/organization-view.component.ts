@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import { AdminApiService } from "@app/admin/services/admin-api.service";
 import { IOrganization } from "@core/interfaces/IOrganization";
+import { environment } from "@env/environment";
 import { MenuItem } from "primeng/api";
 import { take, withLatestFrom } from "rxjs/operators";
 
@@ -13,9 +14,13 @@ export class AdminOrganizationViewComponent implements OnInit {
 
   organization: IOrganization = null;
 
+  debug: any = null;
+
   tabs: MenuItem[] = [];
 
   activeTab = this.tabs[0];
+
+  isDevelop = environment.envName === "DEV";
 
   constructor(
     private api: AdminApiService,
@@ -54,12 +59,14 @@ export class AdminOrganizationViewComponent implements OnInit {
           {
             id: "groups",
             label: "Groups",
-            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "groups"])
+            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "groups"]),
+            disabled: true,
           },
           {
             id: "permissions",
             label: "Permissions",
-            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "permissions"])
+            command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "permissions"]),
+            disabled: true
           },
           {
             id: "invitations",
@@ -94,5 +101,10 @@ export class AdminOrganizationViewComponent implements OnInit {
     this.api.getOrganization(uuid).then((organization) => {
       this.organization = organization;
     })
+    if(this.isDevelop) {
+      this.api.getOrganizationDebug(uuid).then((debug) => {
+        this.debug = debug;
+      })
+    }
   }
 }

@@ -64,6 +64,22 @@ export class AdminApiService {
     });
   }
 
+  getAccountPermissions(uuid: string): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<any[]>(`${this.apiUrl}/v1/admin/accounts/${uuid}/permissions`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
   getAccountGroups(uuid: string): Promise<IAccountGroup[]> {
     return new Promise((resolve, reject) => {
       this.http
@@ -164,6 +180,22 @@ export class AdminApiService {
     return new Promise((resolve, reject) => {
       this.http
         .get<IOrganization>(`${this.apiUrl}/v1/admin/organizations/${uuid}`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
+  getOrganizationDebug(uuid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<any>(`${this.apiUrl}/v1/admin/organizations/${uuid}/debug`)
         .pipe(
           catchError((err) => {
             reject(err.error);

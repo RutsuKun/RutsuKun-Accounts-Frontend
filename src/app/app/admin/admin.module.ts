@@ -16,6 +16,7 @@ import { AdminAccountsCreateComponent } from "./pages/accounts/create-account/cr
 import { AdminAccountsSessionsComponent } from "./pages/accounts/sessions/sessions.component";
 import { AdminAccountViewComponent } from './pages/accounts/account-view/account-view.component';
 import { AdminAccountDetailsComponent } from './pages/accounts/account-view/tabs/account-details/account-details.component';
+import { AdminAccountPermissionsComponent } from "./pages/accounts/account-view/tabs/account-permissions/account-permissions.component";
 import { AdminAccountGroupsComponent } from './pages/accounts/account-view/tabs/account-groups/account-groups.component';
 
 // ADMIN GROUPS
@@ -56,6 +57,7 @@ import { ChartCardComponent } from "./components/chart-card/chart-card.component
 import { AdminApiService } from "./services/admin-api.service";
 import { DialogService } from "primeng/dynamicdialog";
 
+
 @NgModule({
   imports: [
     RouterModule.forChild(AdminRoutes),
@@ -79,6 +81,7 @@ import { DialogService } from "primeng/dynamicdialog";
     AdminAccountsComponent,
     AdminAccountViewComponent,
     AdminAccountDetailsComponent,
+    AdminAccountPermissionsComponent,
     AdminAccountGroupsComponent,
     AdminAccountsCreateComponent,
     AdminAccountsSessionsComponent,

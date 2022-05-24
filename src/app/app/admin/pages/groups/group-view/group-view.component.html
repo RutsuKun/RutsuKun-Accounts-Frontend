@@ -6,8 +6,11 @@
             <ng-container *ngIf="group">{{ group.display_name }} ({{ group.name }})</ng-container>
             <p-skeleton *ngIf="!group" width="200px" height="29px"></p-skeleton>
           </h2>
-          <div class="subtitle mt-1 mb-0">
+          <div class="subtitle flex flex-row align-items-center mt-1">
             <span *ngIf="group" class="mr-2 select-none">Group ID:</span>
+            <code class="mr-2" *ngIf="group">{{ group.id }}</code>
+
+            <span *ngIf="group" class="mr-2 select-none">Group UUID:</span>
             <code *ngIf="group">{{ group.uuid }}</code>
             <p-skeleton *ngIf="!group" width="280px" height="20px"></p-skeleton>
           </div>

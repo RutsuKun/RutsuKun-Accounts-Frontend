@@ -14,21 +14,27 @@
                 [globalFilterFields]="['username', 'emails.email','role','state']" responsiveLayout="scroll">
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 4rem">Picture</th>
-                        <th>Username</th>
-                        <th>Groups</th>
-                        <th>State</th>
+                        <th class="w-16rem">Account</th>
+                        <th class="w-16rem">Groups</th>
+                        <th >State</th>
                         <th style="width: 6rem"></th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-account>
                     <tr>
-                        <td style="width: 4rem">
-                            <p-avatar styleClass="p-mr-2" size="large" [image]="account.avatar"></p-avatar>
-                        </td>
-                        <td>
-                            <a [routerLink]="['/admin/accounts/', account.uuid]">{{account.username}}</a> <br />
-                            {{ getPrimaryEmail(account) }}
+                        <td style="vertical-align: top;">
+                            <div class="flex flex-row align-items-center">
+                              <p-avatar
+                                styleClass="mr-2"
+                                size="large"
+                                [image]="account.picture"
+                              ></p-avatar>
+                    
+                              <div>
+                                <a [routerLink]="['/admin/accounts/', account.uuid]">{{ account.username }}</a><br />
+                                {{ account.email }}
+                              </div>
+                            </div>
                         </td>
                         <td>
                             <p-tag *ngFor="let group of account.groups" [value]="group.display_name" class="mr-1 mt-1"></p-tag>
