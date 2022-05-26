@@ -288,6 +288,22 @@ export class AdminApiService {
     });
   }
 
+  getOrganizationGroups(uuid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<any>(`${this.apiUrl}/v1/admin/organizations/${uuid}/groups`)
+        .pipe(
+          catchError((err) => {
+            reject(err.error);
+            return throwError(err);
+          })
+        )
+        .subscribe((res) => {
+          resolve(res);
+        });
+    });
+  }
+
   getOrganizationPermissions(uuid: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.http

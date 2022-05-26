@@ -28,13 +28,13 @@ export class AdminAccountPermissionsComponent implements OnInit {
 
   getSourceName(source) {
     switch(source.type) {
-      case "ORGANIZATION-MEMBER": return "Organization Member"
+      case "ORGANIZATION-MEMBER": return `Organization Member (${source.organization.name})`
       break;
-      case "ORGANIZATION-GROUP": return "Organization Group"
+      case "ORGANIZATION-GROUP": return `Organization Group (${source.group.name})`
       break;
-      case "ACL-ACCOUNT": return "Account"
+      case "ACL-ACCOUNT": return "Direct"
       break;
-      case "ACL-GROUP": return "Group"
+      case "ACL-GROUP": return `Group (${source.group.name})`
       break;
     }
   }

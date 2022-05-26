@@ -60,7 +60,6 @@ export class AdminOrganizationViewComponent implements OnInit {
             id: "groups",
             label: "Groups",
             command: () => this.router.navigate(["/admin/organizations/", params.get("uuid"), "groups"]),
-            disabled: true,
           },
           {
             id: "permissions",

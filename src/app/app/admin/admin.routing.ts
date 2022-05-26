@@ -30,6 +30,7 @@ import { AdminOrganizationsComponent } from "./pages/organizations/organizations
 import { AdminSettingsComponent } from "./pages/settings/settings.component";
 import { AdminSignInComponent } from "./pages/signin/signin.component";
 import { AdminAccountPermissionsComponent } from "./pages/accounts/account-view/tabs/account-permissions/account-permissions.component";
+import { AdminOrganizationGroupsComponent } from "./pages/organizations/organization-view/tabs/organization-groups/organization-groups.component";
 
 export const AdminRoutes: Routes = [
   {
@@ -202,6 +203,14 @@ export const AdminRoutes: Routes = [
             data: {
               title: "Organization Members",
               tab: 'members'
+            },
+          },
+          {
+            path: "groups",
+            component: AdminOrganizationGroupsComponent,
+            data: {
+              title: "Organization Groups",
+              tab: 'groups'
             },
           },
           {
