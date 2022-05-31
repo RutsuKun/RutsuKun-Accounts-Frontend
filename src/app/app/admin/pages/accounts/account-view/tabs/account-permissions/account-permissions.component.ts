@@ -34,9 +34,9 @@ export class AdminAccountPermissionsComponent implements OnInit {
       break;
       case "ACL-ACCOUNT": return "Direct ACL (Legacy)"
       break;
-      case "DIRECT-ACCOUNT": return "Direct"
+      case "ACL-GROUP": return `Group ACL (${source.group.name}) (Legacy)`
       break;
-      case "ACL-GROUP": return `Group (${source.group.name})`
+      case "DIRECT-ACCOUNT": return "Direct"
       break;
     }
   }
