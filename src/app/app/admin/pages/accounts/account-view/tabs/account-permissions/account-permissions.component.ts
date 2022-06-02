@@ -32,9 +32,11 @@ export class AdminAccountPermissionsComponent implements OnInit {
       break;
       case "ORGANIZATION-GROUP": return `Organization Group (${source.group.name})`
       break;
-      case "ACL-ACCOUNT": return "Direct"
+      case "ACL-ACCOUNT": return "Direct ACL (Legacy)"
       break;
-      case "ACL-GROUP": return `Group (${source.group.name})`
+      case "ACL-GROUP": return `Group ACL (${source.group.name}) (Legacy)`
+      break;
+      case "DIRECT-ACCOUNT": return "Direct"
       break;
     }
   }
@@ -45,7 +47,9 @@ export class AdminAccountPermissionsComponent implements OnInit {
       break;
       case "ORGANIZATION-GROUP": return "info"
       break;
-      case "ACL-ACCOUNT": return "warning"
+      case "ACL-ACCOUNT":
+      case "DIRECT-ACCOUNT":
+        return "warning"
       break;
       case "ACL-GROUP": return "danger"
       break;
