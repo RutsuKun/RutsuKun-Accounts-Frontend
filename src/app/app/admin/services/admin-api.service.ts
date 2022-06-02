@@ -243,7 +243,7 @@ export class AdminApiService {
   getOrganizationOverview(uuid: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.http
-        .get<any>(`${this.apiUrl}/v1/admin/organizations/${uuid}/overview`)
+        .get<any>(`${this.apiUrl}/v1/admin/organizations/${uuid}`)
         .pipe(
           catchError((err) => {
             reject(err.error);

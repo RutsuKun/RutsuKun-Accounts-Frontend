@@ -31,12 +31,12 @@
     <div class="card__content">
       <router-outlet></router-outlet>
     </div>
+  </div>
 
-    <div *ngIf="isDevelop" class="card__content">
-      Debug:
-      <code>
-        <pre>{{ debug | json}}</pre>
-      </code>
-    </div>
+  <div *ngIf="isDevelop" class="mt-4">
+    Debug:
+    <code>
+      <pre>{{ debug | json}}</pre>
+    </code>
   </div>
 </app-admin-page>

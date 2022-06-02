@@ -3,12 +3,12 @@
         
         <div *ngIf="adminAccount.userData" class="user-box flex flex-row relative">
             <div class="user-box-content flex flex-row align-items-center justify-content-center font-medium">
-                <img class="avatar mr-2" [src]="adminAccount.userData.picture" /> {{ adminAccount.userData.username }} <i class="pi pi-angle-down ml-2"></i>
+                <img class="avatar mr-2" [src]="adminAccount.userData.picture" /> {{ adminAccount.userData.nickname }} <i class="pi pi-angle-down ml-2"></i>
             </div>
             <div class="user-box-menu rounded-sm">
                 <div class="current-account p-3 flex flex-column align-items-center">
                     <img class="avatar mb-3" [src]=" adminAccount.userData.picture" />
-                    <span class="font-medium text-lg">{{  adminAccount.userData.username }}</span>
+                    <span class="font-medium text-lg">{{  adminAccount.userData.nickname }}</span>
                     <!-- <small class="font-medium text-white-alpha-50" *ngIf="isDevelop">ID: {{ account.uuid }}</small>
                     <small class="font-medium text-white-alpha-50" *ngIf="isDevelop">ROLE: {{ account.role }}</small> -->
                     <span class="text-sm">{{  adminAccount.userData.email }}</span>
