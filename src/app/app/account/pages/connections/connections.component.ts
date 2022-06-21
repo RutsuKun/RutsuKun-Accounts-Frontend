@@ -46,7 +46,18 @@ export class AccountConnectionsComponent implements OnInit {
   }
 
   connectProvider(provider: string) {
-    location.href = `${environment.auth}/providers/${provider}`;
+    const opened = window.open(`${environment.api}/v1/me/providers/${provider}/connect`, "_blank", "width=300px;height=500px");
+    window.addEventListener('message', (event) => {
+      console.log('event ', event);
+      
+      if (event.origin !== window.origin) return;
+      console.log('message event ', event);
+      if(event.data.success) {
+        this.accountFacade.fetchProviders();
+        window.removeEventListener('message', () => {});
+      }
+      opened.close();
+    })
   }
 
   disconnectProvider(provider: string) {
