@@ -8,6 +8,7 @@ export interface IAccount {
   enabled2fa: boolean;
   providers: IAccountProvider[];
   groups: IAccountGroup[];
+  organizations: IAccountOrganization[];
   authn_methods: IAccountAuthnMethod[];
   role: string;
   secret2fa: string;
@@ -48,6 +49,13 @@ export interface IAccountGroup {
   display_name: string;
   enabled: boolean;
 }
+
+export interface IAccountOrganization {
+  id: number;
+  uuid: string;
+  name: string;
+}
+
 
 export interface IAccountAuthnMethod {
   type: "OTP";
