@@ -48,6 +48,21 @@
                     </ng-container>
                 </div>
             </section>
+
+            <section class="mb-3">
+                <h3>Organizations</h3>
+                <div class="flex flex-row align-items-center">
+                    <ng-container *ngIf="loading$ | async">
+                        <i class="pi pi-spinner pi-spin text-2xl"></i>
+                    </ng-container>
+                    <ng-container *ngIf="!(loading$ | async)">
+                        <p class="flex-1">
+                            <p-tag *ngFor="let org of account.organizations" [value]="org.name" class="mr-2"></p-tag>
+                            <ng-container *ngIf="!account.organizations.length">None</ng-container>
+                        </p>
+                    </ng-container>
+                </div>
+            </section>
         </div>
     </div>
 

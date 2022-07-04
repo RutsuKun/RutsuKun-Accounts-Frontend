@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { AuthFacade } from "@core/store/auth/auth.facade";
+import { OidcConfigService, OidcSecurityService } from "angular-auth-oidc-client";
 import { MenuItem } from "primeng/api";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -66,7 +67,8 @@ export class AdminPageComponent implements OnInit {
   constructor(
     private authFacade: AuthFacade,
     private auth: AuthService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private oidcService: OidcSecurityService
   ) {}
 
   ngOnInit() {

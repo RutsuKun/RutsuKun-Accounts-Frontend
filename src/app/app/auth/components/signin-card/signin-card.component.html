@@ -4,12 +4,14 @@
         DEV
     </div>
 
+    <!-- form loading -->
     <ng-container *ngIf="!(showForm$ | async) && !clientError">
         <div class="flex flex-row justify-content-center align-items-center" style="height: 336px;">
             <i class="pi pi-spinner spin text-7xl"></i>
         </div>
     </ng-container>
 
+    <!-- client error -->
     <ng-container *ngIf="clientError">
         <div class="flex flex-column justify-content-center align-items-center" style="height: 336px;">
             <h2 class="title">{{ clientError.error | translate }}</h2>
@@ -18,6 +20,7 @@
     </ng-container>
 
     <ng-container *ngIf="(showForm$ | async) && !clientError">
+        <!-- card title -->
         <ng-container *ngIf="type !== 'reauth' && type !== 'sso'">
             <h2 class="title">
                 {{ 'pages.signin.title' | translate }}
@@ -47,14 +50,17 @@
             </span>
         </ng-container>
 
+        <!-- login form -->
         <div *ngIf="type !== 'reauth' && type !== 'sso'" class="form" [formGroup]="authForm">
 
+            <!-- login error -->
             <ng-container *ngIf="error$ | async">
                 <span class="error block mb-2">
                     {{ (error$ | async) | translate }}
                 </span>
             </ng-container>
 
+            <!-- email -->
             <div class="mb-2">
                 <label for="email" class="text-500 text-sm auth-form-label flex justify-content-between align-items-center pr-2">
                     <span>{{ 'pages.signin.forms.email' | translate }}</span>
@@ -71,6 +77,7 @@
                 </div>
             </div>
 
+            <!-- password -->
             <div class="mb-2">
                 <label for="password" class="text-500 text-sm auth-form-label">
                     {{ 'pages.signin.forms.password' | translate }}
@@ -79,10 +86,10 @@
             </div>
 
             <div class="flex flex-row">
-                <span class="text-sm text-blue-500 cursor-pointer hover:underline" (click)="redirectForgotPassword()">Forgot password</span>
+                <a class="text-sm cursor-pointer hover:underline" (click)="$event.preventDefault(); redirectForgotPassword();">Forgot password</a>
             </div>
 
-
+            <!-- buttons -->
             <div class="flex flex-column mt-4">
                 <!-- signin button -->
                 <button class="auth-button signin-button mb-3" pButton pRipple (click)="signin()" [disabled]="loading$ | async">
@@ -98,14 +105,17 @@
 
         </div>
 
+        <!-- reauth form -->
         <div *ngIf="type === 'reauth'" class="form" [formGroup]="reauthForm">
 
+            <!-- reauth error -->
             <ng-container *ngIf="error$ | async">
                 <span class="error block mb-2">
                     {{ (error$ | async) | translate }}
                 </span>
             </ng-container>
 
+            <!-- password -->
             <div class="mb-2">
                 <label for="password" class="text-500 text-sm">
                     {{ 'pages.signin.forms.password' | translate }}
@@ -135,15 +145,17 @@
 
         </div>
 
-
+        <!-- sso form -->
         <div *ngIf="type === 'sso'" class="form" [formGroup]="ssoForm">
 
+            <!-- sso error -->
             <ng-container *ngIf="error$ | async">
                 <span class="error block mb-2">
                     {{ (error$ | async) | translate }}
                 </span>
             </ng-container>
 
+            <!-- email -->
             <div class="mb-2">
                 <label for="organization" class="text-500 text-sm">
                     Organization email
@@ -152,7 +164,7 @@
             </div>
 
             <div class="flex flex-row mt-4">
-                <!-- reauth button -->
+                <!-- signin button -->
                 <button class="auth-button signin-button flex-1 ml-2" pButton pRipple (click)="ssoClick()" [disabled]="true">
                     <div class="flex flex-row justify-content-center align-items-center w-full">
                         <span *ngIf="loading$ | async" class="p-button-icon p-button-icon-left p-button-loading-icon pi pi-spinner pi-spin" aria-hidden="true"></span>
@@ -181,14 +193,18 @@
             </div>
         </ng-container>
 
-        <div *ngIf="type === 'auth'" class="flex flex-row justify-content-center mt-3">
+        <!-- <div *ngIf="type === 'auth'" class="flex flex-row justify-content-center mt-3">
             <span class="text-base text-blue-500 cursor-pointer hover:underline" (click)="switchToSamlSSO()">Sign in with SAML SSO</span>
-        </div>
+        </div> -->
 
         <div *ngIf="type === 'sso'" class="flex flex-row justify-content-center mt-3">
             <span class="text-base text-blue-500 cursor-pointer hover:underline" (click)="switchToAuth()">Sign in with provider or password</span>
         </div>
+
+        <div class="flex flex-row justify-content-end pt-5">
+            <a class="ml-2 text-sm" routerLink="/admin/signin">Admin</a>
+            <a class="ml-2 text-sm" routerLink="/support">Support</a>
+            <a class="ml-2 text-sm" routerLink="/terms-of-service">Terms of Service</a>
+        </div>
     </ng-container>
-
-
 </p-card>

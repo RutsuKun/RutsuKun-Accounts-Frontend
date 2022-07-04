@@ -22,9 +22,7 @@ export class TokenInterceptor implements HttpInterceptor {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Token SENDED: " + token);
     }
-    console.log('aaaa');
     
     return next.handle(request);
   }

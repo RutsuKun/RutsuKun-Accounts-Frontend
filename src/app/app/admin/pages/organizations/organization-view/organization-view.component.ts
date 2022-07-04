@@ -36,8 +36,6 @@ export class AdminOrganizationViewComponent implements OnInit {
   }
 
   generateTabs() {
-    console.log('generateTabs');
-    
     this.activatedRoute.paramMap.subscribe((params) => {
         this.fetchOrganization(params.get("uuid"));
         this.tabs = [
@@ -81,7 +79,6 @@ export class AdminOrganizationViewComponent implements OnInit {
   }
 
   setCurrentTab() {
-    console.log('setCurrentTab');
     this.activatedRoute.children[0].data.pipe(take(1)).subscribe((data) => {
       this.activeTab = this.tabs.find((tab) => tab.id === data.tab);
     })

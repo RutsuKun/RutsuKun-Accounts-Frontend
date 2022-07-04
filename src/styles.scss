@@ -22,13 +22,15 @@ html {
 }
 
 body {
-    margin: 0;
-    padding: 0;
     width: 100%;
+    min-height: 100%;
+    overflow: auto;
+    padding: 0;
+    margin: 0;
     color: #fff;
     background-color: #fff;
     font-family: "Inter";
-    height: 100%;
+
     // &.page-auth::before {
     //     position: fixed;
     //     content: ' ';
@@ -39,18 +41,10 @@ body {
     //     z-index: 0;
     // }
     &.page-auth {
-        background: linear-gradient( 180deg, #700b32 17.34%, #3d0319 113.19%);
-        background-blend-mode: normal, normal;
-        background-position: bottom, 50%;
-        background-repeat: no-repeat;
-        background-size: 100%, auto;
+        background: radial-gradient(94% 58.3% at 50.3% 82.6%, #2a2541 0%, #111013 100%);
     }
     &.admin-portal {
-        background: url(/assets/images/swoosh.svg), linear-gradient( 121.55deg, #6c1794 17.34%, #4b006e 113.19%);
-        background-blend-mode: normal, normal;
-        background-position: bottom, 50%;
-        background-repeat: no-repeat;
-        background-size: 100%, auto;
+        background: radial-gradient(94% 58.3% at 50.3% 82.6%, #2a2541 0%, #1a0b37 100%);
     }
     &.app-debug-api {
         background: url(https://nanasubs.pl/images/episodes/komi-san-wa-komyushou-desu-3.webp), linear-gradient( 121.55deg, #6c1794 17.34%, #4b006e 113.19%);
@@ -110,11 +104,6 @@ p {
     margin: 0;
 }
 
-app-root {
-    position: relative;
-    z-index: 1;
-    display: block;
-}
 
 .hover\:underline:hover {
     text-decoration: underline;
